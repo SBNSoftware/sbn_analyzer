@@ -1,8 +1,8 @@
 source /cvmfs/sbnd.opensciencegrid.org/products/sbnd/setup_sbnd.sh
 
-dirName=v09_75_03
+dirName=v09_93_01_01
 cd ${dirName}
-source localProducts_larsoft_v09_75_03_e20_prof/setup
+source localProducts_larsoft_*/setup
 
 mrbsetenv
 cd ..
