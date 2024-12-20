@@ -16,6 +16,8 @@ namespace Constants {
     // User to access
     const std::string UserName = getenv("USER");
 
+    const TString dir_figs = "/pnfs/sbnd/persistent/users/" + TString(UserName) + "/cc2p";
+
     const double Units = 1E38;
 
     const double TargetPOT = 1e21;
