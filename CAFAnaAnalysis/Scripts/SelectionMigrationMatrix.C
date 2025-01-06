@@ -41,9 +41,6 @@ void SelectionMigrationMatrix() {
     // between the events with a reconstructed value in bin i over the total true signal events
     // with true value in bin i
 
-    // Directory to store figs
-    TString dir = "/exp/sbnd/app/users/" + (TString)UserName + "/CC1muAnalysis";
-
     // Root file to store objects in
     TString RootFilePath = "/exp/sbnd/data/users/" + (TString)UserName + "/CAFAnaOutput/Matrix.root";
     TFile* SaveFile = new TFile(RootFilePath, "recreate");
@@ -230,14 +227,14 @@ void SelectionMigrationMatrix() {
         PlotCanvas->cd();
         MigrationMatrix->Draw("colz");
 
-        // Save migration matrix as png
-        PlotCanvas->SaveAs(dir+"/Figs/CAFAna/Matrices/Migration"+PlotNames[i]+".png");
+        // Save migration matrix as pdf
+        PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/Matrices/Migration"+PlotNames[i]+".pdf");
 
         PlotCanvas->cd();
         ResponseMatrix->Draw("colz");
 
-        // Save response matrix as png
-        PlotCanvas->SaveAs(dir+"/Figs/CAFAna/Matrices/Response"+PlotNames[i]+".png");
+        // Save response matrix as pdf
+        PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/Matrices/Response"+PlotNames[i]+".pdf");
         
         // Save both to root file
         SaveFile->WriteObject(MigrationMatrix, PlotNames[i]+"_migration");

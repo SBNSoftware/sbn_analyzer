@@ -182,8 +182,8 @@ void SelectionInteBreakdown() {
                 TString SliceLabel = tools.to_string_with_precision(SliceDiscriminators[iSlice], 1) + " < " + PlotNameToSliceLabel["True"+PlotNames[iVar]+"Plot"] + " < " + tools.to_string_with_precision(SliceDiscriminators[iSlice + 1], 1);
                 textSlice->DrawLatexNDC(0.4,0.92,SliceLabel);
 
-                // Save as png
-                PlotCanvas->SaveAs(dir+"/Figs/CAFAna/InteBreakdown/"+SlicePlotName+".png");
+                // Save as pdf
+                PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/InteBreakdown/"+SlicePlotName+".pdf");
 
                 delete PlotCanvas;
 
@@ -250,8 +250,8 @@ void SelectionInteBreakdown() {
             }
             leg->Draw();
 
-            // Save as png
-            PlotCanvas->SaveAs(dir+"/Figs/CAFAna/InteBreakdown/"+PlotNames[iVar]+".png");
+            // Save as pdf
+            PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/InteBreakdown/"+PlotNames[iVar]+".pdf");
 
             delete PlotCanvas;
         }

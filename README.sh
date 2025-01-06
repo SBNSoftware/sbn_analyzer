@@ -8,33 +8,36 @@
 #Plots generated through the scripts in both directories are placed under [`Figs/`](https://github.com/afropapp13/CC1muAnalysis/tree/main/Figs). 
 
 me="$(whoami)"
-mkdir /pnfs/sbnd/persistent/users/${me}/cc2p
-mkdir /pnfs/sbnd/persistent/users/${me}/cc2p/Figs
-mkdir /pnfs/sbnd/persistent/users/${me}/cc2p/Figs/Overlay
-mkdir /pnfs/sbnd/persistent/users/${me}/cc2p/Figs/Overlay/Serial
-mkdir /pnfs/sbnd/persistent/users/${me}/cc2p/Figs/Overlay/MEC
-mkdir /pnfs/sbnd/persistent/users/${me}/cc2p/Figs/Overlay/MEC/Serial
-mkdir /pnfs/sbnd/persistent/users/${me}/cc2p/Figs/InteBreakDown
-mkdir /pnfs/sbnd/persistent/users/${me}/cc2p/Figs/InteBreakDown/PostFSI
-mkdir /pnfs/sbnd/persistent/users/${me}/cc2p/Figs/InteBreakDown/PreFSI
-mkdir /pnfs/sbnd/persistent/users/${me}/cc2p/Figs/CAFAna
-mkdir /pnfs/sbnd/persistent/users/${me}/cc2p/Figs/CAFAna/Cuts
-mkdir /pnfs/sbnd/persistent/users/${me}/cc2p/Figs/CAFAna/InteBreakdown
-mkdir /pnfs/sbnd/persistent/users/${me}/cc2p/Figs/CAFAna/Serial
-mkdir /pnfs/sbnd/persistent/users/${me}/cc2p/Figs/CAFAna/Efficiency
-mkdir /pnfs/sbnd/persistent/users/${me}/cc2p/Figs/CAFAna/Matrices
-mkdir /pnfs/sbnd/persistent/users/${me}/cc2p/Figs/CAFAna/Uncertainties
-mkdir /pnfs/sbnd/persistent/users/${me}/cc2p/Figs/CAFAna/Uncertainties/NTargets
-mkdir /pnfs/sbnd/persistent/users/${me}/cc2p/Figs/CAFAna/Uncertainties/POT
-mkdir /pnfs/sbnd/persistent/users/${me}/cc2p/Figs/CAFAna/Uncertainties/Reinteraction
-mkdir /pnfs/sbnd/persistent/users/${me}/cc2p/Figs/CAFAna/Uncertainties/Detector
-mkdir /pnfs/sbnd/persistent/users/${me}/cc2p/Figs/CAFAna/Uncertainties/MCStat
-mkdir /pnfs/sbnd/persistent/users/${me}/cc2p/Figs/CAFAna/Uncertainties/Statistical
-mkdir /pnfs/sbnd/persistent/users/${me}/cc2p/Figs/CAFAna/Uncertainties/BinUncertainties
-mkdir /pnfs/sbnd/persistent/users/${me}/cc2p/Figs/CAFAna/Uncertainties/Unfolded
-mkdir /pnfs/sbnd/persistent/users/${me}/cc2p/Figs/CAFAna/Uncertainties/WienerSVDOverlay
-mkdir /pnfs/sbnd/persistent/users/${me}/cc2p/Figs/CAFAna/Uncertainties/FakeDataStudies
-mkdir /pnfs/sbnd/persistent/users/${me}/cc2p/Figs/CAFAna/Uncertainties/FakeDataStudies/Combined
+fig_dir="/exp/sbnd/data/users/${me}"
+
+mkdir ${fig_dir}/cc2p
+mkdir ${fig_dir}/cc2p/Figs
+mkdir ${fig_dir}/cc2p/Figs/Overlay
+mkdir ${fig_dir}/cc2p/Figs/Overlay/Serial
+mkdir ${fig_dir}/cc2p/Figs/Overlay/MEC
+mkdir ${fig_dir}/cc2p/Figs/Overlay/MEC/Serial
+mkdir ${fig_dir}/cc2p/Figs/InteBreakDown
+mkdir ${fig_dir}/cc2p/Figs/InteBreakDown/PostFSI
+mkdir ${fig_dir}/cc2p/Figs/InteBreakDown/PreFSI
+mkdir ${fig_dir}/cc2p/Figs/CAFAna
+mkdir ${fig_dir}/cc2p/Figs/CAFAna/Cuts
+mkdir ${fig_dir}/cc2p/Figs/CAFAna/InteBreakdown
+mkdir ${fig_dir}/cc2p/Figs/CAFAna/TopologyBreakdown
+mkdir ${fig_dir}/cc2p/Figs/CAFAna/Serial
+mkdir ${fig_dir}/cc2p/Figs/CAFAna/Efficiency
+mkdir ${fig_dir}/cc2p/Figs/CAFAna/Matrices
+mkdir ${fig_dir}/cc2p/Figs/CAFAna/Uncertainties
+mkdir ${fig_dir}/cc2p/Figs/CAFAna/Uncertainties/NTargets
+mkdir ${fig_dir}/cc2p/Figs/CAFAna/Uncertainties/POT
+mkdir ${fig_dir}/cc2p/Figs/CAFAna/Uncertainties/Reinteraction
+mkdir ${fig_dir}/cc2p/Figs/CAFAna/Uncertainties/Detector
+mkdir ${fig_dir}/cc2p/Figs/CAFAna/Uncertainties/MCStat
+mkdir ${fig_dir}/cc2p/Figs/CAFAna/Uncertainties/Statistical
+mkdir ${fig_dir}/cc2p/Figs/CAFAna/Uncertainties/BinUncertainties
+mkdir ${fig_dir}/cc2p/Figs/CAFAna/Uncertainties/Unfolded
+mkdir ${fig_dir}/cc2p/Figs/CAFAna/Uncertainties/WienerSVDOverlay
+mkdir ${fig_dir}/cc2p/Figs/CAFAna/Uncertainties/FakeDataStudies
+mkdir ${fig_dir}/cc2p/Figs/CAFAna/Uncertainties/FakeDataStudies/Combined
 
 ### Setting up
 
