@@ -35,9 +35,6 @@ void WienerSVDOverlay() {
 	// Load tools
     Tools tools;
 
-	// Dir to save plots
-    TString dir = "/exp/sbnd/app/users/" + (TString)UserName + "/CC1muAnalysis";
-
 	// File with unfolded spectrum
 	TString UnfoldedFilePath = "/exp/sbnd/data/users/" + (TString)UserName + "/CAFAnaOutput/Unfolded.root";
     std::unique_ptr<TFile> UnfoldedFile(TFile::Open(UnfoldedFilePath));
@@ -298,7 +295,7 @@ void WienerSVDOverlay() {
                 textSlice->DrawLatexNDC(0.4,0.92,SliceLabel);
 
 				leg->Draw();
-				PlotCanvas->SaveAs(dir+"/Figs/CAFAna/WienerSVDOverlay/"+SlicePlotName+".png");
+				PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/WienerSVDOverlay/"+SlicePlotName+".pdf");
 
 				delete leg;
 
@@ -403,7 +400,7 @@ void WienerSVDOverlay() {
 			NormErrorHisto->Draw("hist same");
 
 			leg->Draw();
-			PlotCanvas->SaveAs(dir+"/Figs/CAFAna/WienerSVDOverlay/"+PlotNames[iVar]+".png");
+			PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/WienerSVDOverlay/"+PlotNames[iVar]+".pdf");
 
 			delete leg;
 		}

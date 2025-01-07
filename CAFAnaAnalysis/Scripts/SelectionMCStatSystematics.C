@@ -48,11 +48,8 @@ void SelectionMCStatSystematics() {
     // The SpectrumLoader object handles the loading of CAFs and the creation of Spectrum.
     SpectrumLoader NuLoader(InputFiles);
 
-    // Directory to store figs
-    TString dir = "/exp/sbnd/app/users/" + (TString)UserName + "/CC1muAnalysis";
-
     // Create directory for this sytematic if it does not exist yet
-    std::filesystem::create_directory((std::string)dir+"/Figs/CAFAna/Uncertainties/MCStat");
+    std::filesystem::create_directory((std::string)dir_figs+"/Figs/CAFAna/Uncertainties/MCStat");
 
     // Root file to store objects in
     TString RootFilePath = "/exp/sbnd/data/users/" + (TString)UserName + "/CAFAnaOutput/SelectionSystematicsMCStat.root";
@@ -175,7 +172,7 @@ void SelectionMCStatSystematics() {
             UnivRecoHistos,
             UnivRecoTrueHistos,
             UnivRecoBkgHistos,
-            dir, 
+            dir_figs, 
             "MCStat",
             PlotNames[iVar]
         );
@@ -200,7 +197,7 @@ void SelectionMCStatSystematics() {
             UnivRecoHistos,
             UnivRecoTrueHistos,
             UnivRecoBkgHistos,
-            dir,
+            dir_figs,
             "MCStat",
             VarLabels[iVar],
             PlotNames[iVar],

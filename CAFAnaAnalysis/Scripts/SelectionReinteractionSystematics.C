@@ -41,11 +41,8 @@ void SelectionReinteractionSystematics() {
     // The SpectrumLoader object handles the loading of CAFs and the creation of Spectrum.
     SpectrumLoader NuLoader(InputFiles);
 
-    // Directory to store figs
-    TString dir = "/exp/sbnd/app/users/" + (TString)UserName + "/CC1muAnalysis";
-
     // Create directory for this sytematic if it does not exist yet
-    std::filesystem::create_directory((std::string)dir+"/Figs/CAFAna/Uncertainties/Reinteraction");
+    std::filesystem::create_directory((std::string)dir_figs+"/Figs/CAFAna/Uncertainties/Reinteraction");
 
     // Root file to store objects in
     TString RootFilePath = "/exp/sbnd/data/users/" + (TString)UserName + "/CAFAnaOutput/SelectionSystematicsReinteraction.root";
@@ -92,7 +89,7 @@ void SelectionReinteractionSystematics() {
             {ModifiedRecoHisto},
             {ModifiedRecoTrueHisto},
             {ModifiedRecoBkgHisto},
-            dir,
+            dir_figs,
             "Reinteraction",
             PlotNames[iVar]
         );
@@ -115,7 +112,7 @@ void SelectionReinteractionSystematics() {
             {ModifiedRecoHisto},
             {ModifiedRecoTrueHisto},
             {ModifiedRecoBkgHisto},
-            dir,
+            dir_figs,
             "Reinteraction",
             VarLabels[iVar],
             PlotNames[iVar],

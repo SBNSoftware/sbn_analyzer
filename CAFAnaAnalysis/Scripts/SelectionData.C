@@ -35,11 +35,8 @@ void SelectionData() {
     double TextSize = 0.06;	
 
     // The SpectrumLoader object handles the loading of CAFs and the creation of Spectrum.
-    SpectrumLoader DataLoader("/exp/sbnd/data/users/munjung/SBND/data/run_14500_14503.flat.caf.root");
+    SpectrumLoader DataLoader("/pnfs/sbn/data_add/sbnd/keepup/caf/*/*flat.caf.root");
     SpectrumLoader MCLoader(InputFiles);
-
-    // Directory to store figs
-    TString dir = "/exp/sbnd/app/users/" + (TString)UserName + "/CC1muAnalysis";
 
     // Root file to store objects in
     TString RootFilePath = "/exp/sbnd/data/users/" + (TString)UserName + "/CAFAnaOutput/Data.root";
@@ -138,7 +135,7 @@ void SelectionData() {
         RecoHist->Draw("e1x0");
         MCHist->Draw("hist same");
         leg->Draw();
-        PlotCanvas->SaveAs(dir+"/Figs/CAFAna/DataCounts/"+PlotNames[iVar]+".png");
+        PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/DataCounts/"+PlotNames[iVar]+".pdf");
 
         delete PlotCanvas;
     }
@@ -209,7 +206,7 @@ void SelectionData() {
         RecoHist->Draw("e1x0");
         MCHist->Draw("hist same");
         leg->Draw();
-        PlotCanvas->SaveAs(dir+"/Figs/CAFAna/DataCounts/NoCut/"+NoCutNames[iVar - Vars.size()]+".png");
+        PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/DataCounts/NoCut/"+NoCutNames[iVar - Vars.size()]+".pdf");
 
         delete PlotCanvas;
     }
