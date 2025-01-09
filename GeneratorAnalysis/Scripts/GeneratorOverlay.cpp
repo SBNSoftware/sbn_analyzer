@@ -236,9 +236,8 @@ void GeneratorOverlay() {
             textSlice->DrawLatexNDC(0.16, 0.93, SliceLabel);
         }
 
-        TString dir = "/exp/sbnd/app/users/" + (TString)UserName + "/CC1muAnalysis";
         TString SaveDirectory = (PlotNames[iPlot].Contains("NoFSI")) ? "PreFSI" : "PostFSI";
-        PlotCanvas->SaveAs(dir+"/Figs/Overlay/"+SaveDirectory+"/Overlay_"+PlotNames[iPlot]+".png");
+        PlotCanvas->SaveAs(dir_figs+"/Overlay/"+SaveDirectory+"/Overlay_"+PlotNames[iPlot]+".pdf");
         delete PlotCanvas;
 
     } // End of the loop over the plots

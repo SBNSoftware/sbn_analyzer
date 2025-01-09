@@ -41,11 +41,8 @@ void SelectionPOTSystematics() {
     // The SpectrumLoader object handles the loading of CAFs and the creation of Spectrum.
     SpectrumLoader NuLoader(InputFiles);
 
-    // Directory to store figs
-    TString dir = "/exp/sbnd/app/users/" + (TString)UserName + "/CC1muAnalysis";
-
     // Create directory for this sytematic if it does not exist yet
-    std::filesystem::create_directory((std::string)dir+"/Figs/CAFAna/Uncertainties/POT");
+    std::filesystem::create_directory((std::string)dir_figs+"/Figs/CAFAna/Uncertainties/POT");
 
     // Root file to store objects in
     TString RootFilePath = "/exp/sbnd/data/users/" + (TString)UserName + "/CAFAnaOutput/SelectionSystematicsPOT.root";
@@ -91,7 +88,7 @@ void SelectionPOTSystematics() {
             {ModifiedRecoHisto},
             {ModifiedRecoTrueHisto},
             {ModifiedRecoBkgHisto},
-            dir, 
+            dir_figs, 
             "POT",
             PlotNames[iVar]
         );
@@ -114,7 +111,7 @@ void SelectionPOTSystematics() {
             {ModifiedRecoHisto},
             {ModifiedRecoTrueHisto},
             {ModifiedRecoBkgHisto},
-            dir,
+            dir_figs,
             "POT",
             VarLabels[iVar],
             PlotNames[iVar],

@@ -42,9 +42,6 @@ void Selection() {
     //     2. reco signal events
     //     3. reco background events
 
-    // Directory to store figs
-    TString dir = "/exp/sbnd/app/users/" + (TString)UserName + "/CC1muAnalysis";
-
     // Root file to store objects in
     TString RootFilePath = "/exp/sbnd/data/users/" + (TString)UserName + "/CAFAnaOutput/Selection.root";
     TFile* SaveFile = new TFile(RootFilePath, "RECREATE");
@@ -168,8 +165,8 @@ void Selection() {
         RecoBkgHisto->Draw("hist same");
         leg->Draw();
 
-        // Save as png
-        PlotCanvas->SaveAs(dir+"/Figs/CAFAna/"+PlotNames[i]+".png");
+        // Save as pdf
+        PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/"+PlotNames[i]+".pdf");
 
         // Save to root file
         SaveFile->WriteObject(RecoHisto, PlotNames[i]+"_reco");

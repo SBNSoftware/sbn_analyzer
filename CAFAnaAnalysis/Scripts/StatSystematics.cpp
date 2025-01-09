@@ -39,11 +39,8 @@ void StatSystematics() {
     int FontStyle = 132;
     double TextSize = 0.06;
 
-    // Directory to store figs
-    TString dir = "/exp/sbnd/app/users/" + (TString)UserName + "/CC1muAnalysis";
-
     // Create directory for this sytematic if it does not exist yet
-    std::filesystem::create_directory((std::string)dir+"/Figs/CAFAna/Uncertainties/Statistical");
+    std::filesystem::create_directory((std::string)dir_figs+"/Figs/CAFAna/Uncertainties/Statistical");
 
     // Load root file with histograms
     TString HistoFile = "/exp/sbnd/data/users/" + (TString)UserName + "/CAFAnaOutput/Selection.root";
@@ -80,7 +77,7 @@ void StatSystematics() {
             {UnivRecoHist},
             {UnivRecoTrueHist},
             {UnivRecoBkgHist},
-            dir, 
+            dir_figs, 
             "Statistical",
             PlotNames[iVar]
         );
@@ -106,7 +103,7 @@ void StatSystematics() {
             {UnivRecoHist},
             {UnivRecoTrueHist},
             {UnivRecoBkgHist},
-            dir,
+            dir_figs,
             "Statistical",
             AxisTitle,
             PlotNames[iVar],

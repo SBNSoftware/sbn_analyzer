@@ -43,9 +43,6 @@ void SelectionEfficiency() {
     // as the number of reconstructed the events that pass our signal definition and are true
     // signal events over the total true signal events; these two histograms are plotted
 
-    // Directory to store figs
-    TString dir = "/exp/sbnd/app/users/" + (TString)UserName + "/CC1muAnalysis";
-
     // Root file to store objects in
     TString RootFilePath = "/exp/sbnd/data/users/" + (TString)UserName + "/CAFAnaOutput/SelectionEfficiency.root";
     TFile* SaveFile = new TFile(RootFilePath, "recreate");
@@ -163,8 +160,8 @@ void SelectionEfficiency() {
                 TString SliceLabel = tools.to_string_with_precision(SliceDiscriminators[iSlice], 1) + " < " + PlotNameToSliceLabel["True"+PlotNames[i]+"Plot"] + " < " + tools.to_string_with_precision(SliceDiscriminators[iSlice + 1], 1);
                 textSlice->DrawLatexNDC(0.4,0.92,SliceLabel);
 
-                // Save as png
-                PlotCanvas->SaveAs(dir+"/Figs/CAFAna/Efficiency/"+SlicePlotName+".png");
+                // Save as pdf
+                PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/Efficiency/"+SlicePlotName+".pdf");
 
                 // Save to root file
                 SaveFile->WriteObject(Eff, SlicePlotName+"_eff");
@@ -203,8 +200,8 @@ void SelectionEfficiency() {
             Eff->GetPaintedGraph()->GetYaxis()->SetTitleOffset(1.3);
             Eff->GetPaintedGraph()->GetYaxis()->SetTickSize(0);
 
-            // Save as png
-            PlotCanvas->SaveAs(dir+"/Figs/CAFAna/Efficiency/"+PlotNames[i]+".png");
+            // Save as pdf
+            PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/Efficiency/"+PlotNames[i]+".pdf");
 
             // Save to root file
             SaveFile->WriteObject(Eff, PlotNames[i]+"_eff");

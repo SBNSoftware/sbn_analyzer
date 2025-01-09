@@ -274,8 +274,7 @@ void SerialGeneratorOverlay() {
             TString SliceLabel = tools.to_string_with_precision(SliceDiscriminators[iSlice], 1) + " < " + PlotNameToSliceLabel[GeneralPlotName] + " < " + tools.to_string_with_precision(SliceDiscriminators[iSlice + 1], 1);
             textSlice->DrawLatexNDC(0.4,0.92,SliceLabel);
 
-            TString dir = "/exp/sbnd/app/users/" + (TString)UserName + "/CC1muAnalysis";
-            PlotCanvas->SaveAs(dir+"/Figs/Overlay/Serial/"+SlicePlotName+".png");
+            PlotCanvas->SaveAs(dir_figs+"/Overlay/Serial/"+SlicePlotName+".pdf");
             delete PlotCanvas;
 
             // Update starting index to move to next slice

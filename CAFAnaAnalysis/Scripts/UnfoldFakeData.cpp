@@ -67,12 +67,9 @@ void UnfoldFakeData() {
     std::unique_ptr<TFile> MCStatFile(TFile::Open("/exp/sbnd/data/users/" + (TString)UserName + "/CAFAnaOutput/SelectionSystematicsMCStat.root"));
     CovFiles.push_back(std::move(MCStatFile));
 
-    // Dir to save plots
-    TString dir = "/exp/sbnd/app/users/" + (TString)UserName + "/CC1muAnalysis";
-
     for (std::size_t iData = 0; iData < FakeDataNames.size(); ++iData) {
         // Create directory for this fake data if it does not exist yet
-        std::filesystem::create_directory((std::string)dir+"/Figs/CAFAna/FakeDataStudies/"+(std::string)FakeDataNames[iData]);
+        std::filesystem::create_directory((std::string)dir_figs+"/Figs/CAFAna/FakeDataStudies/"+(std::string)FakeDataNames[iData]);
 
         for (std::size_t iVar = 0; iVar < PlotNames.size(); ++iVar) {
             // Load nominal plots
@@ -343,7 +340,7 @@ void UnfoldFakeData() {
                     textSlice->DrawLatexNDC(0.4,0.92,SliceLabel);
 
                     // Save histogram
-                    PlotCanvas->SaveAs(dir+"/Figs/CAFAna/FakeDataStudies/"+FakeDataNames[iData]+"/"+SlicePlotName+".png");
+                    PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/FakeDataStudies/"+FakeDataNames[iData]+"/"+SlicePlotName+".pdf");
 
                     StartIndex += (SliceNBins + 1); MatrixIndex += SliceNBins;
                 }
@@ -447,7 +444,7 @@ void UnfoldFakeData() {
             leg->Draw();
 
             // Save histogram
-            PlotCanvas->SaveAs(dir+"/Figs/CAFAna/FakeDataStudies/"+FakeDataNames[iData]+"/"+PlotNames[iVar]+".png");
+            PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/FakeDataStudies/"+FakeDataNames[iData]+"/"+PlotNames[iVar]+".pdf");
             delete PlotCanvas;
         }
     }

@@ -168,8 +168,7 @@ void MECGeneratorOverlay() {
         PlotCanvas->cd();
         leg->Draw();
         
-        TString dir = "/exp/sbnd/app/users/" + (TString)UserName + "/CC1muAnalysis";
-        PlotCanvas->SaveAs(dir+"/Figs/Overlay/MEC/Overlay_"+PlotNames[iPlot]+".png");
+        PlotCanvas->SaveAs(dir_figs+"/Figs/Overlay/MEC/Overlay_"+PlotNames[iPlot]+".pdf");
         delete PlotCanvas;
 
     } // End of the loop over the plots

@@ -94,9 +94,6 @@ void Unfold() {
     std::unique_ptr<TFile> MCStatFile(TFile::Open("/exp/sbnd/data/users/" + (TString)UserName + "/CAFAnaOutput/SelectionSystematicsMCStat.root"));
     CovFiles.push_back(std::move(MCStatFile));
 
-    // Dir to save plots
-    TString dir = "/exp/sbnd/app/users/" + (TString)UserName + "/CC1muAnalysis";
-
     const int NPlots = PlotNames.size();
 
     for (int iPlot = 0; iPlot < NPlots; iPlot++) {
@@ -206,7 +203,7 @@ void Unfold() {
 
         PlotCanvas->cd();
         SmearMatrixHisto->Draw("colz");
-        PlotCanvas->SaveAs(dir+"/Figs/CAFAna/Smear/"+PlotNames[iPlot]+".png");
+        PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/Smear/"+PlotNames[iPlot]+".pdf");
         SaveFile->WriteObject(SmearMatrixHisto, PlotNames[iPlot]+"_smear");
 
         ///////////////////////////
@@ -362,8 +359,16 @@ void Unfold() {
             TotalHisto->SetBinContent(iBin + 1, TMath::Sqrt(UnfTotalFracCov(iBin, iBin)) * 100);
 
             // These should be the same
-            std::cout << TMath::Sqrt(UnfTotalFracCov(iBin, iBin)) * 100 << " ==? ";
-            std::cout << TMath::Sqrt(Total) << std::endl;;
+            double frac_unc = TMath::Sqrt(UnfTotalFracCov(iBin, iBin)) * 100;
+	    double sum_unc = TMath::Sqrt(Total);
+
+	    if ( frac_unc != sum_unc ) {
+
+            	std::cout << frac_unc << " ==? ";
+            	std::cout << sum_unc << std::endl;;
+
+	    }
+
         }
         // Margins for bin by bin uncertainties plot
         PlotCanvas->SetTopMargin(0.13);
@@ -467,7 +472,7 @@ void Unfold() {
 
         // Save plot
         leg->Draw();
-        PlotCanvas->SaveAs(dir+"/Figs/CAFAna/UnfBinUncertainties/"+PlotNames[iPlot]+".png");
+        PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/UnfBinUncertainties/"+PlotNames[iPlot]+".pdf");
 
         leg->Clear();
 
@@ -630,7 +635,7 @@ void Unfold() {
                 textSlice->DrawLatexNDC(0.4,0.92,SliceLabel);
 
                 // Save histogram
-                PlotCanvas->SaveAs(dir+"/Figs/CAFAna/Unfolded/"+SlicePlotName+".png");	
+                PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/Unfolded/"+SlicePlotName+".pdf");	
 
                 // Save error band
                 SaveFile->WriteObject(StatErrorBand, SlicePlotName+"_stat_band");
@@ -731,7 +736,7 @@ void Unfold() {
             leg->Draw();
 
             // Save histogram
-            PlotCanvas->SaveAs(dir+"/Figs/CAFAna/Unfolded/"+PlotNames[iPlot]+".png");
+            PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/Unfolded/"+PlotNames[iPlot]+".pdf");
 
             // Save error band
             SaveFile->WriteObject(StatErrorBand, PlotNames[iPlot]+"_stat_band");

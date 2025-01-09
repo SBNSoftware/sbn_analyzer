@@ -30,9 +30,6 @@ void TotalCovMatrices() {
     gStyle->SetOptStat(0);
     gStyle->SetPaintTextFormat("4.1f");
 
-    // Directory to store figs
-    TString dir = "/exp/sbnd/app/users/" + (TString)UserName + "/CC1muAnalysis";
-
     // Vector with all systematic files
     std::vector<std::unique_ptr<TFile>> CovFiles;
 
@@ -130,7 +127,7 @@ void TotalCovMatrices() {
 
         PlotCanvas->cd();
         TotalCovHist->Draw("colz");
-        PlotCanvas->SaveAs(dir+"/Figs/CAFAna/Uncertainties/TotalCov"+PlotNames[iVar]+".png");
+        PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/Uncertainties/TotalCov"+PlotNames[iVar]+".pdf");
 
         SaveFile->WriteObject(TotalCovHist, PlotNames[iVar]);
 
@@ -346,6 +343,6 @@ void TotalCovMatrices() {
 
         // Save plot
         leg->Draw();
-        PlotCanvas->SaveAs(dir+"/Figs/CAFAna/BinUncertainties/"+PlotNames[iVar]+".png");
+        PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/BinUncertainties/"+PlotNames[iVar]+".pdf");
     }
 }

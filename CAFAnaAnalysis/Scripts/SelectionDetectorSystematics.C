@@ -71,11 +71,8 @@ void SelectionDetectorSystematics() {
     UnivLoaders.push_back(std::move(NoTraDifLoader));
     UnivLoaders.push_back(std::move(SCENoDifLoader));
 
-    // Directory to store figs
-    TString dir = "/exp/sbnd/app/users/" + (TString)UserName + "/CC1muAnalysis";
-
     // Create directory for this sytematic if it does not exist yet
-    std::filesystem::create_directory((std::string)dir+"/Figs/CAFAna/Uncertainties/Detector");
+    std::filesystem::create_directory((std::string)dir_figs+"/Figs/CAFAna/Uncertainties/Detector");
 
     // Root file to store objects in
     TString RootFilePath = "/exp/sbnd/data/users/" + (TString)UserName + "/CAFAnaOutput/SelectionSystematicsDetector.root";
@@ -124,7 +121,7 @@ void SelectionDetectorSystematics() {
             UnivRecoHisto,
             UnivRecoTrueHisto,
             UnivRecoBkgHisto,
-            dir,
+            dir_figs,
             "Detector",
             PlotNames[iVar]
         );
@@ -149,7 +146,7 @@ void SelectionDetectorSystematics() {
             UnivRecoHisto,
             UnivRecoTrueHisto,
             UnivRecoBkgHisto,
-            dir,
+            dir_figs,
             "Detector",
             VarLabels[iVar],
             PlotNames[iVar],

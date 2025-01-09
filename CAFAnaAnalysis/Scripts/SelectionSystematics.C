@@ -50,11 +50,8 @@ void SelectionSystematics(std::string SystName, int SystNUniv, bool ModifiedResp
     // The SpectrumLoader object handles the loading of CAFs and the creation of Spectrum.
     SpectrumLoader NuLoader(InputFiles);
 
-    // Directory to store figs
-    TString dir = "/exp/sbnd/app/users/" + (TString)UserName + "/CC1muAnalysis";
-
     // Create directory for this sytematic if it does not exist yet
-    std::filesystem::create_directory((std::string)dir+"/Figs/CAFAna/Uncertainties/"+SystName);
+    std::filesystem::create_directory((std::string)dir_figs+"/Figs/CAFAna/Uncertainties/"+SystName);
 
     // Root file to store objects in
     TString RootFilePath = "/exp/sbnd/data/users/" + (TString)UserName + "/CAFAnaOutput/SelectionSystematics"+TString(SystName)+".root";
@@ -534,7 +531,7 @@ void SelectionSystematics(std::string SystName, int SystNUniv, bool ModifiedResp
         PlotCanvas->SetBottomMargin(0.16);
 
         CovMatrix->Draw("colz");
-        PlotCanvas->SaveAs(dir+"/Figs/CAFAna/Uncertainties/"+(TString)SystName+"/Cov"+PlotNames[i]+".png");
+        PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/Uncertainties/"+(TString)SystName+"/Cov"+PlotNames[i]+".pdf");
 
         // Plot frac cov matrix
         double FracCovMin = FracCovMatrix->GetMinimum();
@@ -573,7 +570,7 @@ void SelectionSystematics(std::string SystName, int SystNUniv, bool ModifiedResp
         PlotCanvas->SetBottomMargin(0.16);
 
         FracCovMatrix->Draw("colz");
-        PlotCanvas->SaveAs(dir+"/Figs/CAFAna/Uncertainties/"+(TString)SystName+"/FracCov"+PlotNames[i]+".png");
+        PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/Uncertainties/"+(TString)SystName+"/FracCov"+PlotNames[i]+".pdf");
 
         // Plot correlation matrix
         CorrMatrix->GetZaxis()->SetRangeUser(-1,1);
@@ -610,7 +607,7 @@ void SelectionSystematics(std::string SystName, int SystNUniv, bool ModifiedResp
         PlotCanvas->SetBottomMargin(0.16);
 
         CorrMatrix->Draw("colz text");
-        PlotCanvas->SaveAs(dir+"/Figs/CAFAna/Uncertainties/"+(TString)SystName+"/Corr"+PlotNames[i]+".png");
+        PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/Uncertainties/"+(TString)SystName+"/Corr"+PlotNames[i]+".pdf");
 
         // Save objects
         SaveFile->WriteObject(CovMatrix, PlotNames[i]+"_cov");
@@ -648,7 +645,7 @@ void SelectionSystematics(std::string SystName, int SystNUniv, bool ModifiedResp
             RecoBkgHisto->Draw("hist same");
             ana::DrawErrorBand(RecoBkgHisto, RecoBkgErrorBand);
             leg->Draw();
-            PlotCanvas->SaveAs(dir+"/Figs/CAFAna/Uncertainties/"+(TString)SystName+"/"+PlotNames[i]+".png");
+            PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/Uncertainties/"+(TString)SystName+"/"+PlotNames[i]+".pdf");
         }
         delete PlotCanvas;
     }

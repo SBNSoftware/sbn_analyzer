@@ -38,9 +38,6 @@ void SelectionTopologyBreakdown() {
     // The SpectrumLoader object handles the loading of CAFs and the creation of Spectrum.
     SpectrumLoader NuLoader(InputFiles);
 
-    // Directory to store figs
-    TString dir = "/exp/sbnd/app/users/" + (TString)UserName + "/CC1muAnalysis";
-
     // Root file to store objects in
     TString RootFilePath = "/exp/sbnd/data/users/" + (TString)UserName + "/CAFAnaOutput/SelectionTopologyBreakdown.root";
     TFile* SaveFile = new TFile(RootFilePath, "recreate");
@@ -181,8 +178,8 @@ void SelectionTopologyBreakdown() {
                 TString SliceLabel = tools.to_string_with_precision(SliceDiscriminators[iSlice], 1) + " < " + PlotNameToSliceLabel["True"+PlotNames[iVar]+"Plot"] + " < " + tools.to_string_with_precision(SliceDiscriminators[iSlice + 1], 1);
                 textSlice->DrawLatexNDC(0.4,0.92,SliceLabel);
 
-                // Save as png
-                PlotCanvas->SaveAs(dir+"/Figs/CAFAna/TopologyBreakdown/"+SlicePlotName+".png");
+                // Save as pdf
+                PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/TopologyBreakdown/"+SlicePlotName+".pdf");
 
                 delete PlotCanvas;
 
@@ -249,8 +246,8 @@ void SelectionTopologyBreakdown() {
             }
             leg->Draw();
 
-            // Save as png
-            PlotCanvas->SaveAs(dir+"/Figs/CAFAna/TopologyBreakdown/"+PlotNames[iVar]+".png");
+            // Save as pdf
+            PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/TopologyBreakdown/"+PlotNames[iVar]+".pdf");
 
             delete PlotCanvas;
         }
