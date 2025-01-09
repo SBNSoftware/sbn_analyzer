@@ -42,7 +42,7 @@ void SelectionCutPlots() {
 
     // Root file to store objects in
     TString RootFilePath = "/exp/sbnd/data/users/" + (TString)UserName + "/CAFAnaOutput/SelectionCutPlots.root";
-    TFile* SaveFile = new TFile(RootFilePath, "UPDATE");
+    TFile* SaveFile = new TFile(RootFilePath, "recreate");
 
     // Colors to use
     std::vector<int> Colors;

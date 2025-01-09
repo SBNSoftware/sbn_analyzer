@@ -1,6 +1,7 @@
 # dev
 .vscode/
 v09_75_03/
+my_larsoft/
 
 # c++/root generated
 *.d

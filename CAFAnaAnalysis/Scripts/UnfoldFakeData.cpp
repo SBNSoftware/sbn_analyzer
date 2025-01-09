@@ -38,7 +38,7 @@ void UnfoldFakeData() {
 
     // Root file to store objects in
     TString RootFilePath = "/exp/sbnd/data/users/" + (TString)UserName + "/CAFAnaOutput/UnfoldedFake.root";
-    TFile* SaveFile = new TFile(RootFilePath, "UPDATE");
+    TFile* SaveFile = new TFile(RootFilePath, "recreate");
 
     // Load root file with fake data
     TString FakeRootFilePath = "/exp/sbnd/data/users/" + (TString)UserName + "/CAFAnaOutput/SelectionFake.root";
@@ -274,7 +274,7 @@ void UnfoldFakeData() {
                         SlicedSmearedFakeSignal->GetXaxis()->CenterTitle();
                         std::string VarLabel = (std::string) VarLabels.at(iVar);
                         VarLabel.erase(VarLabel.end() - 7, VarLabel.end()); // get rid of (bin #)
-                        SlicedSmearedFakeSignal->GetXaxis()->SetTitle(VarLabel.c_str());
+                        SlicedSmearedFakeSignal->GetXaxis()->SetTitle((TString)VarLabel + SerialNameToUnit[PlotNames[iVar]]);
                     }
                     SlicedSmearedFakeSignal->GetYaxis()->SetTitleFont(FontStyle);
                     SlicedSmearedFakeSignal->GetYaxis()->SetLabelFont(FontStyle);

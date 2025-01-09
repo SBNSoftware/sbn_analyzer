@@ -55,6 +55,9 @@ void MECGeneratorOverlay() {
     std::vector<TString> PlotNames;
 
     // Post FSI
+    PlotNames.push_back("TrueVertexXPlot");
+    PlotNames.push_back("TrueVertexYPlot");
+    PlotNames.push_back("TrueVertexZPlot");
     PlotNames.push_back("TrueMuonCosThetaPlot");
     PlotNames.push_back("TrueLeadingProtonCosThetaPlot");
     PlotNames.push_back("TrueRecoilProtonCosThetaPlot");
@@ -65,12 +68,25 @@ void MECGeneratorOverlay() {
     PlotNames.push_back("TrueCosOpeningAngleMuonTotalProtonPlot");
     PlotNames.push_back("TrueTransverseMomentumPlot");
     PlotNames.push_back("TrueDeltaAlphaTPlot");
+    PlotNames.push_back("TrueInvariantMassPlot");
+    PlotNames.push_back("TrueCosOpeningAngleLProtonMuonPlot");
+    PlotNames.push_back("TrueCosOpeningAngleRProtonMuonPlot");
+
+    // GKI
+    PlotNames.push_back("TrueCosOpeningAngleMomentumTransferTotalProtonPlot");
+    PlotNames.push_back("TrueMissingMomentumPlot");
+    PlotNames.push_back("TrueAlphaThreeDPlot");
 
     // Double differential final state
     PlotNames.push_back("TrueSerialTransverseMomentum_InMuonCosThetaPlot");
     PlotNames.push_back("TrueSerialDeltaAlphaT_InMuonCosThetaPlot");
     PlotNames.push_back("TrueSerialCosOpeningAngleProtons_InMuonCosThetaPlot");
     PlotNames.push_back("TrueSerialCosOpeningAngleMuonTotalProton_InMuonCosThetaPlot");
+
+    // GKI
+    PlotNames.push_back("TrueSerialMissingMomentum_InMuonCosThetaPlot");
+    PlotNames.push_back("TrueSerialAlphaThreeD_InMuonCosThetaPlot");
+    PlotNames.push_back("TrueSerialCosOpeningAngleMomentumTransferTotalProton_InMuonCosThetaPlot");
 
     const int NPlots = PlotNames.size();
 

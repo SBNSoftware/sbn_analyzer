@@ -48,7 +48,7 @@ void SelectionEfficiency() {
 
     // Root file to store objects in
     TString RootFilePath = "/exp/sbnd/data/users/" + (TString)UserName + "/CAFAnaOutput/SelectionEfficiency.root";
-    TFile* SaveFile = new TFile(RootFilePath, "UPDATE");
+    TFile* SaveFile = new TFile(RootFilePath, "recreate");
 
     // Construct all spectra
     std::vector<std::tuple<std::unique_ptr<Spectrum>, std::unique_ptr<Spectrum>>> Spectra;
@@ -129,7 +129,7 @@ void SelectionEfficiency() {
                 TEfficiency* Eff = new TEfficiency(*SlicedRecoTrueHisto, *SlicedTrueHisto);
                 std::string VarLabel = (std::string) VarLabels.at(i);
                 VarLabel.erase(VarLabel.end() - 7, VarLabel.end()); // get rid of (bin #)
-                Eff->SetTitle((";True " + VarLabel + ";Efficiency").c_str());
+                Eff->SetTitle(";True " + (TString)VarLabel + SerialNameToUnit[PlotNames[i]] + ";Efficiency");
 
                 PlotCanvas->cd();
                 Eff->SetMarkerStyle(21);

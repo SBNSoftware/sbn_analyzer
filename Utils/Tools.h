@@ -49,13 +49,15 @@ class Tools {
 		std::vector<double> Return3DBinIndices(std::vector< std::vector< std::vector<double> > > BinVector);			
 		int ReturnIndexIn3DList(std::vector< std::vector< std::vector<double> > > BinEdgeVector, int FirstSliceIndex, int SecondSliceIndex, double ValueInSlice);
 		
-		TH1D* GetHistoBins(TH1D* h,int LowBin,int HighBin,double ScaleFactor,std::vector<double> Binning, TString Name);	
+		TH1D* GetHistoBins(TH1D* h,int LowBin,int HighBin,double ScaleFactor,std::vector<double> Binning, TString Name);
+		TH1D* GetHistoBinsNoScale(TH1D* h,int LowBin,int HighBin,std::vector<double> Binning, TString Name);
 		TH2D* Get2DHistoBins(TH2D* h,int LowBin,int HighBin,double ScaleFactor,std::vector<double> Binning, bool Scale);	
 		std::vector< std::vector<double> > CollapseMatrixIntoArray(std::vector< std::vector< std::vector<double> > > Matrix);
 
 		std::tuple<int, vector<double>, vector<int>, vector<int>, vector<int>> FlattenNDBins(vector<double> SliceDiscriminators, vector<vector<double>> SliceBinning);
 
 		void CalcChiSquared(TH1D* h_model, TH1D* h_data, TH2D* cov, double &chi, int &ndof, double &pval, double &sigma);
+		const std::vector<std::string> GetInputFiles(const std::string TargetPath, bool print = false);
 
 		double MuonMass; // MeV
 		double ProtonMass; // MeV

@@ -82,7 +82,7 @@ void TotalCovMatrices() {
 
     // File to store total cov matrices
     TString RootFilePath = "/exp/sbnd/data/users/" + (TString)UserName + "/CAFAnaOutput/TotalCovMatrices.root";
-    TFile* SaveFile = new TFile(RootFilePath, "UPDATE");
+    TFile* SaveFile = new TFile(RootFilePath, "recreate");
 
     TCanvas* PlotCanvas = new TCanvas("Cov","Cov",205,34,1124,768);
 

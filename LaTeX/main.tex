@@ -852,7 +852,7 @@ it is a signal event. We perform the following cuts to define our reconstructed 
     there are multiple candidate tracks, the one with the longest track length is chosen.
     \item Two protons: that there are two proton tracks with $\chi^2_p < 100$, full track in the fiducial volume, and that these have momentum in our allowed range.
     \item No charged pions: that there are no other reconstructed tracks with momentum in the allowed range for charged pions inside the fiducial volume.
-    \item No neutrial pions: that there are no reconstructed particles with a positive \verb|trackScore| less than 0.5 indicating a shower, so we don't allow any neutral pions.
+    \item No neutrial pions: that there are no reconstructed particles with a positive \verb|trackScore| less than 0.5 indicating a shower, so we do not allow any neutral pions.
 \end{enumerate}
 
 Using these two cuts, we can perform a study of Monte Carlo data. Given the events that pass the
@@ -902,6 +902,36 @@ The numbers reported in this table are POT normalized to $6.79 \times 10^{20}$.
     \caption{Global efficiency, selection efficiency, and purity for cuts made in signal definition.}
     \label{table:cut-efficiency-purity}
 \end{table}
+
+\clearpage
+
+\subsection{Purity and efficiency studies}
+
+Before performing the cross-section extraction, we performed a study of the purity and efficiency of the slice in the forward 
+direction of the double differential variables. This way, we could ensure that we have the maximal possible signal contribution, 
+while getting rid of most background events. This is achieved by maximizing the product of the efficiency and purity. 
+The purity is defined as 
+\begin{align}
+    \text{Purity} = \frac{\text{MC}^{CC1p0\pi}_{\text{Reco}}}{\text{MC}_{\text{Reco}}}
+\end{align}
+and the efficiency is 
+\begin{align}
+    \text{Efficiency} = \frac{\text{MC}^{CC1p0\pi}_{\text{Reco}}}{\text{MC}^{CC1p0\pi}_{\text{True}}}
+\end{align}
+
+The efficiency, purity, and their product for each cut position in increments of $0.05$ are shown 
+in Figure~\ref{fig:cutscan-eff-purity}. Since we see no major improvement when moving away from $0.5$, we maintain the 
+cut at this position. We do not move the cut to the apparent peak around $0.9$ as this would increase the statistical uncertainties
+in the forward slice due to the low number of events that would remain there.
+
+\begin{figure}[H]
+    \centering
+    \subfloat{\includegraphics[width=3in]{../Figs/CAFAna/CutScan/Efficiency.png}}
+    \subfloat{\includegraphics[width=3in]{../Figs/CAFAna/CutScan/Purity.png}} \\
+    \subfloat{\includegraphics[width=3in]{../Figs/CAFAna/CutScan/EfficiencyPurity.png}} 
+    \caption{Efficiency and purity of the forward slice at different cut positions for double-differential variables.}
+    \label{fig:cutscan-eff-purity}
+\end{figure}
 
 \clearpage
 
@@ -1226,7 +1256,7 @@ For POT systematics, we consider a $2\%$ variation in the number of protons on t
 $1\sigma$ variation. The corresponding plots are shown in Appendix~\ref{sec:pot-systematics}.
 For number of target systematics, we likewise consider a $1\%$ variation in the number of target nuclei and treat it as a
 $1\sigma$ variation. The corresponding plots are shown in Appendix~\ref{sec:number-of-targets-systematics}.
-We consider detector variations of $15\%$ flat for the moment, and these are shown in Appendix~\ref{sec:detector-systematics}.
+We consider detector variations across various universes, and these are shown in Appendix~\ref{sec:detector-systematics}.
 We consider reinteraction systematics as a $2\%$ flat variation, and these are shown in Appendix~\ref{sec:reinteraction-systematics}.
 The total covariance matrices for each variable are shown in Figures~\labelcref{fig:total-cov-vec,fig:total-cov-angles,fig:total-cov-double-diff}.
 
@@ -1415,15 +1445,68 @@ Figures~\labelcref{fig:bin-uncertainties-rates-vector,fig:bin-uncertainties-rate
 
 \clearpage
 
+\subsection{Difference and resolution}
+
+As a sanity check, we compute the difference and resolution between the reconstructed and the true values for each of our 
+single-differential variables for events that satisfy our signal definiton. The difference is defined as 
+\begin{align}
+    x_\text{Difference} = x_\text{reco} - x_\text{true},
+\end{align}
+while the resolution is defined as
+\begin{align}
+    x_\text{Resolution} = \frac{x_\text{reco} - x_\text{true}}{x_\text{true}}.
+\end{align}
+We expect both distributions to be centered around zero. The distributions are shown in 
+Figures~\labelcref{fig:resolution-momenta-vector,fig:resolution-angles-vector,fig:resolution-angles-transverse}.
+
+\begin{figure}[H]
+    \centering
+    \subfloat{\includegraphics[width=3in]{../Figs//CAFAna/Resolution/DiffMuonMomentum.png}}
+    \subfloat{\includegraphics[width=3in]{../Figs//CAFAna/Resolution/ResMuonMomentum.png}} \\
+    \subfloat{\includegraphics[width=3in]{../Figs//CAFAna/Resolution/DiffLeadingProtonMomentum.png}}
+    \subfloat{\includegraphics[width=3in]{../Figs//CAFAna/Resolution/ResLeadingProtonMomentum.png}} \\
+    \subfloat{\includegraphics[width=3in]{../Figs//CAFAna/Resolution/DiffRecoilProtonMomentum.png}}
+    \subfloat{\includegraphics[width=3in]{../Figs//CAFAna/Resolution/ResRecoilProtonMomentum.png}}
+    \caption{Difference and resolution plots for momenta of individual particles.}
+    \label{fig:resolution-momenta-vector}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \subfloat{\includegraphics[width=3in]{../Figs//CAFAna/Resolution/DiffMuonCosTheta.png}}
+    \subfloat{\includegraphics[width=3in]{../Figs//CAFAna/Resolution/ResMuonCosTheta.png}} \\
+    \subfloat{\includegraphics[width=3in]{../Figs//CAFAna/Resolution/DiffLeadingProtonCosTheta.png}}
+    \subfloat{\includegraphics[width=3in]{../Figs//CAFAna/Resolution/ResLeadingProtonCosTheta.png}} \\
+    \subfloat{\includegraphics[width=3in]{../Figs//CAFAna/Resolution/DiffRecoilProtonCosTheta.png}}
+    \subfloat{\includegraphics[width=3in]{../Figs//CAFAna/Resolution/ResRecoilProtonCosTheta.png}}
+    \caption{Difference and resolution plots for opening angles of individual particles.}
+    \label{fig:resolution-angles-vector}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \subfloat{\includegraphics[width=3in]{../Figs//CAFAna/Resolution/DiffDeltaAlphaT.png}}
+    \subfloat{\includegraphics[width=3in]{../Figs//CAFAna/Resolution/ResDeltaAlphaT.png}} \\
+    \subfloat{\includegraphics[width=3in]{../Figs//CAFAna/Resolution/DiffTransverseMomentum.png}}
+    \subfloat{\includegraphics[width=3in]{../Figs//CAFAna/Resolution/ResTransverseMomentum.png}} \\
+    \subfloat{\includegraphics[width=3in]{../Figs//CAFAna/Resolution/DiffCosOpeningAngleProtons.png}}
+    \subfloat{\includegraphics[width=3in]{../Figs//CAFAna/Resolution/ResCosOpeningAngleProtons.png}} \\
+    \subfloat{\includegraphics[width=3in]{../Figs//CAFAna/Resolution/DiffCosOpeningAngleMuonTotalProton.png}}
+    \subfloat{\includegraphics[width=3in]{../Figs//CAFAna/Resolution/ResCosOpeningAngleMuonTotalProton.png}}
+    \caption{Difference and resolution plots for transverse and opening angle variables.}
+    \label{fig:resolution-angles-transverse}
+\end{figure}
+
+\clearpage
+
 \section{Cross-section results}
 
-We present the unfolded cross-sections (see note below) using the Wiener-SVD filter, and overlay it with the generators 
+We present the unfolded cross-sections obtained using the Wiener-SVD filter, and overlay it with the generators 
 studied in the earlier sections of this document. The generator cross-sections are smeared using the additional smearing matrices,
 and the uncertainties are obtained using the unfolded total covariance matrix. The unfolded cross-sections are shown in
 Figures~\labelcref{fig:cross-section-vector-plots,fig:cross-section-opening-angles-transverse,fig:cross-section-double-differential}.
-
-\textit{Note: the ``results'' shown at the moment labeled as data are unfolded cross-sections of Monte-Carlo data, and will be replaced
-with real data once that is available.}
+Note that the ``data points'' shown are unfolded cross-sections of Monte-Carlo data from the SBND production, first results on 
+real data are presented in the next section.
 
 \begin{figure}[H]
     \centering
@@ -1639,6 +1722,59 @@ The unfolded fake data for this study along with the two smeared signals is show
     \label{fig:combined-fake-data-sliced-double-differential}
 \end{figure}
 
+\clearpage
+\section{SBND Data}
+
+Using the first available real data, we can perform initial comparisons between data and predictions. 
+Since this first data does not have POT information yet, we only perform shape comparisons, i.e., we divide 
+the event counts by the total number of events in the data. Further, the data does not have flash matching data 
+necessary for our signal cuts. Therefore, we present some data before any cuts are applied (in neither the data 
+nor the predictions), in Figure~\ref{fig:sbnd-no-cut-vertex}, which shows good agreement. 
+
+We show our usual variables in Figures~\labelcref{fig:sbnd-data-vector,fig:sbnd-data-transverse,fig:sbnd-data-double-diff},
+but these do not show the same agreement since we can not apply all the signal cuts, and the data is still 
+low-statistics for signal events. 
+
+\begin{figure}[H]
+    \centering
+    \subfloat{\includegraphics[width=3in]{../Figs/CAFAna/DataCounts/NoCut/VertexX.png}}
+    \subfloat{\includegraphics[width=3in]{../Figs/CAFAna/DataCounts/NoCut/VertexY.png}} \\
+    \subfloat{\includegraphics[width=3in]{../Figs/CAFAna/DataCounts/NoCut/VertexZ.png}}
+    \caption{SBND data counts for vertex position before any cuts.}
+    \label{fig:sbnd-no-cut-vertex}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \subfloat{\includegraphics[width=3in]{../Figs/CAFAna/DataCounts/MuonMomentum.png}}
+    \subfloat{\includegraphics[width=3in]{../Figs/CAFAna/DataCounts/MuonCosTheta.png}} \\
+    \subfloat{\includegraphics[width=3in]{../Figs/CAFAna/DataCounts/LeadingProtonMomentum.png}}
+    \subfloat{\includegraphics[width=3in]{../Figs/CAFAna/DataCounts/LeadingProtonCosTheta.png}} \\
+    \subfloat{\includegraphics[width=3in]{../Figs/CAFAna/DataCounts/RecoilProtonMomentum.png}}
+    \subfloat{\includegraphics[width=3in]{../Figs/CAFAna/DataCounts/RecoilProtonCosTheta.png}}
+    \caption{SBND data counts for momenta and opening angles of individual particles.}
+    \label{fig:sbnd-data-vector}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \subfloat{\includegraphics[width=3in]{../Figs/CAFAna/DataCounts/DeltaAlphaT.png}}
+    \subfloat{\includegraphics[width=3in]{../Figs/CAFAna/DataCounts/TransverseMomentum.png}} \\
+    \subfloat{\includegraphics[width=3in]{../Figs/CAFAna/DataCounts/CosOpeningAngleProtons.png}}
+    \subfloat{\includegraphics[width=3in]{../Figs/CAFAna/DataCounts/CosOpeningAngleMuonTotalProton.png}}
+    \caption{SBND data counts for transverse momentum and opening angles variables.}
+    \label{fig:sbnd-data-transverse}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \subfloat{\includegraphics[width=3in]{../Figs/CAFAna/DataCounts/SerialDeltaAlphaT_InMuonCosTheta.png}}
+    \subfloat{\includegraphics[width=3in]{../Figs/CAFAna/DataCounts/SerialTransverseMomentum_InMuonCosTheta.png}} \\
+    \subfloat{\includegraphics[width=3in]{../Figs/CAFAna/DataCounts/SerialCosOpeningAngleProtons_InMuonCosTheta.png}}
+    \subfloat{\includegraphics[width=3in]{../Figs/CAFAna/DataCounts/SerialCosOpeningAngleMuonTotalProton_InMuonCosTheta.png}}
+    \caption{SBND data counts for serial double differential variables.}
+    \label{fig:sbnd-data-double-diff}
+\end{figure}
 
 
 \clearpage

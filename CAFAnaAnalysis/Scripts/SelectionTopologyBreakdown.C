@@ -43,7 +43,7 @@ void SelectionTopologyBreakdown() {
 
     // Root file to store objects in
     TString RootFilePath = "/exp/sbnd/data/users/" + (TString)UserName + "/CAFAnaOutput/SelectionTopologyBreakdown.root";
-    TFile* SaveFile = new TFile(RootFilePath, "UPDATE");
+    TFile* SaveFile = new TFile(RootFilePath, "recreate");
 
     //////////////
     // Topologies
@@ -143,7 +143,7 @@ void SelectionTopologyBreakdown() {
                     Histos[iSlice][iTop]->GetXaxis()->SetLabelSize(TextSize);
                     std::string VarLabel = (std::string) VarLabels.at(iVar);
                     VarLabel.erase(VarLabel.end() - 7, VarLabel.end()); // get rid of (bin #)
-                    Histos[iSlice][iTop]->GetXaxis()->SetTitle(("Reco " + VarLabel).c_str());
+                    Histos[iSlice][iTop]->GetXaxis()->SetTitle("Reco " + (TString)VarLabel + SerialNameToUnit[PlotNames[iVar]]);
                     Histos[iSlice][iTop]->GetXaxis()->SetTitleSize(TextSize);
                     Histos[iSlice][iTop]->GetXaxis()->SetTitleOffset(1.1);
                     Histos[iSlice][iTop]->GetXaxis()->CenterTitle();

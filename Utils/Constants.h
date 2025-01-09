@@ -14,7 +14,7 @@
 
 namespace Constants {
     // User to access
-    const std::string UserName = std::getenv("USER"); //"epelaez";
+    const std::string UserName = std::getenv("USER");
 
     const double Units = 1E38;
 
@@ -23,13 +23,23 @@ namespace Constants {
     // const double NTargets = 4.6712e31; // Nucleons
 
     double Nominal_UB_XY_Surface = 175. * 180. * 2. * 2.; // cm2
-	double POTPerSpill = 5e12;
+    double POTPerSpill = 5e12;
 
     // Integrated flux
     // TFile* FluxFile = TFile::Open("../Utils/MCC9_FluxHist_volTPCActive.root"); // make sure file is in path
 	// TH1D* HistoFlux = (TH1D*)(FluxFile->Get("hEnumu_cv"));
     // double IntegratedFlux = (HistoFlux->Integral() * (TargetPOT / POTPerSpill / Nominal_UB_XY_Surface));
     double IntegratedFlux = 1.65974e13; // from Henry Lay
+
+    // Binning for vertex coordinates
+    static const int NBinsVertexX = 18;
+    static const std::vector<double> ArrayNBinsVertexX{-180.,-160.,-140.,-120.,-100.,-80.,-60.,-40.,-20.,0.,20.,40.,60.,80.,100.,120.,140.,160.,180.};
+
+    static const int NBinsVertexY = 18;
+    static const std::vector<double> ArrayNBinsVertexY{-180.,-160.,-140.,-120.,-100.,-80.,-60.,-40.,-20.,0.,20.,40.,60.,80.,100.,120.,140.,160.,180.};
+
+    static const int NBinsVertexZ = 20;
+    static const std::vector<double> ArrayNBinsVertexZ{10.,32.,54.,76.,98.,120.,142.,164.,186.,208.,230.,252.,274.,296.,318.,340.,362.,384.,406.,428.,450.};
 
     // Binning for single differential analysis
     static const int NBinsEventCount = 1;
@@ -44,6 +54,20 @@ namespace Constants {
     static const int NBinsTransverseMomentum = 7;
     static const std::vector<double> ArrayNBinsTransverseMomentum{0.,0.1,0.2,0.3,0.4,0.5,0.6,1.};
 
+    static const int NBinsAlphaThreeD = 6;
+    static const std::vector<double> ArrayNBinsAlphaThreeD{0.,30.,60.,90.,120.,150.,180.};
+
+    static const int NBinsMissingMomentum = 5;
+    static const std::vector<double> ArrayNBinsMissingMomentum{0.,0.2,0.4,0.6,0.8,1.};
+
+    static const int NBinsInvariantMass = 6;
+    static const std::vector<double> ArrayNBinsInvariantMass{1.9, 2., 2.1, 2.2, 2.3, 2.4, 2.5};
+
+    static const int NBinsCosAngleLPMu = 20;
+    static const std::vector<double> ArrayNBinsCosAngleLPMu{-1., -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0., 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.};
+
+    static const int NBinsCosAngleRPMu = 20;
+    static const std::vector<double> ArrayNBinsCosAngleRPMu{-1., -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0., 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.};
     // 0.183 spacing
     static const int NBinsMuonMomentum = 6;
     static const std::vector<double> ArrayNBinsMuonMomentum{0.1, 0.283, 0.466, 0.649, 0.832, 1.015, 1.2};
@@ -89,6 +113,31 @@ namespace Constants {
     };
     static const TString LabelXAxisTwoDCosOpeningMuonTotalProtonInMuonCosTheta = ";cos(#theta_{#vec{p}_{#mu},#vec{p}_{sum}}) [bin #]";
 
+    // Variables for double differential analysis - GKI
+    static const int TwoDNBinsMissingMomentum = 5;
+    std::vector<double> TwoDArrayMissingMomentum{0.,0.2,0.4,0.6,0.8,1.};
+
+    static const int TwoDNBinsAlphaThreeD = 9;
+    std::vector<double> TwoDArrayAlphaThreeD{0.,20.,40.,60.,80.,100.,120.,140.,160.,180.};
+
+    std::vector<std::vector<double>> TwoDArrayNBinsMissingMomentumInMuonCosThetaSlices{
+        {0.,0.2,0.4,0.6,0.8,1.},
+        {0.,0.2,0.4,0.6,0.8,1.},
+    };
+    static const TString LabelXAxisTwoDMissingMomentumInMuonCosTheta = ";p_{n} [bin #]";
+
+    std::vector<std::vector<double>> TwoDArrayNBinsAlphaThreeDInMuonCosThetaSlices{
+        {0.,20.,40.,60.,80.,100.,120.,140.,160.,180.},
+        {0.,20.,40.,60.,80.,100.,120.,140.,160.,180.},
+    };
+    static const TString LabelXAxisTwoDAlphaThreeDInMuonCosTheta = ";#alpha_{3D} [bin #]";
+
+    std::vector<std::vector<double>> TwoDArrayNBinsCosOpeningAngleMomentumTransferTotalProtonInMuonCosThetaSlices{
+        {-1.,-0.8,-0.6,-0.4,-0.2,0.,0.2,0.4,0.6,0.8,1.},
+        {-1.,-0.8,-0.6,-0.4,-0.2,0.,0.2,0.4,0.6,0.8,1.},
+    };
+    static const TString LabelXAxisTwoDCosOpeningMomentumTransferTotalProtonInMuonCosTheta = ";cos(#theta_{#vec{q},#vec{p}_{sum}}) [bin #]";
+
     static std::map<TString,TString> LatexLabel = {
         { "MuonCosThetaPlot",  "All events" },
         { "LeadingProtonCosThetaPlot",  "All events" },	
@@ -99,20 +148,35 @@ namespace Constants {
         { "CosOpeningAngleProtonsPlot",  "All events" },	
         { "CosOpeningAngleMuonTotalProtonPlot",  "All events" },	
         { "TransverseMomentumPlot",  "All events" },	
+        // GKI
+        { "CosOpeningAngleMomentumTransferTotalProtonPlot",  "All events" },	
+        { "MissingMomentumPlot",  "All events" },
+	// Additional Variables
+	{ "InvariantMassPlot", "All events"},
+	{ "CosOpeningAngleLProtonMuonPlot", "All events"},
+	{ "CosOpeningAngleRProtonMuonPlot", "All events"}
     };
 
     static std::map<TString, std::tuple<vector<double>, vector<vector<double>>>> PlotNameToDiscriminator = {
         {"TrueSerialTransverseMomentum_InMuonCosThetaPlot", {TwoDArrayNBinsMuonCosTheta, TwoDArrayNBinsTransverseMomentumInMuonCosThetaSlices}},
         {"TrueSerialDeltaAlphaT_InMuonCosThetaPlot", {TwoDArrayNBinsMuonCosTheta, TwoDArrayNBinsDeltaAlphaTInMuonCosThetaSlices}},
         {"TrueSerialCosOpeningAngleProtons_InMuonCosThetaPlot", {TwoDArrayNBinsMuonCosTheta, TwoDArrayNBinsCosOpeningAngleProtonsInMuonCosThetaSlices}},
-        {"TrueSerialCosOpeningAngleMuonTotalProton_InMuonCosThetaPlot", {TwoDArrayNBinsMuonCosTheta, TwoDArrayNBinsCosOpeningAngleMuonTotalProtonInMuonCosThetaSlices}}
+        {"TrueSerialCosOpeningAngleMuonTotalProton_InMuonCosThetaPlot", {TwoDArrayNBinsMuonCosTheta, TwoDArrayNBinsCosOpeningAngleMuonTotalProtonInMuonCosThetaSlices}},
+        // GKI
+        {"TrueSerialMissingMomentum_InMuonCosThetaPlot", {TwoDArrayNBinsMuonCosTheta, TwoDArrayNBinsMissingMomentumInMuonCosThetaSlices}},
+        {"TrueSerialAlphaThreeD_InMuonCosThetaPlot", {TwoDArrayNBinsMuonCosTheta, TwoDArrayNBinsAlphaThreeDInMuonCosThetaSlices}},
+        {"TrueSerialCosOpeningAngleMomentumTransferTotalProton_InMuonCosThetaPlot", {TwoDArrayNBinsMuonCosTheta, TwoDArrayNBinsCosOpeningAngleMomentumTransferTotalProtonInMuonCosThetaSlices}}
     };
 
     static std::map<TString, TString> PlotNameToSliceLabel = {
         {"TrueSerialTransverseMomentum_InMuonCosThetaPlot", "cos(#theta_{#vec{p}_{#mu}})"},
         {"TrueSerialDeltaAlphaT_InMuonCosThetaPlot", "cos(#theta_{#vec{p}_{#mu}})"},
         {"TrueSerialCosOpeningAngleProtons_InMuonCosThetaPlot", "cos(#theta_{#vec{p}_{#mu}})"},
-        {"TrueSerialCosOpeningAngleMuonTotalProton_InMuonCosThetaPlot", "cos(#theta_{#vec{p}_{#mu}})"}
+        {"TrueSerialCosOpeningAngleMuonTotalProton_InMuonCosThetaPlot", "cos(#theta_{#vec{p}_{#mu}})"},
+        // GKI
+        {"TrueSerialMissingMomentum_InMuonCosThetaPlot", "cos(#theta_{#vec{p}_{#mu}})"},
+        {"TrueSerialAlphaThreeD_InMuonCosThetaPlot", "cos(#theta_{#vec{p}_{#mu}})"},
+        {"TrueSerialCosOpeningAngleMomentumTransferTotalProton_InMuonCosThetaPlot", "cos(#theta_{#vec{p}_{#mu}})"}
     };
 
     /////////////
@@ -121,6 +185,9 @@ namespace Constants {
 
     static const std::vector<TString> PlotNames = {
         "EventCount",
+        "VertexX",
+        "VertexY",
+        "VertexZ",
         "MuonCosTheta",
         "LeadingProtonCosTheta",
         "RecoilProtonCosTheta",
@@ -131,32 +198,66 @@ namespace Constants {
         "MuonMomentum",
         "LeadingProtonMomentum",
         "RecoilProtonMomentum",
+        "CosOpeningAngleMomentumTransferTotalProton",
+        "AlphaThreeD",
+        "MissingMomentum",
+	"InvariantMass",
+	"CosOpeningAngleLProtonMuon",
+	"CosOpeningAngleRProtonMuon",
         "SerialTransverseMomentum_InMuonCosTheta",
         "SerialDeltaAlphaT_InMuonCosTheta",
         "SerialCosOpeningAngleProtons_InMuonCosTheta",
-        "SerialCosOpeningAngleMuonTotalProton_InMuonCosTheta"
+        "SerialCosOpeningAngleMuonTotalProton_InMuonCosTheta",
+        "SerialMissingMomentum_InMuonCosTheta",
+        "SerialAlphaThreeD_InMuonCosTheta",
+        "SerialCosOpeningAngleMomentumTransferTotalProton_InMuonCosTheta"
+    };
+
+    static std::map<TString, TString> SerialNameToUnit = {
+        {"SerialTransverseMomentum_InMuonCosTheta", "[GeV/c]"},
+        {"SerialDeltaAlphaT_InMuonCosTheta", "[deg]"},
+        {"SerialCosOpeningAngleProtons_InMuonCosTheta", ""},
+        {"SerialCosOpeningAngleMuonTotalProton_InMuonCosTheta", ""},
+        {"SerialMissingMomentum_InMuonCosTheta", "[GeV/c]"},
+        {"SerialAlphaThreeD_InMuonCosTheta", "[deg]"},
+        {"SerialCosOpeningAngleMomentumTransferTotalProton_InMuonCosTheta", ""}
     };
 
     static const std::vector<std::string> VarLabels = {
         "single bin",
+        "#vec{v}_{x} [cm]",
+        "#vec{v}_{y} [cm]",
+        "#vec{v}_{z} [cm]",
         "cos(#theta_{#vec{p}_{#mu}})",
         "cos(#theta_{#vec{p}_{L}})",
         "cos(#theta_{#vec{p}_{R}})",
         "cos(#theta_{#vec{p}_{L},#vec{p}_{R}})",
         "cos(#theta_{#vec{p}_{#mu},#vec{p}_{sum}})",
-        "#delta #alpha_{T}",
-        "#delta P_{T}",
-        "|#vec{p}_{#mu}|",
-        "|#vec{p}_{L}|",
-        "|#vec{p}_{R}|",
-        "#delta P_{T} (bin #)",
-        "#delta #alpha_{T} (bin #)",
-        "cos(#theta_{#vec{p}_{L},#vec{p}_{R}}) (bin #)",
-        "cos(#theta_{#vec{p}_{#mu},#vec{p}_{sum}}) (bin #)"
+        "#delta #alpha_{T} [deg]",
+        "#delta P_{T} [GeV/c]",
+        "|#vec{p}_{#mu}| [GeV/c]",
+        "|#vec{p}_{L}| [GeV/c]",
+        "|#vec{p}_{R}| [GeV/c]",
+        "cos(#theta_{#vec{q},#vec{p}_{sum}})",
+        "#alpha_{3D} [deg]",
+        "p_{n} [GeV/c]",
+	"W [GeV]",
+	"cos(#theta_{#vec{p}_{L},#vec{p}_{#mu}})",
+	"cos(#theta_{#vec{p}_{R},#vec{p}_{#mu}})",
+        "#delta P_{T} [bin #]",
+        "#delta #alpha_{T} [bin #]",
+        "cos(#theta_{#vec{p}_{L},#vec{p}_{R}}) [bin #]",
+        "cos(#theta_{#vec{p}_{#mu},#vec{p}_{sum}}) [bin #]",
+        "p_{n} [bin #]",
+        "#alpha_{3D} [bin #]",
+        "cos(#theta_{#vec{q},#vec{p}_{sum}}) [bin #]"
     };
 
     static const std::vector<std::string> YLabels = {
         "#frac{d#sigma}{# events} #left[10^{-38} #frac{cm^{2}}{Ar}#right]",
+        "#frac{d#sigma}{d #vec{v}_{x}} #left[10^{-38} #frac{cm^{2}}{Ar}#right]",
+        "#frac{d#sigma}{d #vec{v}_{y}} #left[10^{-38} #frac{cm^{2}}{Ar}#right]",
+        "#frac{d#sigma}{d #vec{v}_{z}} #left[10^{-38} #frac{cm^{2}}{Ar}#right]",
         "#frac{d#sigma}{dcos(#theta_{#vec{p}_{#mu}})} #left[10^{-38} #frac{cm^{2}}{Ar}#right]",
         "#frac{d#sigma}{dcos(#theta_{#vec{p}_{L}})} #left[10^{-38} #frac{cm^{2}}{Ar}#right]",
         "#frac{d#sigma}{dcos(#theta_{#vec{p}_{R}})} #left[10^{-38} #frac{cm^{2}}{Ar}#right]",
@@ -167,10 +268,19 @@ namespace Constants {
         "#frac{d#sigma}{d|#vec{p}_{#mu}|} #left[10^{-38} #frac{cm^{2}}{Ar}#right]",
         "#frac{d#sigma}{d|#vec{p}_{L}|} #left[10^{-38} #frac{cm^{2}}{Ar}#right]",
         "#frac{d#sigma}{d|#vec{p}_{R}|} #left[10^{-38} #frac{cm^{2}}{Ar}#right]",
+        "#frac{d#sigma}{dcos(#theta_{#vec{q},#vec{p}_{sum}})} #left[10^{-38} #frac{cm^{2}}{Ar}#right]",
+        "#frac{d#sigma}{d#alpha_{3D}} #left[10^{-38} #frac{cm^{2}}{Ar}#right]",
+        "#frac{d#sigma}{dp_{n}} #left[10^{-38} #frac{cm^{2}}{Ar}#right]",
+	"#frac{d#sigma}{dW} #left[10^{-38} #frac{cm^{2}}{Ar}#right]",
+	"#frac{d#sigma}{dcos(#theta_{#vec{p}_{L},#vec{p}_{#mu}})} #left[10^{-38} #frac{cm^{2}}{Ar}#right]",
+	"#frac{d#sigma}{dcos(#theta_{#vec{p}_{R},#vec{p}_{#mu}})} #left[10^{-38} #frac{cm^{2}}{Ar}#right]", 
         "#frac{d^{2}#sigma}{dcos(#theta_{#vec{p}_{#mu}}) d#delta P_{T}} #left[10^{-38} #frac{cm^{2}}{Ar}#right]",
         "#frac{d^{2}#sigma}{dcos(#theta_{#vec{p}_{#mu}}) d#delta #alpha_{T}} #left[10^{-38} #frac{cm^{2}}{Ar}#right]",
         "#frac{d^{2}#sigma}{dcos(#theta_{#vec{p}_{#mu}}) dcos(#theta_{#vec{p}_{L},#vec{p}_{R}})} #left[10^{-38} #frac{cm^{2}}{Ar}#right]",
-        "#frac{d^{2}#sigma}{dcos(#theta_{#vec{p}_{#mu}}) dcos(#theta_{#vec{p}_{#mu},#vec{p}_{sum}})} #left[10^{-38} #frac{cm^{2}}{Ar}#right]"
+        "#frac{d^{2}#sigma}{dcos(#theta_{#vec{p}_{#mu}}) dcos(#theta_{#vec{p}_{#mu},#vec{p}_{sum}})} #left[10^{-38} #frac{cm^{2}}{Ar}#right]",
+        "#frac{d^{2}#sigma}{dcos(#theta_{#vec{p}_{#mu}}) dp_{n}} #left[10^{-38} #frac{cm^{2}}{Ar}#right]",
+        "#frac{d^{2}#sigma}{dcos(#theta_{#vec{p}_{#mu}}) d#alpha_{3D}} #left[10^{-38} #frac{cm^{2}}{Ar}#right]",
+        "#frac{d^{2}#sigma}{dcos(#theta_{#vec{p}_{#mu}}) dcos(#theta_{#vec{q},#vec{p}_{sum}})} #left[10^{-38} #frac{cm^{2}}{Ar}#right]"
     };
 
     ///////////////

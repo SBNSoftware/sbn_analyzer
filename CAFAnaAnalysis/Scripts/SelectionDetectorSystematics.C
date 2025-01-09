@@ -17,6 +17,7 @@
 // std includes.
 #include <filesystem>
 #include <vector>
+#include <string>
 #include <memory>
 
 // Definitions for Vars and Cuts.
@@ -24,6 +25,7 @@
 #include "Helpers.cpp"
 
 // Utils includes.
+#include "../../Utils/Tools.cxx"
 #include "../../Utils/Constants.h"
 
 using namespace std;
@@ -31,6 +33,8 @@ using namespace ana;
 using namespace Constants;
 
 void SelectionDetectorSystematics() {
+    Tools tools;
+
     // Set defaults and load tools
     TH1D::SetDefaultSumw2();
     TH2D::SetDefaultSumw2();
@@ -38,8 +42,34 @@ void SelectionDetectorSystematics() {
     int FontStyle = 132;
     double TextSize = 0.06;
 
-    // The SpectrumLoader object handles the loading of CAFs and the creation of Spectrum.
-    SpectrumLoader NuLoader(InputFiles);
+    // Target files for each sample
+    std::string CVPath = "/pnfs/sbnd/persistent/users/epelaez/sbnd_detector_variations/v09_88_00_04/cv";
+    std::vector<std::string> CVInputFiles = tools.GetInputFiles(CVPath);
+    auto CVLoader = std::make_unique<SpectrumLoader>(CVInputFiles);
+
+    std::string NoDifPath = "/pnfs/sbnd/persistent/users/epelaez/sbnd_detector_variations/v09_88_00_04/no_diffusion";
+    std::vector<std::string> NoDifInputFiles = tools.GetInputFiles(NoDifPath);
+    auto NoDifLoader = std::make_unique<SpectrumLoader>(NoDifInputFiles);
+
+    std::string NoLonDifPath = "/pnfs/sbnd/persistent/users/epelaez/sbnd_detector_variations/v09_88_00_04/no_longitudinal_diffusion";
+    std::vector<std::string> NoLonDifInputFiles = tools.GetInputFiles(NoLonDifPath);
+    auto NoLonDifLoader = std::make_unique<SpectrumLoader>(NoLonDifInputFiles);
+
+    std::string NoTraDifPath = "/pnfs/sbnd/persistent/users/epelaez/sbnd_detector_variations/v09_88_00_04/no_transverse_diffusion";
+    std::vector<std::string> NoTraDifInputFiles = tools.GetInputFiles(NoTraDifPath);
+    auto NoTraDifLoader = std::make_unique<SpectrumLoader>(NoTraDifInputFiles);
+
+    std::string SCENoDifPath = "/pnfs/sbnd/persistent/users/epelaez/sbnd_detector_variations/v09_88_00_04/with_sce_no_diffusion";
+    std::vector<std::string> SCENoDifInputFiles = tools.GetInputFiles(SCENoDifPath);
+    auto SCENoDifLoader = std::make_unique<SpectrumLoader>(SCENoDifInputFiles);
+
+    // Vector with loader for each universe
+    std::vector<std::unique_ptr<SpectrumLoader>> UnivLoaders;
+    UnivLoaders.push_back(std::move(CVLoader));
+    UnivLoaders.push_back(std::move(NoDifLoader));
+    UnivLoaders.push_back(std::move(NoLonDifLoader));
+    UnivLoaders.push_back(std::move(NoTraDifLoader));
+    UnivLoaders.push_back(std::move(SCENoDifLoader));
 
     // Directory to store figs
     TString dir = "/exp/sbnd/app/users/" + (TString)UserName + "/CC1muAnalysis";
@@ -49,49 +79,51 @@ void SelectionDetectorSystematics() {
 
     // Root file to store objects in
     TString RootFilePath = "/exp/sbnd/data/users/" + (TString)UserName + "/CAFAnaOutput/SelectionSystematicsDetector.root";
-    TFile* SaveFile = new TFile(RootFilePath, "UPDATE");
+    TFile* SaveFile = new TFile(RootFilePath, "recreate");
 
     const int NVars = Vars.size();
 
     // Construct all spectra
-    std::vector<std::tuple<
+    std::vector<std::vector<std::tuple<
         std::unique_ptr<Spectrum>,
         std::unique_ptr<Spectrum>,
         std::unique_ptr<Spectrum>
-    >> Spectra;
+    >>> Spectra;
     for (int iVar = 0; iVar < NVars; ++iVar) {
-        auto RecoSignals = std::make_unique<Spectrum>(VarLabels.at(iVar), VarBins.at(iVar), NuLoader, std::get<0>(Vars.at(iVar)), kNoSpillCut, kRecoIsSignal); 
-        auto RecoTrueSignals = std::make_unique<Spectrum> (VarLabels.at(iVar), VarBins.at(iVar), NuLoader, std::get<0>(Vars.at(iVar)), kNoSpillCut, kRecoIsTrueReco); 
-        auto RecoBkgSignals = std::make_unique<Spectrum>(VarLabels.at(iVar), VarBins.at(iVar), NuLoader, std::get<0>(Vars.at(iVar)), kNoSpillCut, kRecoIsBackground); 
-        Spectra.push_back({std::move(RecoSignals), std::move(RecoTrueSignals), std::move(RecoBkgSignals)});
+        std::vector<std::tuple<std::unique_ptr<Spectrum>, std::unique_ptr<Spectrum>, std::unique_ptr<Spectrum>>> InnerSpectra;
+        for (int iUniv = 0; iUniv < (int) UnivLoaders.size(); iUniv++) {
+            auto RecoSignals = std::make_unique<Spectrum>(VarLabels.at(iVar), VarBins.at(iVar), *UnivLoaders.at(iUniv), std::get<0>(Vars.at(iVar)), kNoSpillCut, kRecoIsSignal); 
+            auto RecoTrueSignals = std::make_unique<Spectrum> (VarLabels.at(iVar), VarBins.at(iVar), *UnivLoaders.at(iUniv), std::get<0>(Vars.at(iVar)), kNoSpillCut, kRecoIsTrueReco); 
+            auto RecoBkgSignals = std::make_unique<Spectrum>(VarLabels.at(iVar), VarBins.at(iVar), *UnivLoaders.at(iUniv), std::get<0>(Vars.at(iVar)), kNoSpillCut, kRecoIsBackground); 
+            InnerSpectra.push_back({std::move(RecoSignals), std::move(RecoTrueSignals), std::move(RecoBkgSignals)});
+        }
+        Spectra.push_back(std::move(InnerSpectra));
     }
-    NuLoader.Go();
+    for (int iUniv = 0; iUniv < (int) UnivLoaders.size(); iUniv++) {
+        UnivLoaders.at(iUniv)->Go();
+    }
 
     for (int iVar = 0; iVar < NVars; ++iVar) {
-        auto& [RecoSpectra, RecoTrueSpectra, RecoBkgSpectra] = Spectra.at(iVar);
+        TH1D* RecoHisto = std::get<0>(Spectra.at(iVar).at(0))->ToTH1(TargetPOT);
+        TH1D* RecoTrueHisto = std::get<1>(Spectra.at(iVar).at(0))->ToTH1(TargetPOT);
+        TH1D* RecoBkgHisto = std::get<2>(Spectra.at(iVar).at(0))->ToTH1(TargetPOT);
 
-        // Get nominal plots
-        TH1D* RecoHisto = RecoSpectra->ToTH1(TargetPOT);
-        TH1D* RecoTrueHisto = RecoTrueSpectra->ToTH1(TargetPOT);
-        TH1D* RecoBkgHisto = RecoBkgSpectra->ToTH1(TargetPOT);
-
-        // Get plots with modified POT
-        TH1D* ModifiedRecoHisto = RecoSpectra->ToTH1(TargetPOT);
-        TH1D* ModifiedRecoTrueHisto = RecoTrueSpectra->ToTH1(TargetPOT);
-        TH1D* ModifiedRecoBkgHisto = RecoBkgSpectra->ToTH1(TargetPOT);
-
-        // Scale 15%
-        ModifiedRecoHisto->Scale(1.15);
-        ModifiedRecoTrueHisto->Scale(1.15);
-        ModifiedRecoBkgHisto->Scale(1.15);
+        std::vector<TH1D*> UnivRecoHisto;
+        std::vector<TH1D*> UnivRecoTrueHisto;
+        std::vector<TH1D*> UnivRecoBkgHisto;
+        for (int iUniv = 1; iUniv < (int) UnivLoaders.size(); iUniv++) {
+            UnivRecoHisto.push_back(std::get<0>(Spectra.at(iVar).at(iUniv))->ToTH1(TargetPOT));
+            UnivRecoTrueHisto.push_back(std::get<1>(Spectra.at(iVar).at(iUniv))->ToTH1(TargetPOT));
+            UnivRecoBkgHisto.push_back(std::get<2>(Spectra.at(iVar).at(iUniv))->ToTH1(TargetPOT));
+        }
 
         SelectionHelpers::DrawHistosWithErrorBands(
             RecoHisto,
             RecoTrueHisto,
             RecoBkgHisto,
-            {ModifiedRecoHisto},
-            {ModifiedRecoTrueHisto},
-            {ModifiedRecoBkgHisto},
+            UnivRecoHisto,
+            UnivRecoTrueHisto,
+            UnivRecoBkgHisto,
             dir,
             "Detector",
             PlotNames[iVar]
@@ -103,18 +135,20 @@ void SelectionDetectorSystematics() {
         RecoBkgHisto->Scale(Units / (IntegratedFlux * NTargets));
 
         // Scale modified histograms for cov matrices
-        ModifiedRecoHisto->Scale(Units / (IntegratedFlux * NTargets));
-        ModifiedRecoTrueHisto->Scale(Units / (IntegratedFlux * NTargets));
-        ModifiedRecoBkgHisto->Scale(Units / (IntegratedFlux * NTargets));
+        for (int iUniv = 0; iUniv < (int) UnivRecoHisto.size(); iUniv++) {
+            UnivRecoHisto.at(iUniv)->Scale(Units / (IntegratedFlux * NTargets));
+            UnivRecoTrueHisto.at(iUniv)->Scale(Units / (IntegratedFlux * NTargets));
+            UnivRecoBkgHisto.at(iUniv)->Scale(Units / (IntegratedFlux * NTargets));
+        }
 
         // Plot cov, frac cov, and corr matrices
         SelectionHelpers::DrawMatrices(
             RecoHisto,
             RecoTrueHisto,
             RecoBkgHisto,
-            {ModifiedRecoHisto},
-            {ModifiedRecoTrueHisto},
-            {ModifiedRecoBkgHisto},
+            UnivRecoHisto,
+            UnivRecoTrueHisto,
+            UnivRecoBkgHisto,
             dir,
             "Detector",
             VarLabels[iVar],

@@ -48,7 +48,7 @@ void SelectionResolution() {
     TString HistoFile = "/exp/sbnd/data/users/" + (TString)UserName + "/CAFAnaOutput/Selection.root";
     std::unique_ptr<TFile> File(TFile::Open(HistoFile));
 
-    const int NVars = PlotNames.size() - 4; // exclude double-differential variables
+    const int NVars = PlotNames.size() - 7; // exclude double-differential variables
 
     // Construct spectra
     std::vector<std::tuple<

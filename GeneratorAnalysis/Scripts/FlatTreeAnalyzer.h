@@ -5,7 +5,6 @@
 #include <TChain.h>
 #include <TFile.h>
 #include <TString.h>
-
 #include "../../Utils/Constants.h"
 
 class FlatTreeAnalyzer {

@@ -7,6 +7,7 @@
 
 // STD includes
 #include <iostream>
+#include <filesystem>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -118,6 +119,25 @@ TH1D* Tools::GetHistoBins(TH1D* h,int LowBin,int HighBin,double ScaleFactor,std:
 
 }
 
+TH1D* Tools::GetHistoBinsNoScale(TH1D* h,int LowBin,int HighBin,std::vector<double> Binning, TString Name) {
+	TString PlotName = Name + TString(h->GetName()) + "_"+TString(std::to_string(LowBin)) + "_"+TString(std::to_string(HighBin));
+	TString XaxisTitle = h->GetXaxis()->GetTitle();
+	TString YaxisTitle = h->GetYaxis()->GetTitle();
+	int NBins = HighBin - LowBin + 1;
+
+	TH1D* clone = new TH1D(PlotName,";" + XaxisTitle + ";" + YaxisTitle, NBins, &Binning[0] );
+
+	// Loop over the bin indices, aka starting from 1
+	for (int iBin = 1; iBin <= NBins; iBin++) {
+		double CurrentHistoEntry = h->GetBinContent(LowBin + iBin - 1);		
+		double CurrentHistoError = h->GetBinError(LowBin + iBin - 1);		
+		clone->SetBinContent(iBin,CurrentHistoEntry);
+		clone->SetBinError(iBin,CurrentHistoError);		
+	} // End of the loop over the bin indices
+
+	return clone;
+}
+
 //----------------------------------------//
 
 std::vector<TMatrixD> Tools::MatrixDecomp(int nbins,TVectorD matrix_pred,TMatrixD matrix_syst) {
@@ -176,7 +196,7 @@ std::vector<TMatrixD> Tools::MatrixDecomp(int nbins,TVectorD matrix_pred,TMatrix
 
 	//cout << endl;
 
-	std::vector<TMatrixD> NormShapeVector = {matrix_norm+matrix_mixed,matrix_shape};
+	std::vector<TMatrixD> NormShapeVector = {matrix_norm,matrix_shape+matrix_mixed};
 	return NormShapeVector;
 
 }
@@ -671,6 +691,18 @@ void Tools::CalcChiSquared(TH1D* h_model, TH1D* h_data, TH2D* cov, double &chi, 
 	delete h_model_clone;
 	delete h_data_clone;
 	delete h_cov_clone;
+}
+
+const std::vector<std::string> Tools::GetInputFiles(const std::string TargetPath, bool print) {
+	std::vector<std::string> Input;
+	for (const auto & entry : std::filesystem::directory_iterator(TargetPath)) {
+		if ((entry.path().string().find("flat.caf.root") != std::string::npos) && (entry.path().extension() == ".root")) {
+			std::string XRootPath = "root://fndcadoor.fnal.gov:1094/pnfs/fnal.gov/usr/" + entry.path().string().substr(6);
+			if (print == true) std::cout << entry.path().string().substr(6) << std::endl;
+			Input.push_back(XRootPath);
+		}
+	}
+	return Input;
 }
 
 #endif

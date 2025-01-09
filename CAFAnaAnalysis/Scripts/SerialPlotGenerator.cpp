@@ -39,9 +39,11 @@ void SerialPlotGenerator() {
 
     const int NSamples = SampleNames.size();
 
-    // start at 11 to start with double diff variables
-    for (int iPlot = 11; iPlot < NPlots; iPlot++) {
-        // Load true plots
+    for (int iPlot = 0; iPlot < NPlots; iPlot++) {
+        
+	if ( !(PlotNames[iPlot].Contains("Serial")) ) { continue; }
+	// Load true plots
+	
         std::vector<TH1D*> TruePlots; TruePlots.resize(NSamples);
         for (int iSample = 0; iSample < NSamples; iSample++) {
             TString PlotName = PlotNames[iPlot] + SampleNames[iSample];
@@ -107,7 +109,7 @@ void SerialPlotGenerator() {
                 Histos[iSlice][iSample]->GetXaxis()->SetLabelSize(TextSize);
                 std::string VarLabel = (std::string) VarLabels.at(iPlot);
                 VarLabel.erase(VarLabel.end() - 7, VarLabel.end()); // get rid of (bin #)
-                Histos[iSlice][iSample]->GetXaxis()->SetTitle(("Reco " + VarLabel).c_str());
+                Histos[iSlice][iSample]->GetXaxis()->SetTitle("Reco " + (TString)VarLabel + SerialNameToUnit[PlotNames[iPlot]]);
                 Histos[iSlice][iSample]->GetXaxis()->SetTitleSize(TextSize);
                 Histos[iSlice][iSample]->GetXaxis()->SetTitleOffset(1.1);
                 Histos[iSlice][iSample]->GetXaxis()->CenterTitle();

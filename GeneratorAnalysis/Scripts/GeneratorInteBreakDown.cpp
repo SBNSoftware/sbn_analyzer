@@ -101,15 +101,15 @@ void GeneratorInteBreakDown() {
     YAxisLabel.push_back("#frac{d#sigma}{dcos(#theta_{#vec{p}_{R}})} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
 
     PlotNames.push_back("TrueNoFSILeadingProtonMomentumPlot");
-    XAxisLabel.push_back("|#vec{p}_{L}|");
+    XAxisLabel.push_back("|#vec{p}_{L}| [GeV/c]");
     YAxisLabel.push_back("#frac{d#sigma}{d|#vec{p}_{L}|} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
 
     PlotNames.push_back("TrueNoFSIRecoilProtonMomentumPlot");
-    XAxisLabel.push_back("|#vec{p}_{R}|");
+    XAxisLabel.push_back("|#vec{p}_{R}| [GeV/c]");
     YAxisLabel.push_back("#frac{d#sigma}{d|#vec{p}_{R}|} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
 
     PlotNames.push_back("TrueNoFSIMuonMomentumPlot");
-    XAxisLabel.push_back("|#vec{p}_{#mu}|");
+    XAxisLabel.push_back("|#vec{p}_{#mu}| [GeV/c]");
     YAxisLabel.push_back("#frac{d#sigma}{d|#vec{p}_{#mu}|} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
 
     PlotNames.push_back("TrueNoFSICosOpeningAngleProtonsPlot");
@@ -121,14 +121,51 @@ void GeneratorInteBreakDown() {
     YAxisLabel.push_back("#frac{d#sigma}{dcos(#theta_{#vec{p}_{#mu},#vec{p}_{sum}})} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
 
     PlotNames.push_back("TrueNoFSITransverseMomentumPlot");
-    XAxisLabel.push_back("#delta P_{T}");
+    XAxisLabel.push_back("#delta P_{T} [GeV/c]");
     YAxisLabel.push_back("#frac{d#sigma}{d#delta P_{T}} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
 
     PlotNames.push_back("TrueNoFSIDeltaAlphaTPlot");
-    XAxisLabel.push_back("#delta #alpha_{T}");
+    XAxisLabel.push_back("#delta #alpha_{T} [deg]");
     YAxisLabel.push_back("#frac{d#sigma}{d#delta #alpha_{T}} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
 
+    PlotNames.push_back("TrueNoFSIInvariantMassPlot");
+    XAxisLabel.push_back("W [GeV]");
+    YAxisLabel.push_back("#frac{d#sigma}{d#delta W} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
+
+    PlotNames.push_back("TrueNoFSICosOpeningAngleLProtonMuonPlot");
+    XAxisLabel.push_back("cos(#theta_{#vec{p}_{L},#vec{p}_{#mu}})");
+    YAxisLabel.push_back("#frac{d#sigma}{dcos(#theta_{#vec{p}_{L},#vec{p}_{#mu}})} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
+
+    PlotNames.push_back("TrueNoFSICosOpeningAngleRProtonMuonPlot");
+    XAxisLabel.push_back("cos(#theta_{#vec{p}_{R},#vec{p}_{#mu}})");
+    YAxisLabel.push_back("#frac{d#sigma}{dcos(#theta_{#vec{p}_{R},#vec{p}_{#mu}})} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
+
+    // GKI
+    PlotNames.push_back("TrueNoFSICosOpeningAngleMomentumTransferTotalProtonPlot");
+    XAxisLabel.push_back("cos(#theta_{#vec{q},#vec{p}_{sum}})");
+    YAxisLabel.push_back("#frac{d#sigma}{dcos(#theta_{#vec{q},#vec{p}_{sum}})} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
+
+    PlotNames.push_back("TrueNoFSIMissingMomentumPlot");
+    XAxisLabel.push_back("p_{n} [GeV/c]");
+    YAxisLabel.push_back("#frac{d#sigma}{dp_{n}} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
+
+    PlotNames.push_back("TrueNoFSIAlphaThreeDPlot");
+    XAxisLabel.push_back("#alpha_{3D} [deg]");
+    YAxisLabel.push_back("#frac{d#sigma}{d#alpha_{3D}} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
+
     // Post FSI
+    PlotNames.push_back("TrueVertexXPlot");
+    XAxisLabel.push_back("#vec{v}_{x} [cm]");
+    YAxisLabel.push_back("#frac{d#sigma}{d #vec{v}_{x}} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
+
+    PlotNames.push_back("TrueVertexYPlot");
+    XAxisLabel.push_back("#vec{v}_{y} [cm]");
+    YAxisLabel.push_back("#frac{d#sigma}{d #vec{v}_{y}} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
+
+    PlotNames.push_back("TrueVertexZPlot");
+    XAxisLabel.push_back("#vec{v}_{z} [cm]");
+    YAxisLabel.push_back("#frac{d#sigma}{d #vec{v}_{z}} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
+
     PlotNames.push_back("TrueMuonCosThetaPlot");
     XAxisLabel.push_back("cos(#theta_{#vec{p}_{#mu}})");
     YAxisLabel.push_back("#frac{d#sigma}{dcos(#theta_{#vec{p}_{#mu}})} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
@@ -142,15 +179,15 @@ void GeneratorInteBreakDown() {
     YAxisLabel.push_back("#frac{d#sigma}{dcos(#theta_{#vec{p}_{R}})} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
 
     PlotNames.push_back("TrueLeadingProtonMomentumPlot");
-    XAxisLabel.push_back("|#vec{p}_{L}|");
+    XAxisLabel.push_back("|#vec{p}_{L}| [GeV/c]");
     YAxisLabel.push_back("#frac{d#sigma}{d|#vec{p}_{L}|} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
 
     PlotNames.push_back("TrueRecoilProtonMomentumPlot");
-    XAxisLabel.push_back("|#vec{p}_{R}|");
+    XAxisLabel.push_back("|#vec{p}_{R}| [GeV/c]");
     YAxisLabel.push_back("#frac{d#sigma}{d|#vec{p}_{R}|} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
 
     PlotNames.push_back("TrueMuonMomentumPlot");
-    XAxisLabel.push_back("|#vec{p}_{#mu}|");
+    XAxisLabel.push_back("|#vec{p}_{#mu}| [GeV/c]");
     YAxisLabel.push_back("#frac{d#sigma}{d|#vec{p}_{#mu}|} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
 
     PlotNames.push_back("TrueCosOpeningAngleProtonsPlot");
@@ -162,20 +199,45 @@ void GeneratorInteBreakDown() {
     YAxisLabel.push_back("#frac{d#sigma}{dcos(#theta_{#vec{p}_{#mu},#vec{p}_{sum}})} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
 
     PlotNames.push_back("TrueTransverseMomentumPlot");
-    XAxisLabel.push_back("#delta P_{T}");
+    XAxisLabel.push_back("#delta P_{T} [GeV/c]");
     YAxisLabel.push_back("#frac{d#sigma}{d#delta P_{T}} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
 
     PlotNames.push_back("TrueDeltaAlphaTPlot");
-    XAxisLabel.push_back("#delta #alpha_{T}");
+    XAxisLabel.push_back("#delta #alpha_{T} [deg]");
     YAxisLabel.push_back("#frac{d#sigma}{d#delta #alpha_{T}} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
+	
+    PlotNames.push_back("TrueInvariantMassPlot");
+    XAxisLabel.push_back("W [GeV]");
+    YAxisLabel.push_back("#frac{d#sigma}{dW} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
+
+    PlotNames.push_back("TrueCosOpeningAngleLProtonMuonPlot");
+    XAxisLabel.push_back("cos(#theta_{#vec{p}_{L},#vec{p}_{#mu}})");
+    YAxisLabel.push_back("#frac{d#sigma}{dcos(#theta_{#vec{p}_{L},#vec{p}_{#mu}})} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
+
+    PlotNames.push_back("TrueCosOpeningAngleRProtonMuonPlot");
+    XAxisLabel.push_back("cos(#theta_{#vec{p}_{R},#vec{p}_{#mu}})");
+    YAxisLabel.push_back("#frac{d#sigma}{dcos(#theta_{#vec{p}_{R},#vec{p}_{#mu}})} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
+   
+    // GKI
+    PlotNames.push_back("TrueCosOpeningAngleMomentumTransferTotalProtonPlot");
+    XAxisLabel.push_back("cos(#theta_{#vec{q},#vec{p}_{sum}})");
+    YAxisLabel.push_back("#frac{d#sigma}{dcos(#theta_{#vec{q},#vec{p}_{sum}})} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
+
+    PlotNames.push_back("TrueMissingMomentumPlot");
+    XAxisLabel.push_back("p_{n} [GeV/c]");
+    YAxisLabel.push_back("#frac{d#sigma}{dp_{n}} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
+
+    PlotNames.push_back("TrueAlphaThreeDPlot");
+    XAxisLabel.push_back("#alpha_{3D} [deg]");
+    YAxisLabel.push_back("#frac{d#sigma}{d#alpha_{3D}} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
 
     // Double differential final state
     PlotNames.push_back("TrueSerialTransverseMomentum_InMuonCosThetaPlot");
-    XAxisLabel.push_back("#delta P_{T}");
+    XAxisLabel.push_back("#delta P_{T} [GeV/c]");
     YAxisLabel.push_back("#frac{d#sigma}{d#delta P_{T}} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
 
     PlotNames.push_back("TrueSerialDeltaAlphaT_InMuonCosThetaPlot");
-    XAxisLabel.push_back("#delta #alpha_{T}");
+    XAxisLabel.push_back("#delta #alpha_{T} [deg]");
     YAxisLabel.push_back("#frac{d#sigma}{d#delta #alpha_{T}} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
 
     PlotNames.push_back("TrueSerialCosOpeningAngleProtons_InMuonCosThetaPlot");
@@ -186,13 +248,26 @@ void GeneratorInteBreakDown() {
     XAxisLabel.push_back("cos(#theta_{#vec{p}_{#mu},#vec{p}_{sum}})");
     YAxisLabel.push_back("#frac{d#sigma}{dcos(#theta_{#vec{p}_{#mu},#vec{p}_{sum}})} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
 
+    // GKI
+    PlotNames.push_back("TrueSerialMissingMomentum_InMuonCosThetaPlot");
+    XAxisLabel.push_back("p_{n} [GeV/c]");
+    YAxisLabel.push_back("#frac{d#sigma}{dp_{n}} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
+
+    PlotNames.push_back("TrueSerialAlphaThreeD_InMuonCosThetaPlot");
+    XAxisLabel.push_back("#alpha_{3D} [deg]");
+    YAxisLabel.push_back("#frac{d#sigma}{d#alpha_{3D}} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
+
+    PlotNames.push_back("TrueSerialCosOpeningAngleMomentumTransferTotalProton_InMuonCosThetaPlot");
+    XAxisLabel.push_back("cos(#theta_{#vec{q},#vec{p}_{sum}})");
+    YAxisLabel.push_back("#frac{d#sigma}{dcos(#theta_{#vec{q},#vec{p}_{sum}})} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
+
     // Double differential pre FSI
     PlotNames.push_back("TrueSerialNoFSITransverseMomentum_InMuonCosThetaPlot");
-    XAxisLabel.push_back("#delta P_{T}");
+    XAxisLabel.push_back("#delta P_{T} [GeV/c]");
     YAxisLabel.push_back("#frac{d#sigma}{d#delta P_{T}} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
 
     PlotNames.push_back("TrueSerialNoFSIDeltaAlphaT_InMuonCosThetaPlot");
-    XAxisLabel.push_back("#delta #alpha_{T}");
+    XAxisLabel.push_back("#delta #alpha_{T} [deg]");
     YAxisLabel.push_back("#frac{d#sigma}{d#delta #alpha_{T}} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
 
     PlotNames.push_back("TrueSerialNoFSICosOpeningAngleProtons_InMuonCosThetaPlot");
@@ -202,6 +277,19 @@ void GeneratorInteBreakDown() {
     PlotNames.push_back("TrueSerialNoFSICosOpeningAngleMuonTotalProton_InMuonCosThetaPlot");
     XAxisLabel.push_back("cos(#theta_{#vec{p}_{#mu},#vec{p}_{sum}})");
     YAxisLabel.push_back("#frac{d#sigma}{dcos(#theta_{#vec{p}_{#mu},#vec{p}_{sum}})} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
+
+    // GKI
+    PlotNames.push_back("TrueSerialNoFSIMissingMomentum_InMuonCosThetaPlot");
+    XAxisLabel.push_back("p_{n} [GeV/c]");
+    YAxisLabel.push_back("#frac{d#sigma}{dp_{n}} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
+
+    PlotNames.push_back("TrueSerialNoFSIAlphaThreeD_InMuonCosThetaPlot");
+    XAxisLabel.push_back("#alpha_{3D} [deg]");
+    YAxisLabel.push_back("#frac{d#sigma}{d#alpha_{3D}} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
+
+    PlotNames.push_back("TrueSerialNoFSICosOpeningAngleMomentumTransferTotalProton_InMuonCosThetaPlot");
+    XAxisLabel.push_back("cos(#theta_{#vec{q},#vec{p}_{sum}})");
+    YAxisLabel.push_back("#frac{d#sigma}{dcos(#theta_{#vec{q},#vec{p}_{sum}})} #left[10^{-38} #frac{cm^{2}}{Ar}#right]");
 
 
     //------------------------------//
@@ -226,6 +314,9 @@ void GeneratorInteBreakDown() {
     // Loop over the plots to be compared
 
     for (int iPlot = 0; iPlot < NPlots; iPlot++) {
+
+        TString PlotNameDuplicate = PlotNames[iPlot];
+        TString GeneralPlotName = PlotNameDuplicate.ReplaceAll("NoFSI","");
 
         for (int iSample = 0; iSample < NSamples; iSample++) {	
             if (PlotNames[iPlot].Contains("NoFSI") && Labels[iSample] == "GiBUU_NoFSI") {

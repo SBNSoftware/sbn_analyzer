@@ -43,7 +43,7 @@ void SelectionInteBreakdown() {
 
     // Root file to store objects in
     TString RootFilePath = "/exp/sbnd/data/users/" + (TString)UserName + "/CAFAnaOutput/SelectionInteBreakdown.root";
-    TFile* SaveFile = new TFile(RootFilePath, "UPDATE");
+    TFile* SaveFile = new TFile(RootFilePath, "recreate");
 
     ////////////////////
     // Interaction modes
@@ -143,7 +143,7 @@ void SelectionInteBreakdown() {
                     Histos[iSlice][iInt]->GetXaxis()->SetLabelSize(TextSize);
                     std::string VarLabel = (std::string) VarLabels.at(iVar);
                     VarLabel.erase(VarLabel.end() - 7, VarLabel.end()); // get rid of (bin #)
-                    Histos[iSlice][iInt]->GetXaxis()->SetTitle(("Reco " + VarLabel).c_str());
+                    Histos[iSlice][iInt]->GetXaxis()->SetTitle("Reco " + (TString)VarLabel + SerialNameToUnit[PlotNames[iVar]]);
                     Histos[iSlice][iInt]->GetXaxis()->SetTitleSize(TextSize);
                     Histos[iSlice][iInt]->GetXaxis()->SetTitleOffset(1.1);
                     Histos[iSlice][iInt]->GetXaxis()->CenterTitle();

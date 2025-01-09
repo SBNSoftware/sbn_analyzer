@@ -77,6 +77,13 @@ void WienerSVDOverlay() {
         int n = UnfSpectrum->GetNbinsX();
 		double edges[n+1]; for (int i = 0; i < n+1; i++) { edges[i] = UnfSpectrum->GetBinLowEdge(i+1); }
 
+		/////////////////////////////////
+		// Get unfolded covariance matrix
+		/////////////////////////////////
+
+		TH2D* UnfTotalCovHisto = (TH2D*) UnfoldedFile->Get(PlotNames[iVar]+"_unf_cov");
+		TMatrixD UnfCovMatrix(n, n); H2M(UnfTotalCovHisto, UnfCovMatrix, kTRUE);
+
 		//////////////////////
 		// Get smearing matrix
 		//////////////////////
@@ -118,15 +125,16 @@ void WienerSVDOverlay() {
 		if (PlotNames[iVar].Contains("Serial")) {
 			auto [SliceDiscriminators, SliceBinning] = PlotNameToDiscriminator["True"+PlotNames[iVar]+"Plot"];
             auto [NSlices, SerialVectorRanges, SerialVectorBins, SerialVectorLowBin, SerialVectorHighBin] = tools.FlattenNDBins(SliceDiscriminators, SliceBinning);
-            int StartIndex = 0;
+            int StartIndex = 0; int MatrixIndex = 0;
 
 			// Loop over slices
 			for (int iSlice = 0; iSlice < NSlices; ++iSlice) {
-				TLegend* leg = new TLegend(0.2,0.73,0.75,0.83);
+				TLegend* leg = new TLegend(0.2,0.70,0.8,0.85);
 				leg->SetBorderSize(0);
-				leg->SetNColumns(3);
-				leg->SetTextSize(TextSize*0.8);
+				leg->SetNColumns(2);
+				leg->SetTextSize(TextSize*0.6);
 				leg->SetTextFont(FontStyle);
+				leg->SetMargin(0.1);
 
 				////////////////////
 				// Slice information
@@ -144,7 +152,26 @@ void WienerSVDOverlay() {
 				// Get error band for data
 				//////////////////////////
 
-				TGraphAsymmErrors* ErrorBand = (TGraphAsymmErrors*)UnfoldedFile->Get(SlicePlotName+"_band");
+				TGraphAsymmErrors* StatErrorBand = (TGraphAsymmErrors*)UnfoldedFile->Get(SlicePlotName+"_stat_band");
+				TGraphAsymmErrors* ShapeErrorBand = (TGraphAsymmErrors*)UnfoldedFile->Get(SlicePlotName+"_shape_band");
+				TH1D* NormErrorHisto = (TH1D*)UnfoldedFile->Get(SlicePlotName+"_norm_histo");
+
+				////////////////////
+				// Get subcov matrix
+				////////////////////
+
+				TMatrixD SubCovMatrix(SliceNBins, SliceNBins);
+				for (int i = MatrixIndex; i < MatrixIndex + SliceNBins; ++i) {
+					for (int j = MatrixIndex; j < MatrixIndex + SliceNBins; ++j) {
+						SubCovMatrix(i - MatrixIndex, j - MatrixIndex) = UnfCovMatrix(i, j);
+					}
+				}
+
+				// Convert sub cov matrix to histo and reweight
+				TH2D* UnfSubCovHisto = new TH2D("UnfSubCov"+SlicePlotName,"UnfSubCov"+SlicePlotName, SliceNBins, SerialSliceBinning.data(), SliceNBins, SerialSliceBinning.data());
+				M2H(SubCovMatrix, UnfSubCovHisto); 
+				UnfSubCovHisto->Scale(1 / (TMath::Power(SliceWidth, 2)));
+				tools.Reweight2D(UnfSubCovHisto);
 
 				////////////////
 				// Slice histos
@@ -200,34 +227,70 @@ void WienerSVDOverlay() {
 				SlicedSmearedTrueHisto->GetYaxis()->SetTickSize(0);
 				SlicedSmearedTrueHisto->GetYaxis()->CenterTitle();
 
+				std::string VarLabel = (std::string) VarLabels.at(iVar);
+				VarLabel.erase(VarLabel.end() - 7, VarLabel.end());
+				SlicedSmearedTrueHisto->GetXaxis()->SetTitle((TString)VarLabel + SerialNameToUnit[PlotNames[iVar]]);
+
 				double Max = 0;
-				for (int i = 1; i < ErrorBand->GetN() - 1; ++i){
-					Max = std::max(Max, ErrorBand->GetY()[i] + ErrorBand->GetErrorYhigh(i));
+				for (int i = 1; i < ShapeErrorBand->GetN() - 1; ++i){
+					Max = std::max(Max, ShapeErrorBand->GetY()[i] + ShapeErrorBand->GetErrorYhigh(i));
 				}
 				for (int i = 0; i < NAltGen; ++i) {
 					Max = std::max(Max, SlicedAltGenHistos[i]->GetMaximum());
 				}
-				SlicedSmearedTrueHisto->GetYaxis()->SetRangeUser(0., 1.3 * Max);
+				SlicedSmearedTrueHisto->GetYaxis()->SetRangeUser(0., 1.4 * Max);
 
-				TLegendEntry* legSmearedTrue = leg->AddEntry(SlicedSmearedTrueHisto,"True","l");
+				double ChiTrue; int NDofTrue; double PValTrue; double SigmaTrue;
+				tools.CalcChiSquared(SlicedUnfSpectrum, SlicedSmearedTrueHisto, UnfSubCovHisto, ChiTrue, NDofTrue, PValTrue, SigmaTrue);
+				TString TrueChiLabel = " (" + 
+                        tools.to_string_with_precision(ChiTrue, 1) + 
+                        "/" + 
+                        tools.to_string_with_precision(NDofTrue, 0) + 
+                        ", " + 
+                        tools.to_string_with_precision(PValTrue, 1) + 
+                        ", " + 
+                        tools.to_string_with_precision(SigmaTrue, 1) + "#sigma" +
+                        ")";
+
+				TLegendEntry* legSmearedTrue = leg->AddEntry(SlicedSmearedTrueHisto,"True"+TrueChiLabel,"l");
 				SlicedSmearedTrueHisto->SetLineColor(kBlue+2);
 				SlicedSmearedTrueHisto->SetLineWidth(4);
 				SlicedSmearedTrueHisto->Draw("hist");
 
 				for (int iAltGen = 0; iAltGen < NAltGen; ++iAltGen) {
-					TLegendEntry* legRecoTrue = leg->AddEntry(SlicedAltGenHistos[iAltGen],AltGenLabels[iAltGen],"l");
+					double Chi; int NDof; double PVal; double Sigma;
+					tools.CalcChiSquared(SlicedUnfSpectrum, SlicedAltGenHistos[iAltGen], UnfSubCovHisto, Chi, NDof, PVal, Sigma);
+					TString ChiLabel = " (" + 
+                        tools.to_string_with_precision(Chi, 1) + 
+                        "/" + 
+                        tools.to_string_with_precision(NDof, 0) + 
+                        ", " + 
+                        tools.to_string_with_precision(PVal, 1) + 
+                        ", " + 
+                        tools.to_string_with_precision(Sigma, 1) + "#sigma" +
+                        ")";
+					TLegendEntry* legRecoTrue = leg->AddEntry(SlicedAltGenHistos[iAltGen],AltGenLabels[iAltGen]+ChiLabel,"l");
 					SlicedAltGenHistos[iAltGen]->SetLineColor(Colors[iAltGen]);
 					SlicedAltGenHistos[iAltGen]->SetLineWidth(4);
 					SlicedAltGenHistos[iAltGen]->Draw("hist same");
 				}
 
-				TLegendEntry* legUnfSpectrum = leg->AddEntry(SlicedUnfSpectrum,"Unfolded data","ep");
+				TLegendEntry* legUnfSpectrum = leg->AddEntry(SlicedUnfSpectrum,"Stat#oplusShape","ep");
 				SlicedUnfSpectrum->SetLineColor(kBlack);
 				SlicedUnfSpectrum->SetMarkerColor(kBlack);
 				SlicedUnfSpectrum->SetMarkerStyle(20);
 				SlicedUnfSpectrum->SetMarkerSize(1.);
 				SlicedUnfSpectrum->Draw("e1x0 same");
-				ErrorBand->Draw("e1 same");
+	            
+				ShapeErrorBand->SetLineWidth(2);
+				StatErrorBand->Draw("e1 same");
+				ShapeErrorBand->Draw("e1 same");
+
+				TLegendEntry* legNorm = leg->AddEntry(NormErrorHisto,"Norm","f");
+				NormErrorHisto->SetLineColor(kGray);
+				NormErrorHisto->SetFillColorAlpha(kGray, 0.5);
+				NormErrorHisto->SetFillStyle(1001);
+				NormErrorHisto->Draw("hist same");
 				
 				// Slice label
                 TLatex *textSlice = new TLatex();
@@ -239,20 +302,23 @@ void WienerSVDOverlay() {
 
 				delete leg;
 
-            	StartIndex += (SliceNBins + 1);
+            	StartIndex += (SliceNBins + 1); MatrixIndex += SliceNBins;
 			}
 		} else {
-			TLegend* leg = new TLegend(0.2,0.73,0.75,0.83);
+			TLegend* leg = new TLegend(0.2,0.70,0.8,0.85);
 			leg->SetBorderSize(0);
-			leg->SetNColumns(3);
-			leg->SetTextSize(TextSize*0.8);
+			leg->SetNColumns(2);
+			leg->SetTextSize(TextSize*0.6);
 			leg->SetTextFont(FontStyle);
+			leg->SetMargin(0.1);
 
 			//////////////////////////
 			// Get error band for data
 			//////////////////////////
 
-			TGraphAsymmErrors* ErrorBand = (TGraphAsymmErrors*)UnfoldedFile->Get(PlotNames[iVar]+"_band");
+			TGraphAsymmErrors* StatErrorBand = (TGraphAsymmErrors*)UnfoldedFile->Get(PlotNames[iVar]+"_stat_band");
+			TGraphAsymmErrors* ShapeErrorBand = (TGraphAsymmErrors*)UnfoldedFile->Get(PlotNames[iVar]+"_shape_band");
+			TH1D* NormErrorHisto = (TH1D*)UnfoldedFile->Get(PlotNames[iVar]+"_norm_histo");
 
 			//////////////////
 			// Plot everything
@@ -275,33 +341,66 @@ void WienerSVDOverlay() {
 			SmearedTrueHisto->GetYaxis()->CenterTitle();
 
 			double Max = 0;
-			for (int i = 1; i < ErrorBand->GetN() - 1; ++i){
-				Max = std::max(Max, ErrorBand->GetY()[i] + ErrorBand->GetErrorYhigh(i));
+			for (int i = 1; i < ShapeErrorBand->GetN() - 1; ++i){
+				Max = std::max(Max, ShapeErrorBand->GetY()[i] + ShapeErrorBand->GetErrorYhigh(i));
 			}
 			for (int i = 0; i < NAltGen; ++i) {
 				Max = std::max(Max, AltGenHistos[i]->GetMaximum());
 			}
-			SmearedTrueHisto->GetYaxis()->SetRangeUser(0., 1.3 * Max);
+			SmearedTrueHisto->GetYaxis()->SetRangeUser(0., 1.4 * Max);
 
-			TLegendEntry* legSmearedTrue = leg->AddEntry(SmearedTrueHisto,"True","l");
+			double ChiTrue; int NDofTrue; double PValTrue; double SigmaTrue;
+			tools.CalcChiSquared(UnfSpectrum, SmearedTrueHisto, UnfTotalCovHisto, ChiTrue, NDofTrue, PValTrue, SigmaTrue);
+			TString TrueChiLabel = " (" + 
+					tools.to_string_with_precision(ChiTrue, 1) + 
+					"/" + 
+					tools.to_string_with_precision(NDofTrue, 0) + 
+					", " + 
+					tools.to_string_with_precision(PValTrue, 1) + 
+					", " + 
+					tools.to_string_with_precision(SigmaTrue, 1) + "#sigma" +
+					")";
+
+			TLegendEntry* legSmearedTrue = leg->AddEntry(SmearedTrueHisto,"True"+TrueChiLabel,"l");
 			SmearedTrueHisto->SetLineColor(kBlue+2);
 			SmearedTrueHisto->SetLineWidth(4);
 			SmearedTrueHisto->Draw("hist");
 
 			for (int iAltGen = 0; iAltGen < NAltGen; ++iAltGen) {
-				TLegendEntry* legRecoTrue = leg->AddEntry(AltGenHistos[iAltGen],AltGenLabels[iAltGen],"l");
+				double Chi; int NDof; double PVal; double Sigma;
+				tools.CalcChiSquared(UnfSpectrum, AltGenHistos[iAltGen], UnfTotalCovHisto, Chi, NDof, PVal, Sigma);
+
+				TString ChiLabel = " (" + 
+					tools.to_string_with_precision(Chi, 1) + 
+					"/" + 
+					tools.to_string_with_precision(NDof, 0) + 
+					", " + 
+					tools.to_string_with_precision(PVal, 1) + 
+					", " + 
+					tools.to_string_with_precision(Sigma, 1) + "#sigma" +
+					")";
+				TLegendEntry* legRecoTrue = leg->AddEntry(AltGenHistos[iAltGen],AltGenLabels[iAltGen]+ChiLabel,"l");
 				AltGenHistos[iAltGen]->SetLineColor(Colors[iAltGen]);
 				AltGenHistos[iAltGen]->SetLineWidth(4);
 				AltGenHistos[iAltGen]->Draw("hist same");
 			}
 
-			TLegendEntry* legUnfSpectrum = leg->AddEntry(UnfSpectrum,"Unfolded data","ep");
+			TLegendEntry* legUnfSpectrum = leg->AddEntry(UnfSpectrum,"Stat#oplusShape","ep");
 			UnfSpectrum->SetLineColor(kBlack);
 			UnfSpectrum->SetMarkerColor(kBlack);
 			UnfSpectrum->SetMarkerStyle(20);
 			UnfSpectrum->SetMarkerSize(1.);
 			UnfSpectrum->Draw("e1x0  same");
-			ErrorBand->Draw("e1 same");
+			
+			ShapeErrorBand->SetLineWidth(2);
+			StatErrorBand->Draw("e1 same");
+			ShapeErrorBand->Draw("e1 same");
+
+			TLegendEntry* legNorm = leg->AddEntry(NormErrorHisto,"Norm","f");
+			NormErrorHisto->SetLineColor(kGray);
+			NormErrorHisto->SetFillColorAlpha(kGray, 0.5);
+			NormErrorHisto->SetFillStyle(1001);
+			NormErrorHisto->Draw("hist same");
 
 			leg->Draw();
 			PlotCanvas->SaveAs(dir+"/Figs/CAFAna/WienerSVDOverlay/"+PlotNames[iVar]+".png");

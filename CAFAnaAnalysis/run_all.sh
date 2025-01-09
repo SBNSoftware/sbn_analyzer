@@ -18,3 +18,4 @@ root -b -q Scripts/Unfold.cpp
 root -b -q Scripts/WienerSVDOverlay.cpp
 cafe -bq Scripts/SelectionFakeData.C
 root -b -q Scripts/UnfoldFakeData.cpp
+cafe -bq Scripts/SelectionData.C

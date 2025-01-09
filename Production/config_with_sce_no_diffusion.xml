@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+
+<!-- Production Project -->
+
+<!DOCTYPE project [
+<!ENTITY username    "epelaez">
+<!ENTITY release     "v09_88_00_04">
+<!ENTITY releasetag  "e26:prof">
+<!ENTITY file_type   "mc">
+<!ENTITY run_type    "physics">
+<!ENTITY scratch_dir "/pnfs/sbnd/scratch/users/&username;">
+<!ENTITY name        "sbnd_detector_variations_with_sce_no_diffusion">
+<!ENTITY date        "Sep_05_2024">
+<!ENTITY ver         "v1">
+<!ENTITY num_jobs    "150">
+<!ENTITY file_list   "/pnfs/sbnd/persistent/users/&username;/Lists/with_sce_no_diffusion">
+]>
+
+<project name="&name;">
+
+  <!-- Group -->
+  <group>sbnd</group>
+
+  <!-- Project size -->
+  <numevents>20000</numevents>
+  <maxfilesperjob>10</maxfilesperjob>
+
+  <!-- Operating System -->
+  <os>SL7</os>
+
+  <!-- Batch resources -->
+  <resource>DEDICATED,OPPORTUNISTIC</resource>
+
+  <!-- Larsoft information -->
+  <larsoft>
+    <tag>&release;</tag>
+    <qual>&releasetag;</qual>
+    <local>/pnfs/sbnd/resilient/users/&username;/&username;_&release;.tar</local>
+  </larsoft>
+
+  <stage name="flatcaf-with-sce-no-diffusion">
+      <fcl>cafmakerjob_sbnd_systtools_and_fluxwgt.fcl</fcl>
+      <schema>root</schema>
+      <outdir>&scratch_dir;/&name;_&release;/&date;_&ver;</outdir>
+      <workdir>&scratch_dir;/&name;_&release;/&date;_&ver;</workdir>
+      <logdir>&scratch_dir;/&name;_&release;/&date;_&ver;</logdir>
+      <bookdir>&scratch_dir;/&name;_&release;/&date;_&ver;</bookdir>
+      <numjobs>&num_jobs;</numjobs>
+      <datatier>reconstructed</datatier>
+      <memory>6000</memory>
+      <disk>30GB</disk> 
+      <!-- This bit will resubmit jobs that are held due to exceeding memory request and give them more memory -->
+      <jobsub> --expected-lifetime=12h --lines '+FERMIHTC_AutoRelease=True' --lines '+FERMIHTC_GraceMemory=4000' --lines '+FERMIHTC_GraceLifetime=3600'</jobsub>
+      <inputlist>&file_list;.list</inputlist>
+  </stage>
+
+  <!-- file type -->
+  <filetype>&file_type;</filetype>
+
+  <!-- run type -->
+  <runtype>&run_type;</runtype>
+
+</project>

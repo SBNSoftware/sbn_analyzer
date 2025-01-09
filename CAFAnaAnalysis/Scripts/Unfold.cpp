@@ -37,7 +37,7 @@ void Unfold() {
 
     // Root file to store objects in
     TString RootFilePath = "/exp/sbnd/data/users/" + (TString)UserName + "/CAFAnaOutput/Unfolded.root";
-    TFile* SaveFile = new TFile(RootFilePath, "UPDATE");
+    TFile* SaveFile = new TFile(RootFilePath, "recreate");
 
     // Load root file with histograms
     TString SelectionRootFilePath = "/exp/sbnd/data/users/" + (TString)UserName + "/CAFAnaOutput/Selection.root";
@@ -145,6 +145,7 @@ void Unfold() {
         // Reweight unfolded covariance matrix
         TH2D* UnfTotalCovHisto = new TH2D("UnfTotalCov"+PlotNames[iPlot],"UnfTotalCov" + PlotNames[iPlot],n, edges, n, edges);
         M2H(UnfoldCov, UnfTotalCovHisto); tools.Reweight2D(UnfTotalCovHisto);
+        SaveFile->WriteObject(UnfTotalCovHisto, PlotNames[iPlot]+"_unf_cov");
 
         // Get transpose cov rotation matrix
         TMatrixD CovRotationT (TMatrixD::kTransposed, CovRotation);
@@ -474,6 +475,17 @@ void Unfold() {
         // Unfolded cross-sections
         //////////////////////////
 
+        // Separate unfolded covariance matrices into: norm, shape, and stat
+        TMatrixD ReweightedUnfTotalCov(n, n); H2M(UnfTotalCovHisto, ReweightedUnfTotalCov, kTRUE);
+        TMatrixD ReweightedUnfStatCov(n, n); H2M(UnfStatCovHist, ReweightedUnfStatCov, kTRUE);
+        TMatrixD UnfoldCovNoStat = ReweightedUnfTotalCov - ReweightedUnfStatCov; // Remove stat from total cov matrix
+        std::vector<TMatrixD> DecompOutput = tools.MatrixDecomp(n, MeasureVector, UnfoldCovNoStat); // Get norm and shape covariances
+        TMatrixD UnfNormCov = DecompOutput[0]; TMatrixD UnfShapeCov = DecompOutput[1];
+
+        TH2D* UnfNormCovHist = new TH2D("UnfCovNorm"+PlotNames[iPlot], "UnfCovNorm"+PlotNames[iPlot], n, edges, n, edges);
+        TH2D* UnfShapeCovHist = new TH2D("UnfCovShape"+PlotNames[iPlot], "UnfCovShape"+PlotNames[iPlot], n, edges, n, edges);
+        M2H(UnfNormCov, UnfNormCovHist); M2H(UnfShapeCov, UnfShapeCovHist);
+
         // Margins for unfolded xsecs
         PlotCanvas->SetTopMargin(0.13);
         PlotCanvas->SetLeftMargin(0.17);
@@ -522,17 +534,31 @@ void Unfold() {
                 );
 
                 // Create error band
-                TGraphAsymmErrors* ErrorBand = new TGraphAsymmErrors;
+                TGraphAsymmErrors* StatErrorBand = new TGraphAsymmErrors;
+                TGraphAsymmErrors* ShapeErrorBand = new TGraphAsymmErrors;
+                TH1D* NormErrorHisto = new TH1D("Norm"+SlicePlotName, "", SerialSliceBinning.size() - 1, SerialSliceBinning.data());
+
                 for (int iBin = 1; iBin < SliceNBins + 1; ++iBin) {
                     const double xnom = SlicedUnfoldedSpectrum->GetXaxis()->GetBinCenter(iBin);
                     const double ynom = SlicedUnfoldedSpectrum->GetBinContent(iBin);
-                    ErrorBand->SetPoint(iBin, xnom, ynom);
                     const double dx = SlicedUnfoldedSpectrum->GetXaxis()->GetBinWidth(iBin);
-                    ErrorBand->SetPointError(
+
+                    StatErrorBand->SetPoint(iBin, xnom, ynom);
+                    ShapeErrorBand->SetPoint(iBin, xnom, ynom);
+
+                    StatErrorBand->SetPointError(
                         iBin, 0, 0,
-                        TMath::Sqrt(UnfTotalCovHisto->GetBinContent(MatrixIndex + iBin, MatrixIndex + iBin)) / (SliceWidth * dx),
-                        TMath::Sqrt(UnfTotalCovHisto->GetBinContent(MatrixIndex + iBin, MatrixIndex + iBin)) / (SliceWidth * dx)
+                        TMath::Sqrt(UnfStatCovHist->GetBinContent(MatrixIndex + iBin, MatrixIndex + iBin)) / (SliceWidth * dx),
+                        TMath::Sqrt(UnfStatCovHist->GetBinContent(MatrixIndex + iBin, MatrixIndex + iBin)) / (SliceWidth * dx)
                     );
+                    ShapeErrorBand->SetPointError(
+                        iBin, 0, 0,
+                        TMath::Sqrt(UnfShapeCovHist->GetBinContent(MatrixIndex + iBin, MatrixIndex + iBin)) / (SliceWidth * dx) + 
+                        TMath::Sqrt(UnfStatCovHist->GetBinContent(MatrixIndex + iBin, MatrixIndex + iBin)) / (SliceWidth * dx),
+                        TMath::Sqrt(UnfShapeCovHist->GetBinContent(MatrixIndex + iBin, MatrixIndex + iBin)) / (SliceWidth * dx) + 
+                        TMath::Sqrt(UnfStatCovHist->GetBinContent(MatrixIndex + iBin, MatrixIndex + iBin)) / (SliceWidth * dx)
+                    );
+                    NormErrorHisto->SetBinContent(iBin, TMath::Sqrt(UnfNormCovHist->GetBinContent(MatrixIndex + iBin, MatrixIndex + iBin)) / (SliceWidth * dx));
                 }
 
                 // Style 
@@ -564,7 +590,7 @@ void Unfold() {
                 // Create legend object
                 TLegend* leg = new TLegend(0.2,0.73,0.55,0.83);
                 leg->SetBorderSize(0);
-                leg->SetNColumns(3);
+                leg->SetNColumns(2);
                 leg->SetTextSize(TextSize*0.8);
                 leg->SetTextFont(FontStyle);
 
@@ -572,11 +598,19 @@ void Unfold() {
                 SlicedSmearedSignal->SetLineColor(kRed+1);
                 SlicedSmearedSignal->SetLineWidth(4);
 
-                TLegendEntry* legSlicedUnf = leg->AddEntry(SlicedUnfoldedSpectrum,"Unfolded","l");
+                TLegendEntry* legSlicedUnf = leg->AddEntry(SlicedUnfoldedSpectrum,"Unfolded","p");
                 SlicedUnfoldedSpectrum->SetLineColor(kBlack);
                 SlicedUnfoldedSpectrum->SetMarkerColor(kBlack);
                 SlicedUnfoldedSpectrum->SetMarkerStyle(20);
-                SlicedUnfoldedSpectrum->SetMarkerSize(1.);
+                SlicedUnfoldedSpectrum->SetMarkerSize(0.5);
+
+                TLegendEntry* legNorm = leg->AddEntry(NormErrorHisto,"Norm","f");
+                NormErrorHisto->SetLineColor(kGray);
+                NormErrorHisto->SetFillColorAlpha(kGray, 0.5);
+                NormErrorHisto->SetFillStyle(1001);
+
+                TLegendEntry* legStatShape = leg->AddEntry(ShapeErrorBand,"Stat#oplusShape","ep");	
+                ShapeErrorBand->SetLineWidth(2);
 
                 double imax = TMath::Max(SlicedUnfoldedSpectrum->GetMaximum(),SlicedSmearedSignal->GetMaximum());
                 SlicedUnfoldedSpectrum->GetYaxis()->SetRangeUser(0.,1.35*imax);
@@ -585,7 +619,9 @@ void Unfold() {
                 PlotCanvas->cd();
                 SlicedSmearedSignal->Draw("hist");
                 SlicedUnfoldedSpectrum->Draw("p0 hist same");
-                ErrorBand->Draw("e1 same");
+                StatErrorBand->Draw("e1 same");
+                ShapeErrorBand->Draw("e1 same");
+                NormErrorHisto->Draw("hist same");
                 leg->Draw();
 
                 // Slice label
@@ -597,22 +633,38 @@ void Unfold() {
                 PlotCanvas->SaveAs(dir+"/Figs/CAFAna/Unfolded/"+SlicePlotName+".png");	
 
                 // Save error band
-                SaveFile->WriteObject(ErrorBand, SlicePlotName+"_band");
+                SaveFile->WriteObject(StatErrorBand, SlicePlotName+"_stat_band");
+                SaveFile->WriteObject(ShapeErrorBand, SlicePlotName+"_shape_band");
+                SaveFile->WriteObject(NormErrorHisto, SlicePlotName+"_norm_histo");
 
                 StartIndex += (SliceNBins + 1); MatrixIndex += SliceNBins;
             }
         } else {
             // Create error band
-            TGraphAsymmErrors* ErrorBand = new TGraphAsymmErrors;
+            TGraphAsymmErrors* StatErrorBand = new TGraphAsymmErrors;
+            TGraphAsymmErrors* ShapeErrorBand = new TGraphAsymmErrors;
+            TH1D* NormErrorHisto = new TH1D("Norm"+PlotNames[iPlot], "", n, edges);
+
             for (int iBin = 1; iBin < UnfoldedSpectrum->GetNbinsX() + 1; ++iBin) {
                 const double xnom = UnfoldedSpectrum->GetXaxis()->GetBinCenter(iBin);
                 const double ynom = UnfoldedSpectrum->GetBinContent(iBin);
-                ErrorBand->SetPoint(iBin, xnom, ynom);
-                ErrorBand->SetPointError(
+
+                StatErrorBand->SetPoint(iBin, xnom, ynom);
+                ShapeErrorBand->SetPoint(iBin, xnom, ynom);
+
+                StatErrorBand->SetPointError(
                     iBin, 0, 0,
-                    TMath::Sqrt(UnfTotalCovHisto->GetBinContent(iBin, iBin)),
-                    TMath::Sqrt(UnfTotalCovHisto->GetBinContent(iBin, iBin))
+                    TMath::Sqrt(UnfStatCovHist->GetBinContent(iBin, iBin)),
+                    TMath::Sqrt(UnfStatCovHist->GetBinContent(iBin, iBin))
                 );
+                ShapeErrorBand->SetPointError(
+                    iBin, 0, 0,
+                    TMath::Sqrt(UnfShapeCovHist->GetBinContent(iBin, iBin)) +
+                    TMath::Sqrt(UnfStatCovHist->GetBinContent(iBin, iBin)),
+                    TMath::Sqrt(UnfShapeCovHist->GetBinContent(iBin, iBin)) + 
+                    TMath::Sqrt(UnfStatCovHist->GetBinContent(iBin, iBin))
+                );
+                NormErrorHisto->SetBinContent(iBin, TMath::Sqrt(UnfNormCovHist->GetBinContent(iBin, iBin)));
             }
 
             // Style 
@@ -640,7 +692,7 @@ void Unfold() {
 
             TLegend* leg = new TLegend(0.2,0.73,0.55,0.83);
             leg->SetBorderSize(0);
-            leg->SetNColumns(3);
+            leg->SetNColumns(2);
             leg->SetTextSize(TextSize*0.8);
             leg->SetTextFont(FontStyle);
 
@@ -648,16 +700,24 @@ void Unfold() {
             SmearedSignal->SetLineColor(kRed+1);
             SmearedSignal->SetLineWidth(4);
 
-            TLegendEntry* legUnfSpectrum = leg->AddEntry(UnfoldedSpectrum,"Unfolded","l");
+            TLegendEntry* legUnfSpectrum = leg->AddEntry(UnfoldedSpectrum,"Unfolded","p");
             UnfoldedSpectrum->SetLineColor(kBlack);
             UnfoldedSpectrum->SetLineWidth(4);
             UnfoldedSpectrum->SetMarkerColor(kBlack);
 			UnfoldedSpectrum->SetMarkerStyle(20);
-			UnfoldedSpectrum->SetMarkerSize(1.);
+			UnfoldedSpectrum->SetMarkerSize(0.5);
+
+            TLegendEntry* legNorm = leg->AddEntry(NormErrorHisto,"Norm","f");
+            NormErrorHisto->SetLineColor(kGray);
+            NormErrorHisto->SetFillColorAlpha(kGray, 0.5);
+            NormErrorHisto->SetFillStyle(1001);
+
+            TLegendEntry* legStatShape = leg->AddEntry(ShapeErrorBand,"Stat#oplusShape","ep");	
+            ShapeErrorBand->SetLineWidth(2);
 
             double imax = TMath::Max(UnfoldedSpectrum->GetMaximum(),SmearedSignal->GetMaximum());
-            for(int i = 1; i < ErrorBand->GetN() - 1; ++i){
-                imax = std::max(imax, ErrorBand->GetY()[i] + ErrorBand->GetErrorYhigh(i));
+            for(int i = 1; i < ShapeErrorBand->GetN() - 1; ++i){
+                imax = std::max(imax, ShapeErrorBand->GetY()[i] + ShapeErrorBand->GetErrorYhigh(i));
             }
             UnfoldedSpectrum->GetYaxis()->SetRangeUser(0.,1.3 * imax);
             SmearedSignal->GetYaxis()->SetRangeUser(0.,1.3 * imax);	
@@ -665,14 +725,18 @@ void Unfold() {
             PlotCanvas->cd();
             SmearedSignal->Draw("hist");
             UnfoldedSpectrum->Draw("p0 hist same");
-            ErrorBand->Draw("e1 same");
+            StatErrorBand->Draw("e1 same");
+            ShapeErrorBand->Draw("e1 same");
+            NormErrorHisto->Draw("hist same");
             leg->Draw();
 
             // Save histogram
             PlotCanvas->SaveAs(dir+"/Figs/CAFAna/Unfolded/"+PlotNames[iPlot]+".png");
 
             // Save error band
-            SaveFile->WriteObject(ErrorBand, PlotNames[iPlot]+"_band");
+            SaveFile->WriteObject(StatErrorBand, PlotNames[iPlot]+"_stat_band");
+            SaveFile->WriteObject(ShapeErrorBand, PlotNames[iPlot]+"_shape_band");
+            SaveFile->WriteObject(NormErrorHisto, PlotNames[iPlot]+"_norm_histo");
         }
         delete PlotCanvas;
     }
