@@ -1,26 +1,34 @@
 
-#ifndef TwoPTools_cxx
-#define TwoPTools_cxx
+#ifndef CaloEhadTools_cxx
+#define CaloEhadTools_cxx
 
 #include <TMath.h>
 #include <TVector3.h>
 
-#include "TwoPTools.h"
+#include "CaloEhadTools.h"
 
 using namespace std;
 
-TwoPTools::TwoPTools(TVector3 MuonVector, TVector3 LeadingProtonVector, TVector3 RecoilProtonVector) {
+CaloEhadTools::CaloEhadTools(TVector3 MuonVector, vector<TVector3> HadronVectors, vector<int> HadronPIDs) {
   // Swap lead and recoil protons to make sure lead has higher magnitude
-  if (RecoilProtonVector.Mag() > LeadingProtonVector.Mag()) std::swap(LeadingProtonVector, RecoilProtonVector); 
+    
+  vector<TVector3> HadronVectors
 
   // Momenta and theta variables
   fMuonMomentum = MuonVector.Mag();
   fMuonCosTheta = MuonVector.CosTheta();
+  fHadronMomentumMag=0;
+  TVector3 fHadronMomentumVec= (0,0,0)
+    //fHadronMomentum=0;
+
+    for( TVector3 hadron: HadronVectors){
+      fHadronMomentumVec+=hadron
+    }
+        
+
   fLeadingProtonMomentum = LeadingProtonVector.Mag();
   fLeadingProtonCosTheta = LeadingProtonVector.CosTheta();
-  fRecoilProtonMomentum = RecoilProtonVector.Mag();
-  fRecoilProtonCosTheta = RecoilProtonVector.CosTheta();
-
+    
   // Opening angle variables
   TVector3 TotalProtonVector = LeadingProtonVector + RecoilProtonVector;
   fCosOpeningAngleProtons = std::cos(LeadingProtonVector.Angle(RecoilProtonVector));
@@ -79,67 +87,67 @@ TwoPTools::TwoPTools(TVector3 MuonVector, TVector3 LeadingProtonVector, TVector3
   if (fAlphaThreeD < 0.) { fAlphaThreeD += 180.; }
 }
 
-double TwoPTools::ReturnMuonMomentum() {
+double CaloEhadTools::ReturnMuonMomentum() {
   return fMuonMomentum;
 }
 
-double TwoPTools::ReturnMuonCosTheta() {
+double CaloEhadTools::ReturnMuonCosTheta() {
   return fMuonCosTheta;
 }
 
-double TwoPTools::ReturnLeadingProtonMomentum() {
+double CaloEhadTools::ReturnLeadingProtonMomentum() {
   return fLeadingProtonMomentum;
 }
 
-double TwoPTools::ReturnLeadingProtonCosTheta() {
+double CaloEhadTools::ReturnLeadingProtonCosTheta() {
   return fLeadingProtonCosTheta;
 }
 
-double TwoPTools::ReturnRecoilProtonMomentum() {
+double CaloEhadTools::ReturnRecoilProtonMomentum() {
   return fRecoilProtonMomentum;
 }
 
-double TwoPTools::ReturnRecoilProtonCosTheta() {
+double CaloEhadTools::ReturnRecoilProtonCosTheta() {
   return fRecoilProtonCosTheta;
 }
 
-double TwoPTools::ReturnCosOpeningAngleProtons() {
+double CaloEhadTools::ReturnCosOpeningAngleProtons() {
   return fCosOpeningAngleProtons;
 }
 
-double TwoPTools::ReturnCosOpeningAngleMuonTotalProton() {
+double CaloEhadTools::ReturnCosOpeningAngleMuonTotalProton() {
   return fCosOpeningAngleMuonTotalProton;
 }
 
-double TwoPTools::ReturnTransverseMomentum() {
+double CaloEhadTools::ReturnTransverseMomentum() {
   return fTransverseMomentum;
 }
 
-double TwoPTools::ReturnDeltaAlphaT() {
+double CaloEhadTools::ReturnDeltaAlphaT() {
   return fDeltaAlphaT;
 }
 
-double TwoPTools::ReturnMissingMomentum() {
+double CaloEhadTools::ReturnMissingMomentum() {
   return fMissingMomentum;
 }
 
-double TwoPTools::ReturnInvariantMass(){
+double CaloEhadTools::ReturnInvariantMass(){
   return fInvariantMass;
 }
 
-double TwoPTools::ReturnCosOpeningAngleLProtonMuon(){
+double CaloEhadTools::ReturnCosOpeningAngleLProtonMuon(){
   return fCosOpeningAngleLProtonMuon;
 }
 
-double TwoPTools::ReturnCosOpeningAngleRProtonMuon(){
+double CaloEhadTools::ReturnCosOpeningAngleRProtonMuon(){
   return fCosOpeningAngleRProtonMuon;
 }
 
-double TwoPTools::ReturnAlphaThreeD() {
+double CaloEhadTools::ReturnAlphaThreeD() {
   return fAlphaThreeD;
 }
 
-double TwoPTools::ReturnCosOpeningAngleMomentumTransferTotalProton() {
+double CaloEhadTools::ReturnCosOpeningAngleMomentumTransferTotalProton() {
   return fCosOpeningAngleMomentumTransferTotalProton;
 }
 

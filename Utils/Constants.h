@@ -153,10 +153,10 @@ namespace Constants {
         // GKI
         { "CosOpeningAngleMomentumTransferTotalProtonPlot",  "All events" },	
         { "MissingMomentumPlot",  "All events" },
-	// Additional Variables
-	{ "InvariantMassPlot", "All events"},
-	{ "CosOpeningAngleLProtonMuonPlot", "All events"},
-	{ "CosOpeningAngleRProtonMuonPlot", "All events"}
+	    // Additional Variables
+	    { "InvariantMassPlot", "All events"},
+	    { "CosOpeningAngleLProtonMuonPlot", "All events"},
+	    { "CosOpeningAngleRProtonMuonPlot", "All events"}
     };
 
     static std::map<TString, std::tuple<vector<double>, vector<vector<double>>>> PlotNameToDiscriminator = {
@@ -203,9 +203,9 @@ namespace Constants {
         "CosOpeningAngleMomentumTransferTotalProton",
         "AlphaThreeD",
         "MissingMomentum",
-	"InvariantMass",
-	"CosOpeningAngleLProtonMuon",
-	"CosOpeningAngleRProtonMuon",
+	    "InvariantMass",
+	    "CosOpeningAngleLProtonMuon",
+    	"CosOpeningAngleRProtonMuon",
         "SerialTransverseMomentum_InMuonCosTheta",
         "SerialDeltaAlphaT_InMuonCosTheta",
         "SerialCosOpeningAngleProtons_InMuonCosTheta",
@@ -227,7 +227,7 @@ namespace Constants {
 
     static const std::vector<std::string> VarLabels = {
         "single bin",
-        "#vec{v}_{x} [cm]",
+        /*"#vec{v}_{x} [cm]",
         "#vec{v}_{y} [cm]",
         "#vec{v}_{z} [cm]",
         "cos(#theta_{#vec{p}_{#mu}})",
@@ -236,16 +236,16 @@ namespace Constants {
         "cos(#theta_{#vec{p}_{L},#vec{p}_{R}})",
         "cos(#theta_{#vec{p}_{#mu},#vec{p}_{sum}})",
         "#delta #alpha_{T} [deg]",
-        "#delta P_{T} [GeV/c]",
-        "|#vec{p}_{#mu}| [GeV/c]",
-        "|#vec{p}_{L}| [GeV/c]",
+        "#delta P_{T} [GeV/c]",*/
+        "|#vec{p}_{#mu}| [GeV/c]"//,
+        /*"|#vec{p}_{L}| [GeV/c]",
         "|#vec{p}_{R}| [GeV/c]",
         "cos(#theta_{#vec{q},#vec{p}_{sum}})",
         "#alpha_{3D} [deg]",
         "p_{n} [GeV/c]",
-	"W [GeV]",
-	"cos(#theta_{#vec{p}_{L},#vec{p}_{#mu}})",
-	"cos(#theta_{#vec{p}_{R},#vec{p}_{#mu}})",
+	    "W [GeV]",
+	    "cos(#theta_{#vec{p}_{L},#vec{p}_{#mu}})",
+	    "cos(#theta_{#vec{p}_{R},#vec{p}_{#mu}})",
         "#delta P_{T} [bin #]",
         "#delta #alpha_{T} [bin #]",
         "cos(#theta_{#vec{p}_{L},#vec{p}_{R}}) [bin #]",
@@ -253,6 +253,7 @@ namespace Constants {
         "p_{n} [bin #]",
         "#alpha_{3D} [bin #]",
         "cos(#theta_{#vec{q},#vec{p}_{sum}}) [bin #]"
+        */
     };
 
     static const std::vector<std::string> YLabels = {
