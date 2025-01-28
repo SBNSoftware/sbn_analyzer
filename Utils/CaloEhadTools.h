@@ -12,39 +12,52 @@
 #include <TLorentzVector.h>
 
 class CaloEhadTools {
-    private: 
-        double fMuonMomentum;
-        double fMuonCosTheta;
-        double fHadronMomentum;
-    
-	double fInvariantMass;
-	double fCosOpeningAngleLProtonMuon;
-	double fCosOpeningAngleRProtonMuon;
+ private: 
+  double fMuonMomentum;
+  double fMuonCosTheta;
+  double fHadronMomentum;
+  double fHadronCosTheta;
+  //These really need to go but tmp hacks.
+  double fLeadingProtonMomentum;
+  double fLeadingProtonCosTheta;
+  double fRecoilProtonMomentum;
+  double fRecoilProtonCosTheta;
+  double fCosOpeningAngleProtons;
+  double fCosOpeningAngleMuonTotalProton;
+  double fTransverseMomentum;
+  double fDeltaAlphaT;
+  double fMissingMomentum;
+  double fAlphaThreeD;
+  double fCosOpeningAngleMomentumTransferTotalProton;
 
-    public:
-        // Default constructor
-        CaloEhadTools(TVector3 MuonVector, TVector3 LeadingProtonVector, TVector3 RecoilProtonVector);
 
-        // Default destructor
-        ~CaloEhadTools() = default;
+  double fInvariantMass;
+  double fCosOpeningAngleLProtonMuon;
+  double fCosOpeningAngleRProtonMuon;
 
-        // Getter functions
-        double ReturnMuonMomentum();
-        double ReturnMuonCosTheta();
-        double ReturnLeadingProtonMomentum();
-        double ReturnLeadingProtonCosTheta();
-        double ReturnRecoilProtonMomentum();
-        double ReturnRecoilProtonCosTheta();
-        double ReturnCosOpeningAngleProtons();
-        double ReturnCosOpeningAngleMuonTotalProton();
-        double ReturnTransverseMomentum();
-        double ReturnDeltaAlphaT();
-        double ReturnMissingMomentum();
-        double ReturnAlphaThreeD();
-        double ReturnCosOpeningAngleMomentumTransferTotalProton();
-	double ReturnInvariantMass();
-	double ReturnCosOpeningAngleLProtonMuon();
-	double ReturnCosOpeningAngleRProtonMuon();
+ public:
+  // Default constructor
+  CaloEhadTools(TVector3 MuonVector, vector<TVector3> HadronVectors, vector<int> HadronPIDs);
+  // Default destructor
+  ~CaloEhadTools() = default;
+
+  // Getter functions
+  double ReturnMuonMomentum();
+  double ReturnMuonCosTheta();
+  double ReturnLeadingProtonMomentum();
+  double ReturnLeadingProtonCosTheta();
+  double ReturnRecoilProtonMomentum();
+  double ReturnRecoilProtonCosTheta();
+  double ReturnCosOpeningAngleProtons();
+  double ReturnCosOpeningAngleMuonTotalProton();
+  double ReturnTransverseMomentum();
+  double ReturnDeltaAlphaT();
+  double ReturnMissingMomentum();
+  double ReturnAlphaThreeD();
+  double ReturnCosOpeningAngleMomentumTransferTotalProton();
+  double ReturnInvariantMass();
+  double ReturnCosOpeningAngleLProtonMuon();
+  double ReturnCosOpeningAngleRProtonMuon();
 };
 
 #endif

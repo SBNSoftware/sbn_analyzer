@@ -11,20 +11,21 @@ using namespace std;
 
 CaloEhadTools::CaloEhadTools(TVector3 MuonVector, vector<TVector3> HadronVectors, vector<int> HadronPIDs) {
   // Swap lead and recoil protons to make sure lead has higher magnitude
-    
-  vector<TVector3> HadronVectors
 
-    // Momenta and theta variables
-    fMuonMomentum = MuonVector.Mag();
+  // Momenta and theta variables
+  fMuonMomentum = MuonVector.Mag();
   fMuonCosTheta = MuonVector.CosTheta();
-  fHadronMomentumMag=0;
-  TVector3 fHadronMomentumVec= (0,0,0)
+  fHadronMomentum=0;
+  TVector3 fHadronMomentumVec= {0,0,0};
     //fHadronMomentum=0;
 
     for( TVector3 hadron: HadronVectors){
-      fHadronMomentumVec+=hadron
+      fHadronMomentumVec+=hadron;
     }
         
+//some not real shit so this doesnt just fully not compile
+TVector3 LeadingProtonVector=HadronVectors[0];
+TVector3 RecoilProtonVector=HadronVectors[0];
 
   fLeadingProtonMomentum = LeadingProtonVector.Mag();
   fLeadingProtonCosTheta = LeadingProtonVector.CosTheta();

@@ -27,12 +27,35 @@ namespace Constants {
     double Nominal_UB_XY_Surface = 175. * 180. * 2. * 2.; // cm2
     double POTPerSpill = 5e12;
 
+
+    const int MU_PDG=13;
+    const int PI_PDG=211;
+    const int P_PDG=2212;
+
+    const double M_MU= 0.1056583755; //GeV/c^2
+    const double M_NEUTRON = 0.93956;
+    const double M_PROTON  = 0.93827;
+    const double M_NUCLEON  = ( 1.5*M_NEUTRON + M_PROTON ) / 2.5; //weighted average because xsec is bigger on n  
+
     // Integrated flux
     // TFile* FluxFile = TFile::Open("../Utils/MCC9_FluxHist_volTPCActive.root"); // make sure file is in path
 	// TH1D* HistoFlux = (TH1D*)(FluxFile->Get("hEnumu_cv"));
     // double IntegratedFlux = (HistoFlux->Integral() * (TargetPOT / POTPerSpill / Nominal_UB_XY_Surface));
     double IntegratedFlux = 1.65974e13; // from Henry Lay
 
+    double CalcQ2(double Enu, double pmu, double thetamu){
+        double Emu=std::hypot(pmu,M_MU); //is there any issue with this that I'm not considering?
+        double Q2= 2 * Enu * (Emu - pmu* cos(thetamu) ) - pow(M_MU,2);
+        return Q2;
+    }
+
+    double CalcW( double Enu, double pmu, double thetamu){
+        double Q2=CalcQ2(Enu, pmu, thetamu);
+        double Emu=std::hypot(pmu,M_MU); 
+        double W=TMath::Sqrt( pow(M_NUCLEON,2) + 2* M_NUCLEON *(Enu - Emu) -Q2);
+        return W;
+    }
+    
     // Binning for vertex coordinates
     static const int NBinsVertexX = 18;
     static const std::vector<double> ArrayNBinsVertexX{-180.,-160.,-140.,-120.,-100.,-80.,-60.,-40.,-20.,0.,20.,40.,60.,80.,100.,120.,140.,160.,180.};
@@ -225,9 +248,9 @@ namespace Constants {
         {"SerialCosOpeningAngleMomentumTransferTotalProton_InMuonCosTheta", ""}
     };
 
-    static const std::vector<std::string> VarLabels = {
+    static const std::vector<std::string> VarLabelsOld = {
         "single bin",
-        /*"#vec{v}_{x} [cm]",
+        "#vec{v}_{x} [cm]",
         "#vec{v}_{y} [cm]",
         "#vec{v}_{z} [cm]",
         "cos(#theta_{#vec{p}_{#mu}})",
@@ -236,9 +259,9 @@ namespace Constants {
         "cos(#theta_{#vec{p}_{L},#vec{p}_{R}})",
         "cos(#theta_{#vec{p}_{#mu},#vec{p}_{sum}})",
         "#delta #alpha_{T} [deg]",
-        "#delta P_{T} [GeV/c]",*/
-        "|#vec{p}_{#mu}| [GeV/c]"//,
-        /*"|#vec{p}_{L}| [GeV/c]",
+        "#delta P_{T} [GeV/c]",
+        "|#vec{p}_{#mu}| [GeV/c]",
+        "|#vec{p}_{L}| [GeV/c]",
         "|#vec{p}_{R}| [GeV/c]",
         "cos(#theta_{#vec{q},#vec{p}_{sum}})",
         "#alpha_{3D} [deg]",
@@ -253,7 +276,7 @@ namespace Constants {
         "p_{n} [bin #]",
         "#alpha_{3D} [bin #]",
         "cos(#theta_{#vec{q},#vec{p}_{sum}}) [bin #]"
-        */
+        
     };
 
     static const std::vector<std::string> YLabels = {
