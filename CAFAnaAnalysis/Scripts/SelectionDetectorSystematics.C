@@ -44,23 +44,23 @@ void SelectionDetectorSystematics() {
 
     // Target files for each sample
     std::string CVPath = "/pnfs/sbnd/persistent/users/epelaez/sbnd_detector_variations/v09_88_00_04/cv";
-    std::vector<std::string> CVInputFiles = tools.GetInputFiles(CVPath);
+    std::vector<std::string> CVInputFiles = tools.GetInputFiles(CVPath,false,true);
     auto CVLoader = std::make_unique<SpectrumLoader>(CVInputFiles);
 
     std::string NoDifPath = "/pnfs/sbnd/persistent/users/epelaez/sbnd_detector_variations/v09_88_00_04/no_diffusion";
-    std::vector<std::string> NoDifInputFiles = tools.GetInputFiles(NoDifPath);
+    std::vector<std::string> NoDifInputFiles = tools.GetInputFiles(NoDifPath,false,true);
     auto NoDifLoader = std::make_unique<SpectrumLoader>(NoDifInputFiles);
 
     std::string NoLonDifPath = "/pnfs/sbnd/persistent/users/epelaez/sbnd_detector_variations/v09_88_00_04/no_longitudinal_diffusion";
-    std::vector<std::string> NoLonDifInputFiles = tools.GetInputFiles(NoLonDifPath);
+    std::vector<std::string> NoLonDifInputFiles = tools.GetInputFiles(NoLonDifPath,false, true);
     auto NoLonDifLoader = std::make_unique<SpectrumLoader>(NoLonDifInputFiles);
 
     std::string NoTraDifPath = "/pnfs/sbnd/persistent/users/epelaez/sbnd_detector_variations/v09_88_00_04/no_transverse_diffusion";
-    std::vector<std::string> NoTraDifInputFiles = tools.GetInputFiles(NoTraDifPath);
+    std::vector<std::string> NoTraDifInputFiles = tools.GetInputFiles(NoTraDifPath,false,true);
     auto NoTraDifLoader = std::make_unique<SpectrumLoader>(NoTraDifInputFiles);
 
     std::string SCENoDifPath = "/pnfs/sbnd/persistent/users/epelaez/sbnd_detector_variations/v09_88_00_04/with_sce_no_diffusion";
-    std::vector<std::string> SCENoDifInputFiles = tools.GetInputFiles(SCENoDifPath);
+    std::vector<std::string> SCENoDifInputFiles = tools.GetInputFiles(SCENoDifPath,false,true);
     auto SCENoDifLoader = std::make_unique<SpectrumLoader>(SCENoDifInputFiles);
 
     // Vector with loader for each universe

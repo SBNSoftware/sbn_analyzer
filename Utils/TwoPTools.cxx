@@ -57,7 +57,7 @@ TwoPTools::TwoPTools(TVector3 MuonVector, TVector3 LeadingProtonVector, TVector3
     //Proton energies
     double ProtonMass = 0.9383; //in Gev/c^2
     double LProtonEnergy = sqrt(pow(ProtonMass, 2) +  pow(LeadingProtonVector.Mag(),2));
-    double RProtonEnergy = sqrt(pow(ProtonMass, 2) +  pow(LeadingProtonVector.Mag(),2));
+    double RProtonEnergy = sqrt(pow(ProtonMass, 2) +  pow(RecoilProtonVector.Mag(),2));
     
     //Invariant Mass of the Hadronic System variable
     fInvariantMass = sqrt(pow((LProtonEnergy + RProtonEnergy), 2) - pow(TotalProtonVector.Mag(), 2));

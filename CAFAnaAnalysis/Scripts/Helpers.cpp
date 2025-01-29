@@ -171,7 +171,7 @@ namespace SelectionHelpers {
         RecoBkgHisto->Draw("hist same");
         SelectionHelpers::DrawErrorBand(RecoBkgHisto, BkgErrorBand, -1, 1);
         leg->Draw();
-        PlotCanvas->SaveAs(dir+"/Figs/CAFAna/Uncertainties/"+SystName+"/"+PlotName+".png");
+        PlotCanvas->SaveAs(dir+"/Figs/CAFAna/Uncertainties/"+SystName+"/"+PlotName+".pdf");
         delete PlotCanvas; delete leg;
     }
 
@@ -330,7 +330,7 @@ namespace SelectionHelpers {
         PlotCanvas->SetBottomMargin(0.16);
 
         CovMatrix->Draw("colz");
-        PlotCanvas->SaveAs(dir+"/Figs/CAFAna/Uncertainties/"+SystName+"/Cov"+PlotName+".png");
+        PlotCanvas->SaveAs(dir+"/Figs/CAFAna/Uncertainties/"+SystName+"/Cov"+PlotName+".pdf");
 
         // Plot frac cov matrix
         double FracCovMin = FracCovMatrix->GetMinimum();
@@ -354,7 +354,7 @@ namespace SelectionHelpers {
         PlotCanvas->SetBottomMargin(0.16);
 
         FracCovMatrix->Draw("colz");
-        PlotCanvas->SaveAs(dir+"/Figs/CAFAna/Uncertainties/"+SystName+"/FracCov"+PlotName+".png");
+        PlotCanvas->SaveAs(dir+"/Figs/CAFAna/Uncertainties/"+SystName+"/FracCov"+PlotName+".pdf");
 
         // Plot correlation matrix
         CorrMatrix->GetZaxis()->SetRangeUser(-1,1);
@@ -376,7 +376,7 @@ namespace SelectionHelpers {
         PlotCanvas->SetBottomMargin(0.16);
 
         CorrMatrix->Draw("colz text");
-        PlotCanvas->SaveAs(dir+"/Figs/CAFAna/Uncertainties/"+SystName+"/Corr"+PlotName+".png");
+        PlotCanvas->SaveAs(dir+"/Figs/CAFAna/Uncertainties/"+SystName+"/Corr"+PlotName+".pdf");
 
         // Save objects
         SaveFile->WriteObject(CovMatrix, PlotName+"_cov");

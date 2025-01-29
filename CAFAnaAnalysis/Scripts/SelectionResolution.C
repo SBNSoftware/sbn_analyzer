@@ -127,11 +127,11 @@ void SelectionResolution() {
 
         PlotCanvas->cd();
         ResolutionHist->Draw("hist e1");
-        PlotCanvas->SaveAs(dir+"/Figs/CAFAna/Resolution/Diff"+PlotNames[iVar]+".png");
+        PlotCanvas->SaveAs(dir+"/Figs/CAFAna/Resolution/Diff"+PlotNames[iVar]+".pdf");
 
         PlotCanvas->cd();
         ActualResolutionHist->Draw("hist e1");
-        PlotCanvas->SaveAs(dir+"/Figs/CAFAna/Resolution/Res"+PlotNames[iVar]+".png");
+        PlotCanvas->SaveAs(dir+"/Figs/CAFAna/Resolution/Res"+PlotNames[iVar]+".pdf");
 
         delete PlotCanvas;
     }

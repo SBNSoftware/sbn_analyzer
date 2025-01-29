@@ -215,7 +215,7 @@ void SelectionCutScan() {
     EfficiencyHisto->SetMarkerStyle(20);
     EfficiencyHisto->SetMarkerSize(1.);
     EfficiencyHisto->Draw("hist p");
-    PlotCanvas->SaveAs(dir+"/Figs/CAFAna/CutScan/Efficiency.png");
+    PlotCanvas->SaveAs(dir+"/Figs/CAFAna/CutScan/Efficiency.pdf");
 
     PurityHisto->GetXaxis()->SetTitleFont(FontStyle);
     PurityHisto->GetXaxis()->SetLabelFont(FontStyle);
@@ -243,7 +243,7 @@ void SelectionCutScan() {
     PurityHisto->SetMarkerStyle(20);
     PurityHisto->SetMarkerSize(1.);
     PurityHisto->Draw("hist p");
-    PlotCanvas->SaveAs(dir+"/Figs/CAFAna/CutScan/Purity.png");
+    PlotCanvas->SaveAs(dir+"/Figs/CAFAna/CutScan/Purity.pdf");
 
     EfficiencyPurityHisto->GetXaxis()->SetTitleFont(FontStyle);
     EfficiencyPurityHisto->GetXaxis()->SetLabelFont(FontStyle);
@@ -271,5 +271,5 @@ void SelectionCutScan() {
     EfficiencyPurityHisto->SetMarkerStyle(20);
     EfficiencyPurityHisto->SetMarkerSize(1.);
     EfficiencyPurityHisto->Draw("hist p");;
-    PlotCanvas->SaveAs(dir+"/Figs/CAFAna/CutScan/EfficiencyPurity.png");
+    PlotCanvas->SaveAs(dir+"/Figs/CAFAna/CutScan/EfficiencyPurity.pdf");
 }

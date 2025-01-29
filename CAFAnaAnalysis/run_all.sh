@@ -1,4 +1,4 @@
-cafe -bq Scripts/Selection.C
+cafe -bq Scripts/Selection.cxx
 cafe -bq Scripts/SelectionInteBreakdown.C
 cafe -bq Scripts/SelectionTopologyBreakdown.C
 cafe -bq Scripts/SelectionCutPlots.C

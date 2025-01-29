@@ -693,16 +693,54 @@ void Tools::CalcChiSquared(TH1D* h_model, TH1D* h_data, TH2D* cov, double &chi, 
 	delete h_cov_clone;
 }
 
-const std::vector<std::string> Tools::GetInputFiles(const std::string TargetPath, bool print) {
+//---------------------//
+
+const std::vector<std::string> Tools::GetInputFiles(const std::string TargetPath, bool print = false, bool detvar = false) {
+
 	std::vector<std::string> Input;
+
 	for (const auto & entry : std::filesystem::directory_iterator(TargetPath)) {
-		if ((entry.path().string().find("flat.caf.root") != std::string::npos) && (entry.path().extension() == ".root")) {
-			std::string XRootPath = "root://fndcadoor.fnal.gov:1094/pnfs/fnal.gov/usr/" + entry.path().string().substr(6);
-			if (print == true) std::cout << entry.path().string().substr(6) << std::endl;
-			Input.push_back(XRootPath);
-		}
-	}
+
+		if (detvar) {
+
+			// MC2023A production or detvars
+			if ((entry.path().string().find("flat.caf.root") != std::string::npos) && (entry.path().extension() == ".root")) {
+
+				std::string XRootPath = "root://fndcadoor.fnal.gov:1094/pnfs/fnal.gov/usr/" + entry.path().string().substr(6);
+				if (print == true) std::cout << entry.path().string().substr(6) << std::endl;
+				Input.push_back(XRootPath);
+
+			}
+
+		} else {
+
+			//MC2024B production
+			//2nd iterator bc we have subdirectories
+			for (const auto & subentry : std::filesystem::directory_iterator(entry)) {
+
+				//3rd iterator bc we have sub-subdirectories
+				for (const auto & subsubentry : std::filesystem::directory_iterator(subentry)) {
+
+					if ((subsubentry.path().string().find("caf.flat.caf") != std::string::npos) && (subsubentry.path().extension() == ".root")) {
+
+						std::string XRootPath = "root://fndcadoor.fnal.gov:1094/pnfs/fnal.gov/usr/" + subsubentry.path().string().substr(6);
+						if (print == true) std::cout << subsubentry.path().string().substr(6) << std::endl;
+						Input.push_back(XRootPath);
+
+					} // end of requirement that the naming scheme is satisfied
+
+				} // end of loop over 3rd directory iterator
+
+			}// end of loop over 2nd directory iterator
+
+		} // detvar or regular file
+
+	} // end of loop over 1st directory iterator
+
 	return Input;
+
 }
+
+//---------------------//
 
 #endif

@@ -57,7 +57,7 @@ class Tools {
 		std::tuple<int, vector<double>, vector<int>, vector<int>, vector<int>> FlattenNDBins(vector<double> SliceDiscriminators, vector<vector<double>> SliceBinning);
 
 		void CalcChiSquared(TH1D* h_model, TH1D* h_data, TH2D* cov, double &chi, int &ndof, double &pval, double &sigma);
-		const std::vector<std::string> GetInputFiles(const std::string TargetPath, bool print = false);
+		const std::vector<std::string> GetInputFiles(const std::string TargetPath, bool print, bool detvar);
 
 		double MuonMass; // MeV
 		double ProtonMass; // MeV
