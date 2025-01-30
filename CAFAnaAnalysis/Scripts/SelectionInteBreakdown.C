@@ -38,9 +38,6 @@ void SelectionInteBreakdown() {
     // The SpectrumLoader object handles the loading of CAFs and the creation of Spectrum.
     SpectrumLoader NuLoader(InputFiles);
 
-    // Directory to store figs
-    TString dir = "/exp/sbnd/app/users/" + (TString)UserName + "/CC1muAnalysis";
-
     // Root file to store objects in
     TString RootFilePath = "/exp/sbnd/data/users/" + (TString)UserName + "/CAFAnaOutput/SelectionInteBreakdown.root";
     TFile* SaveFile = new TFile(RootFilePath, "recreate");

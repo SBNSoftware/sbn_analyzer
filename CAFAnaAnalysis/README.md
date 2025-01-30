@@ -4,9 +4,9 @@
 
 ###Setting up
 
-###To setup your workspace to run the scripts in this directory, you have to run `source setup.sh/activate.sh` as indicated [here](https://github.com/afropapp13/CC1muAnalysis/blob/main/README.md).
+###To setup your workspace to run the scripts in this directory, you have to run `source setup.sh/activate.sh` as indicated [here](https://github.com/afropapp13/sbn_analyzer/blob/main/README.md).
 
-###Although the goal is to perform all the analysis within the C++ framework, there is [example Python code by Moon Jung](https://github.com/wjdanswjddl/flatcaf-ana) under [`src/`](https://github.com/afropapp13/CC1muAnalysis/tree/main/CAFAnaAnalysis/src). To use this code, create a virtual environment with the required packages
+###Although the goal is to perform all the analysis within the C++ framework, there is [example Python code by Moon Jung](https://github.com/wjdanswjddl/flatcaf-ana) under [`src/`](https://github.com/afropapp13/sbn_analyzer/tree/main/CAFAnaAnalysis/src). To use this code, create a virtual environment with the required packages
 
 ###```bash
 #python3 -m venv .venv
@@ -14,7 +14,7 @@
 #pip install uproot numpy pandas matplotlib scipy lz4 xxhash jupyter
 ###```
 
-###And run the [`event_selection.ipynb`](https://github.com/afropapp13/CC1muAnalysis/blob/main/CAFAnaAnalysis/src/event_selection.ipynb) notebook in this environment.
+###And run the [`event_selection.ipynb`](https://github.com/afropapp13/sbn_analyzer/blob/main/CAFAnaAnalysis/src/event_selection.ipynb) notebook in this environment.
 
 #jupyter notebook src/event_selection.ipynb
 

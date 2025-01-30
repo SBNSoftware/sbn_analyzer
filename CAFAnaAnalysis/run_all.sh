@@ -4,6 +4,8 @@ cafe -bq Scripts/SelectionTopologyBreakdown.C
 cafe -bq Scripts/SelectionCutPlots.C
 root -b -q Scripts/SerialPlotGenerator.cpp
 cafe -bq Scripts/SelectionRunData.C
+cafe -bq Scripts/SelectionResolution.C
+cafe -bq Scripts/SelectionCutScan.C
 cafe -bq Scripts/SelectionEfficiency.C
 cafe -bq Scripts/SelectionMigrationMatrix.C
 cafe -bq Scripts/RunAllSystematics.C

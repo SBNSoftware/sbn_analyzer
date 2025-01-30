@@ -37,9 +37,6 @@ void SelectionCutScan() {
     // The SpectrumLoader object handles the loading of CAFs and the creation of Spectrum.
     SpectrumLoader NuLoader(InputFiles);
 
-    // Directory to store figs
-    TString dir = "/exp/sbnd/app/users/" + (TString)UserName + "/CC1muAnalysis";
-
     std::vector<std::tuple<
         std::unique_ptr<Spectrum>,
         std::unique_ptr<Spectrum>,
@@ -215,7 +212,7 @@ void SelectionCutScan() {
     EfficiencyHisto->SetMarkerStyle(20);
     EfficiencyHisto->SetMarkerSize(1.);
     EfficiencyHisto->Draw("hist p");
-    PlotCanvas->SaveAs(dir+"/Figs/CAFAna/CutScan/Efficiency.pdf");
+    PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/CutScan/Efficiency.pdf");
 
     PurityHisto->GetXaxis()->SetTitleFont(FontStyle);
     PurityHisto->GetXaxis()->SetLabelFont(FontStyle);
@@ -243,7 +240,7 @@ void SelectionCutScan() {
     PurityHisto->SetMarkerStyle(20);
     PurityHisto->SetMarkerSize(1.);
     PurityHisto->Draw("hist p");
-    PlotCanvas->SaveAs(dir+"/Figs/CAFAna/CutScan/Purity.pdf");
+    PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/CutScan/Purity.pdf");
 
     EfficiencyPurityHisto->GetXaxis()->SetTitleFont(FontStyle);
     EfficiencyPurityHisto->GetXaxis()->SetLabelFont(FontStyle);
@@ -271,5 +268,5 @@ void SelectionCutScan() {
     EfficiencyPurityHisto->SetMarkerStyle(20);
     EfficiencyPurityHisto->SetMarkerSize(1.);
     EfficiencyPurityHisto->Draw("hist p");;
-    PlotCanvas->SaveAs(dir+"/Figs/CAFAna/CutScan/EfficiencyPurity.pdf");
+    PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/CutScan/EfficiencyPurity.pdf");
 }

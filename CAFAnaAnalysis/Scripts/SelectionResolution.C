@@ -41,9 +41,6 @@ void SelectionResolution() {
     // The SpectrumLoader object handles the loading of CAFs and the creation of Spectrum.
     SpectrumLoader NuLoader(InputFiles);
 
-    // Directory to store figs
-    TString dir = "/exp/sbnd/app/users/" + (TString)UserName + "/CC1muAnalysis";
-
     // Load root file with histograms
     TString HistoFile = "/exp/sbnd/data/users/" + (TString)UserName + "/CAFAnaOutput/Selection.root";
     std::unique_ptr<TFile> File(TFile::Open(HistoFile));
@@ -127,11 +124,11 @@ void SelectionResolution() {
 
         PlotCanvas->cd();
         ResolutionHist->Draw("hist e1");
-        PlotCanvas->SaveAs(dir+"/Figs/CAFAna/Resolution/Diff"+PlotNames[iVar]+".pdf");
+        PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/Resolution/Diff"+PlotNames[iVar]+".pdf");
 
         PlotCanvas->cd();
         ActualResolutionHist->Draw("hist e1");
-        PlotCanvas->SaveAs(dir+"/Figs/CAFAna/Resolution/Res"+PlotNames[iVar]+".pdf");
+        PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/Resolution/Res"+PlotNames[iVar]+".pdf");
 
         delete PlotCanvas;
     }

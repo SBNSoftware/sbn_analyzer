@@ -35,7 +35,9 @@ void SelectionData() {
     double TextSize = 0.06;	
 
     // The SpectrumLoader object handles the loading of CAFs and the creation of Spectrum.
-    SpectrumLoader DataLoader("/pnfs/sbn/data_add/sbnd/keepup/caf/*/*flat.caf.root");
+    //SpectrumLoader DataLoader("/pnfs/sbn/data_add/sbnd/keepup/caf/00/*flat.caf.root");
+    //SpectrumLoader DataLoader("/pnfs/sbn/data_add/sbnd/keepup/caf/00/reco2_reco1_filtered_decoded-raw_filtered_data_evb03_EventBuilder3_art4_run14593_5_20240708T030500-008c991b-cf07-bace-f4ee-bfe4d41f0544.flat.caf.root");
+    SpectrumLoader DataLoader("/exp/sbnd/data/users/munjung/SBND/data/recombination/run14737_14755_newCcal.flat.caf.root");
     SpectrumLoader MCLoader(InputFiles);
 
     // Root file to store objects in
@@ -100,7 +102,7 @@ void SelectionData() {
         double MCArea = MCHist->Integral();
         MCHist->Scale(1 / MCArea);
 
-        TLegendEntry* legData = leg->AddEntry(RecoHist,"Data","l");
+        TLegendEntry* legData = leg->AddEntry(RecoHist,"Data","e1x0");
         RecoHist->SetLineColor(kBlack);
         RecoHist->SetMarkerColor(kBlack);
         RecoHist->SetMarkerStyle(20);
@@ -134,6 +136,7 @@ void SelectionData() {
         PlotCanvas->cd();
         RecoHist->Draw("e1x0");
         MCHist->Draw("hist same");
+        RecoHist->Draw("e1x0 same"); // draw again so that the data points are on top
         leg->Draw();
         PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/DataCounts/"+PlotNames[iVar]+".pdf");
 
@@ -171,7 +174,7 @@ void SelectionData() {
         double MCArea = MCHist->Integral();
         MCHist->Scale(1 / MCArea);
 
-        TLegendEntry* legData = leg->AddEntry(RecoHist,"Data","l");
+        TLegendEntry* legData = leg->AddEntry(RecoHist,"Data","e1x0");
         RecoHist->SetLineColor(kBlack);
         RecoHist->SetMarkerColor(kBlack);
         RecoHist->SetMarkerStyle(20);
@@ -205,6 +208,7 @@ void SelectionData() {
         PlotCanvas->cd();
         RecoHist->Draw("e1x0");
         MCHist->Draw("hist same");
+        RecoHist->Draw("e1x0 same"); // so that the data points will be on top
         leg->Draw();
         PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/DataCounts/NoCut/"+NoCutNames[iVar - Vars.size()]+".pdf");
 
