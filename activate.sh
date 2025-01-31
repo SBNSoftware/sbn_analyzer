@@ -6,7 +6,7 @@ cd ${dirName}
 source localProducts_larsoft_*/setup
 
 mrbsetenv
-cd ..
+#cd ..
 
 kx509
 voms-proxy-init -noregen -rfc -voms 'fermilab:/fermilab/sbnd/Role=Analysis'

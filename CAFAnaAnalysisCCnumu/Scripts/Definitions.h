@@ -57,7 +57,7 @@ namespace ana {
     {111, {0.0f, std::numeric_limits<float>::max()}}    // Pi zero
   };
 
-  bool debug=true;//false;
+  bool debug=false;
 
   ///////////
   // Binning

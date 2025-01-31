@@ -104,9 +104,8 @@ void SelectionEfficiency() {
 
         
     //string var=vars[v];
-    auto VarX=GetVarTuple(varx);
-    auto VarY=GetVarTuple(vary);
-    auto RecoTrueSignals=std::make_unique<Spectrum>(AxisTitle(varx), AxisTitle(vary), NuLoader, VarBinning(varx), trueVar, VarBinning(vary), recoVar, kTruthIsSignal, kNoSpillCut, kRecoIsSignal);
+    auto RecoTrueSignals=std::make_unique<Spectrum>(AxisTitle(var), AxisTitle(var), NuLoader, VarBinning(var), trueVar, VarBinning(var), recoVar, kNoSpillCut, kRecoIsTrueReco);
+    //kTruthIsSignal, kNoSpillCut, kRecoIsSignal);
         
     SpectraMig.push_back(std::move(RecoTrueSignals));
 
@@ -154,13 +153,17 @@ void SelectionEfficiency() {
     TCanvas* PlotCanvas = new TCanvas("Selection","Selection",205,34,1124,768);
     TH1D* TrueHisto = TrueSignals->ToTH1(TargetPOT);
     TH1D* RecoTrueHisto = RecoTrueSignals->ToTH1(TargetPOT);
-	
+    TH2* MigHisto= SpectraMig[i]->ToTH2(TargetPOT);
+    
     TrueHisto->GetXaxis()->SetTitle(VarLabels[i].c_str());
     RecoTrueHisto->GetXaxis()->SetTitle(VarLabels[i].c_str());
-
+    MigHisto->GetXaxis()->SetTitle(Form("True %s", VarLabels[i].c_str() ));
+    MigHisto->GetYaxis()->SetTitle(Form("Reconstructed %s", VarLabels[i].c_str()) );
+    
     SaveFile->WriteObject(TrueHisto, Form("EffDenom_%s",varnamesshort[i].c_str() ) );
     SaveFile->WriteObject(RecoTrueHisto, Form("EffNum_%s",varnamesshort[i].c_str() ) );
-
+    SaveFile->WriteObject(MigHisto, Form("Mig_%s",varnamesshort[i].c_str() ) );
+                                   
     if(i==0) mcPOT=RecoTrueSignals->POT();
     // Manage under/overflow bins
     TrueHisto->SetBinContent(TrueHisto->GetNbinsX(), TrueHisto->GetBinContent(TrueHisto->GetNbinsX()) + TrueHisto->GetBinContent(TrueHisto->GetNbinsX() + 1));
@@ -188,84 +191,84 @@ void SelectionEfficiency() {
 
       // Loop over slices
       for (int iSlice = 0; iSlice < NSlices; iSlice++) {
-	// Slice name
-	TString SlicePlotName = PlotNames[i] + "_" + TString(std::to_string(iSlice));
+        // Slice name
+        TString SlicePlotName = PlotNames[i] + "_" + TString(std::to_string(iSlice));
 	      
-	// Get slice width
-	double SliceWidth = SliceDiscriminators[iSlice + 1] - SliceDiscriminators[iSlice]; 
+        // Get slice width
+        double SliceWidth = SliceDiscriminators[iSlice + 1] - SliceDiscriminators[iSlice]; 
 	      
-	// Get number of bins
-	int SliceNBins = SerialVectorBins.at(iSlice);
-	std::vector<double> SerialSliceBinning;
+        // Get number of bins
+        int SliceNBins = SerialVectorBins.at(iSlice);
+        std::vector<double> SerialSliceBinning;
 	      
-	for (int iBin = 0; iBin < SliceNBins + 1; iBin++) {
-	  double value = SerialVectorRanges.at(StartIndex + iBin);
-	  SerialSliceBinning.push_back(value);
-	} // End of the number of bins and the bin ranges declaration
+        for (int iBin = 0; iBin < SliceNBins + 1; iBin++) {
+          double value = SerialVectorRanges.at(StartIndex + iBin);
+          SerialSliceBinning.push_back(value);
+        } // End of the number of bins and the bin ranges declaration
 	      
-	// Slice true and reco true histos
-	TH1D* SlicedTrueHisto = tools.GetHistoBins(
-						   TrueHisto,
-						   SerialVectorLowBin.at(iSlice),
-						   SerialVectorHighBin.at(iSlice),
-						   SliceWidth,
-						   SerialSliceBinning,
-						   "True"
-						   );
-	TH1D* SlicedRecoTrueHisto = tools.GetHistoBins(
-						       RecoTrueHisto,
-						       SerialVectorLowBin.at(iSlice),
-						       SerialVectorHighBin.at(iSlice),
-						       SliceWidth,
-						       SerialSliceBinning,
-						       "RecoTrue"
-						       );
+        // Slice true and reco true histos
+        TH1D* SlicedTrueHisto = tools.GetHistoBins(
+                                                   TrueHisto,
+                                                   SerialVectorLowBin.at(iSlice),
+                                                   SerialVectorHighBin.at(iSlice),
+                                                   SliceWidth,
+                                                   SerialSliceBinning,
+                                                   "True"
+                                                   );
+        TH1D* SlicedRecoTrueHisto = tools.GetHistoBins(
+                                                       RecoTrueHisto,
+                                                       SerialVectorLowBin.at(iSlice),
+                                                       SerialVectorHighBin.at(iSlice),
+                                                       SliceWidth,
+                                                       SerialSliceBinning,
+                                                       "RecoTrue"
+                                                       );
 	      
-	// Create efficiency plot
-	TEfficiency* Eff = new TEfficiency(*SlicedRecoTrueHisto, *SlicedTrueHisto);
-	std::string VarLabel = (std::string) VarLabels.at(i);
-	VarLabel.erase(VarLabel.end() - 7, VarLabel.end()); // get rid of (bin #)
-	Eff->SetTitle(";True " + (TString)VarLabel + SerialNameToUnit[PlotNames[i]] + ";Efficiency");
+        // Create efficiency plot
+        TEfficiency* Eff = new TEfficiency(*SlicedRecoTrueHisto, *SlicedTrueHisto);
+        std::string VarLabel = (std::string) VarLabels.at(i);
+        VarLabel.erase(VarLabel.end() - 7, VarLabel.end()); // get rid of (bin #)
+        Eff->SetTitle(";True " + (TString)VarLabel + SerialNameToUnit[PlotNames[i]] + ";Efficiency");
 	  
-	PlotCanvas->cd();
-	Eff->SetMarkerStyle(21);
-	Eff->SetMarkerColor(kBlack);
-	Eff->Draw("AP");
+        PlotCanvas->cd();
+        Eff->SetMarkerStyle(21);
+        Eff->SetMarkerColor(kBlack);
+        Eff->Draw("AP");
                 
-	gPad->Update();
-	Eff->GetPaintedGraph()->GetXaxis()->SetRangeUser(SerialSliceBinning.at(0),SerialSliceBinning.at(SerialSliceBinning.size() - 1));
-	double max = Eff->GetPaintedGraph()->GetYaxis()->GetBinUpEdge(Eff->GetPaintedGraph()->GetYaxis()->GetNbins());
-	Eff->GetPaintedGraph()->GetYaxis()->SetRangeUser(0., max*1.2);
+        gPad->Update();
+        Eff->GetPaintedGraph()->GetXaxis()->SetRangeUser(SerialSliceBinning.at(0),SerialSliceBinning.at(SerialSliceBinning.size() - 1));
+        double max = Eff->GetPaintedGraph()->GetYaxis()->GetBinUpEdge(Eff->GetPaintedGraph()->GetYaxis()->GetNbins());
+        Eff->GetPaintedGraph()->GetYaxis()->SetRangeUser(0., max*1.2);
 
-	Eff->GetPaintedGraph()->GetXaxis()->CenterTitle();
-	Eff->GetPaintedGraph()->GetXaxis()->SetTitleFont(FontStyle);
-	Eff->GetPaintedGraph()->GetXaxis()->SetLabelFont(FontStyle);
-	Eff->GetPaintedGraph()->GetXaxis()->SetNdivisions(8);
-	Eff->GetPaintedGraph()->GetXaxis()->SetLabelSize(TextSize);
-	Eff->GetPaintedGraph()->GetXaxis()->SetTitleSize(TextSize);
-	Eff->GetPaintedGraph()->GetXaxis()->SetTitleOffset(1.1);
+        Eff->GetPaintedGraph()->GetXaxis()->CenterTitle();
+        Eff->GetPaintedGraph()->GetXaxis()->SetTitleFont(FontStyle);
+        Eff->GetPaintedGraph()->GetXaxis()->SetLabelFont(FontStyle);
+        Eff->GetPaintedGraph()->GetXaxis()->SetNdivisions(8);
+        Eff->GetPaintedGraph()->GetXaxis()->SetLabelSize(TextSize);
+        Eff->GetPaintedGraph()->GetXaxis()->SetTitleSize(TextSize);
+        Eff->GetPaintedGraph()->GetXaxis()->SetTitleOffset(1.1);
 
-	Eff->GetPaintedGraph()->GetYaxis()->CenterTitle();
-	Eff->GetPaintedGraph()->GetYaxis()->SetTitleFont(FontStyle);
-	Eff->GetPaintedGraph()->GetYaxis()->SetLabelFont(FontStyle);
-	Eff->GetPaintedGraph()->GetYaxis()->SetNdivisions(6);
-	Eff->GetPaintedGraph()->GetYaxis()->SetLabelSize(TextSize);
-	Eff->GetPaintedGraph()->GetYaxis()->SetTitleSize(TextSize);
-	Eff->GetPaintedGraph()->GetYaxis()->SetTitleOffset(1.3);
-	Eff->GetPaintedGraph()->GetYaxis()->SetTickSize(0);
+        Eff->GetPaintedGraph()->GetYaxis()->CenterTitle();
+        Eff->GetPaintedGraph()->GetYaxis()->SetTitleFont(FontStyle);
+        Eff->GetPaintedGraph()->GetYaxis()->SetLabelFont(FontStyle);
+        Eff->GetPaintedGraph()->GetYaxis()->SetNdivisions(6);
+        Eff->GetPaintedGraph()->GetYaxis()->SetLabelSize(TextSize);
+        Eff->GetPaintedGraph()->GetYaxis()->SetTitleSize(TextSize);
+        Eff->GetPaintedGraph()->GetYaxis()->SetTitleOffset(1.3);
+        Eff->GetPaintedGraph()->GetYaxis()->SetTickSize(0);
 
-	// Slice label
-	TLatex *textSlice = new TLatex();
-	TString SliceLabel = tools.to_string_with_precision(SliceDiscriminators[iSlice], 1) + " < " + PlotNameToSliceLabel["True"+PlotNames[i]+"Plot"] + " < " + tools.to_string_with_precision(SliceDiscriminators[iSlice + 1], 1);
-	textSlice->DrawLatexNDC(0.4,0.92,SliceLabel);
+        // Slice label
+        TLatex *textSlice = new TLatex();
+        TString SliceLabel = tools.to_string_with_precision(SliceDiscriminators[iSlice], 1) + " < " + PlotNameToSliceLabel["True"+PlotNames[i]+"Plot"] + " < " + tools.to_string_with_precision(SliceDiscriminators[iSlice + 1], 1);
+        textSlice->DrawLatexNDC(0.4,0.92,SliceLabel);
 
-	// Save as pdf
-	PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/Efficiency/"+SlicePlotName+".pdf");
+        // Save as pdf
+        PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/Efficiency/"+SlicePlotName+".pdf");
 
-	// Save to root file
-	SaveFile->WriteObject(Eff, SlicePlotName+"_eff");
+        // Save to root file
+        SaveFile->WriteObject(Eff, SlicePlotName+"_eff");
 
-	StartIndex += (SliceNBins + 1);
+        StartIndex += (SliceNBins + 1);
       }
     } else {
       // Create efficiency plot
