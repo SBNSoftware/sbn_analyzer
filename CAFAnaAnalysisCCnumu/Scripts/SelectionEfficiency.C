@@ -73,6 +73,7 @@ void SelectionEfficiency() {
 	}
   */
 
+  //2D efficency histograms
   std::vector<std::pair<std::string,std::string>> vars2D={{"Q2", "W"}, {"pMu", "onebin"}};
   std::vector< std::pair<string, string>> spectra2d_names;
   std::vector< std::pair<TString, TString>> hist2dtitles;
@@ -80,18 +81,36 @@ void SelectionEfficiency() {
     string varx=get<0>(vars2D[i]);
     string vary=get<1>(vars2D[i]);
     string varxy=vary+"_vs_"+varx;
-        
+    
     //string var=vars[v];
     auto VarX=GetVarTuple(varx);
     auto VarY=GetVarTuple(vary);
     auto TrueSignals=std::make_unique<Spectrum>(AxisTitle(varx), AxisTitle(vary), NuLoader, VarBinning(varx), std::get<2>(VarX), VarBinning(vary), std::get<2>(VarY), kTruthIsSignal, kNoSpillCut, kNoCut);
     auto RecoTrueSignals=std::make_unique<Spectrum>(AxisTitle(varx), AxisTitle(vary), NuLoader, VarBinning(varx), std::get<2>(VarX), VarBinning(vary), std::get<2>(VarY), kTruthIsSignal, kNoSpillCut, kRecoIsSignal);
-        
+    
     Spectra2D.push_back({std::move(TrueSignals),std::move(RecoTrueSignals)});
     spectra2d_names.push_back( GetEffSpectrumNames(varxy) );
     hist2dtitles.push_back( {"True CC#nu_{#mu}","Reco True CC#nu_{#mu}"} );
   }
-  
+
+
+
+  //Make migration matrix histograms  
+  std::vector< std::unique_ptr<Spectrum> > SpectraMig;
+  for( unsigned i; i<Vars.size(); i++){
+    string var=varnamesshort[i];
+    Var recoVar=get<0>(Vars[i]);
+    Var trueVar=get<1>(Vars[i]);
+
+        
+    //string var=vars[v];
+    auto VarX=GetVarTuple(varx);
+    auto VarY=GetVarTuple(vary);
+    auto RecoTrueSignals=std::make_unique<Spectrum>(AxisTitle(varx), AxisTitle(vary), NuLoader, VarBinning(varx), trueVar, VarBinning(vary), recoVar, kTruthIsSignal, kNoSpillCut, kRecoIsSignal);
+        
+    SpectraMig.push_back(std::move(RecoTrueSignals));
+
+  }
 
 
   cout<<"l65"<<endl;

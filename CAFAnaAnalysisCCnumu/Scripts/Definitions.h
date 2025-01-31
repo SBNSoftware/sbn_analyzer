@@ -57,7 +57,7 @@ namespace ana {
     {111, {0.0f, std::numeric_limits<float>::max()}}    // Pi zero
   };
 
-  bool debug=false;
+  bool debug=true;//false;
 
   ///////////
   // Binning
@@ -308,27 +308,47 @@ namespace ana {
     // This is really only gonna work for track based particles and needs new caveats for like electrons etc
     for (auto const &pfp : slc->reco.pfp) {
       if (pfp.id == PID) {
-	partVec.SetTheta(TMath::ACos(pfp.trk.costh));
-	partVec.SetPhi(pfp.trk.phi);
-	if (abs(partPDG) == 13) {
-	  if (bIsInFV(&pfp.trk.end)) {
-	    partVec.SetMag(pfp.trk.rangeP.p_muon);
+	//If its a track
+        //if(pfp.trackScore>0.5){//this def needs to be optimized... 
+
+	  partVec.SetTheta(TMath::ACos(pfp.trk.costh));
+	  partVec.SetPhi(pfp.trk.phi);
+	  if (abs(partPDG) == 13) {
+            if (bIsInFV(&pfp.trk.end)) {
+	      partVec.SetMag(pfp.trk.rangeP.p_muon);
+            } else {
+	      partVec.SetMag(pfp.trk.mcsP.fwdP_muon);
+            }
+	  } else if (abs(partPDG) == 2212) {
+            partVec.SetMag(pfp.trk.rangeP.p_proton);
+	  } else if (abs(partPDG) == 211) {
+            partVec.SetMag(pfp.trk.rangeP.p_pion);
 	  } else {
-	    partVec.SetMag(pfp.trk.mcsP.fwdP_muon);
+            cout << "This PDG doesn't have a well defined momentum, using rangeP.p_muon. PDG: " << partPDG << endl;
+            partVec.SetMag(pfp.trk.rangeP.p_muon);
 	  }
-	} else if (abs(partPDG) == 2212) {
-	  partVec.SetMag(pfp.trk.rangeP.p_proton);
-	} else if (abs(partPDG) == 211) {
-	  partVec.SetMag(pfp.trk.rangeP.p_pion);
-	} else {
-	  cout << "This PDG doesn't have a well defined momentum, using rangeP.p_muon. PDG: " << partPDG << endl;
-	  partVec.SetMag(pfp.trk.rangeP.p_muon);
-	}
-      }
+        }
+	/*      }
+      else{//shower like -- I think we really need a case for looking like a cosmic though?
+	pfp.shw.bestplane_energy
+	}*/
       return partVec;
     }//end loop over pfps 
     cout<<"PFP with PID ="<< PID<<"not found."<<endl;
     return partVec;//return -999 vec if i didnt find the PID
+  }
+
+  double GetShowerEnergy(const caf::SRSliceProxy *slc, int PID){
+    double energy=-999.;
+    for (auto const &pfp: slc->reco.pfp){
+      if(pfp.id==PID){
+	energy=pfp.shw.bestplane_energy;
+	//seriously don't know about this
+	break;
+      }
+    }
+      
+    return energy;
   }
 
   // Get true momentum vectors
@@ -375,7 +395,7 @@ namespace ana {
 
     if(debug) cout<<"l371"<<endl;
     if (!(FirstMuon)) {
-      std::cout << "GetTrueVector: All particles not found" << std::endl;
+      std::cout << "GetTrueVector: Didn't find a muon" << std::endl;
       exit(-1);
     }
     if(debug) cout<<"Returning TrueVector"<<endl;
@@ -913,7 +933,60 @@ namespace ana {
     });
 
   //EAvaialable
+  const Var kEAvail([](const caf::SRSliceProxy *slc) -> double { 
+      double eavail=0;
+      double p=-999; 
+      auto [OneMuon, MuonID] = bOneMuon(slc);
+      for (auto const &pfp: slc->reco.pfp){
+	if (pfp.id==MuonID) continue;
+	//if(pfp.trackScore<0.5 && pfp.shw.bestplane_energy>0){
+    if(pfp.shw.bestplane_energy>0)
+	  eavail+=pfp.shw.bestplane_energy;
+    //lets just look at treating everything as a shower first even though theyre obviously not 
+	/*}//end if shower
+	else{
+	  //GetParticleVector(slc, pfp.id, pfp.pdg);
+	  int bestplane=pfp.trk.bestplane;
+	  if (bestplane==-1){ cout<<"No calorimetry found for PID "<<pfp.id<<endl;
+	    continue;
+	  }
+	  int partPDG=pfp.trk.chi2pid[bestplane].pdg;//no idea if this is relieabe but minimum particle chi2 seems reasonable enough to me 
+	  double caloT=pfp.trk.calo[bestplane].ke*mev_to_gev; //these numbers are huge like 200... must be in MeV? or is really not what I think it is. 
+      if(std::is_nan(caloT)){ 
+        cout<<"caloT is a nan. partpdg"<<partPDG<<endl;
+        continue;
+      }
+	  eavail+=caloT;
+	  //Get a momentum here too 
+	  
+	  if (abs(partPDG) == 13) {
+            if (bIsInFV(&pfp.trk.end)) {
+	      p+=pfp.trk.rangeP.p_muon;
+            } else {
+	      p+=pfp.trk.mcsP.fwdP_muon;
+            }
+	  } else if (abs(partPDG) == 2212) {
+            p+=pfp.trk.rangeP.p_proton;
+	  } else if (abs(partPDG) == 211) {
+            p+=pfp.trk.rangeP.p_pion;
+	  } else {
+            cout << "This PDG doesn't have a well defined momentum, using rangeP.p_muon. PDG: " << partPDG << endl;
+            p+=pfp.trk.rangeP.p_muon;
+	  }
+	    cout<<"calo T: "<<caloT<<" p: "<<p<< " PDG: "<<partPDG<< endl;
+	}//end if track*/
+      }//end loop over pfps
+      return eavail; 
+    });
+
+  const TruthVar kTruthEAvail([](const caf::SRTrueInteractionProxy *nu) -> double { 
+      //auto [Muon, HadronVector, HadronPDG] = GetTrueVector(nu); 
+      //return kTruthVars(nu).at(6); 
+      return kTruthHadronicEnergy(nu);
+    });
+  const Var kRecoTruthEAvail([](const caf::SRSliceProxy *slc) -> double { return kTruthEAvail(&slc->truth); });
   
+
   //Q2
   
   const TruthVar kTruthQ2([](const caf::SRTrueInteractionProxy *nu) -> double {

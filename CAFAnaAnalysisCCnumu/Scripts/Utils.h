@@ -1,82 +1,6 @@
-//#include "Definitions.h"
+#include "Definitions.h"
 #include "Utils_noSBNcode.h"
 using namespace ana;
-
-string AxisTitle(string var)
-{
-  if (var == "onebin")
-    return "single bin";
-  else if (var == "Emu")
-    return "Muon Energy (GeV)";
-  else if (var == "Enu")
-    return "Neutrino Energy (GeV)";
-  else if (var == "Ep")
-    return "Proton Energy (GeV)";
-  else if (var == "Epi")
-    return "Pion Energy (GeV)";
-  else if (var == "Tp")
-    return "Proton Kinetic Energy (GeV)";
-  else if (var == "Tpi")
-    return "Pion Kinetic Energy (GeV)";
-  else if (var == "pMu")
-    return "Muon Momentum (GeV)";
-  else if (var == "pPi")
-    return "#pi^{#pm} Momentum (GeV)";
-  else if (var == "pMu")
-    return "Proton Momentum (GeV)";
-  else if (var == "trkLen")
-    return "Primary Track Length";
-  else if (var == "Ehad")
-    return "Hadronic Energy (GeV)";
-  else if (var == "VtxEnergy")
-    return "Vertex Energy (GeV)";
-  else if (var == "Q2")
-    return "Q^{2} (GeV/c)^{2}";
-  else if (var == "W")
-    return "W (GeV/c^{2})";
-  else if (var == "y")
-    return "Inelasticity";
-  else if (var == "x")
-    return "Bjorken x";
-  else if (var == "xi")
-    return "Nachtmann";
-  else if (var == "PhiMu")
-    return "Muon Phi wrt Beam (deg)";
-  else if (var == "CosThetaMu")
-    return "Cos(Muon Theta wrt Beam)";
-  else if (var == "ThetaMu")
-    return "Muon Theta wrt Beam (deg)";
-  else if (var == "ThetaMuX")
-    return "Muon Theta_{X} wrt Beam (deg)";
-  else if (var == "ThetaMuY")
-    return "Muon Theta_{Y} wrt Beam (deg)";
-  else if (var == "ETheta")
-    return "E_{\\mu}*(1-cos(\\theta_{\\mu}))";
-  else if (var == "nParticles")
-    return "# True Particles";
-  else if (var == "pdg")
-    return "Longest Track's PDG";
-  else if (var == "allpdgs")
-    return "All Tracks PDG";
-  else if (var == "pdgMu")
-    return "Reconstructed Muon Track's True PDG";
-  else if (var == "pdgP")
-    return "Reconstructed Proton Track's True PDG";
-  else if (var == "pdgPi")
-    return "Reconstructed #pi^{#pm} Track's True PDG";
-  else if (var == "chi2Ps")
-    return "#chi^{2} for Proton Hypothesis";
-  else if (var == "chi2Pis")
-    return "#chi^{2} for Pion Hypothesis";
-  else if (var == "chi2Mus")
-    return "#chi^{2} for Muon Hypothesis";
-  else if (var == "W")
-    return "W (GeV)";
-  else if (var == "Q2")
-    return "Q2 (GeV)";
-  else
-    return var;
-}
 
 
 
@@ -90,6 +14,8 @@ const Binning VarBinning(string var, bool isTrue = true)
     //bMuonMomentumBins;
   else if (var == "Emu" || var == "Enu" )//|| var == "pMu")
     return Binning::Simple(50, 0, 3.5);
+  else if (var == "EAvail" || var == "Ehad" )//|| var == "pMu")
+    return Binning::Simple(50, 0, 5);
   else if (var == "W")
     return Binning::Simple(50, 0, 3);
   else if (var == "Q2")
@@ -113,11 +39,6 @@ const Binning VarBinning(string var, bool isTrue = true)
   return Binning::Simple(100, 0, 10);
 }
 
-std::vector<std::string> GetSISVarNames()
-{
-  std::vector<std::string> varnames = {"onebin", "pMu", "Q2", "W"};
-  return varnames;
-}
 
 std::tuple<Var,Var, TruthVar> GetVarTuple(std::string var){
   if (var=="onebin"){
@@ -134,6 +55,11 @@ std::tuple<Var,Var, TruthVar> GetVarTuple(std::string var){
     return {kRecoTruthQ2, kRecoTruthQ2, kTruthQ2};//tmp fix
     //return {kQ2, kRecoTruthQ2, kTruthQ2};  
   }   
+  else if (var=="EAvail"){
+    return {kEAvail, kRecoTruthEAvail, kTruthEAvail};//tmp fix
+    //return {kQ2, kRecoTruthQ2, kTruthQ2};  
+  }   
+
   else if (var=="cosTheta"){
     return {kMuonCosTheta, kRecoTruthMuonCosTheta, kTruthMuonCosTheta};  
   }   
@@ -153,15 +79,6 @@ static const std::vector<std::tuple<Var, Var, TruthVar>> GetVars(std::vector<std
       Vars.push_back(VarTuple);
     }
   return Vars;
-}
-
-static const std::vector<std::string> GetVarLabels(std::vector<std::string> varnames){
-  std::vector<std::string> VarLabels;
-  for (string varname : varnames){
-    VarLabels.push_back( AxisTitle(varname) );
-
-  }
-  return VarLabels;
 }
 
 
@@ -190,23 +107,9 @@ static const std::vector<Binning> GetSISBins(){
   return VarBins;
 }
 
-static const std::vector<std::string> GetSISVarLabels(){
-  std::vector<std::string> varnames = GetSISVarNames();
-  std::vector<std::string> VarLabels=GetVarLabels(varnames);
-  return VarLabels;
-}
-
-
-
 void WritePOT(TFile *file, double mcPOT){
   TVector2* pot=new TVector2(TargetPOT, mcPOT);
   file->WriteTObject(pot,"pot");
-}
-
-std::pair<std::string, std::string> GetEffSpectrumNames(std::string var){
-    std::string specnameA="TrueSignal_"+var;
-    std::string specnameB="RecoTrueSignal_"+var;
-    return{specnameA, specnameB};
 }
 
 

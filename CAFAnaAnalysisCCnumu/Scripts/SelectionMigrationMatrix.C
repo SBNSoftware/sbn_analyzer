@@ -21,6 +21,7 @@
 #include <memory>
 
 // Definitions for Vars and Cuts.
+#include "Utils.h"
 #include "Definitions.h"
 
 // Utils includes.
@@ -44,6 +45,15 @@ void SelectionMigrationMatrix() {
     // Root file to store objects in
     TString RootFilePath = "/exp/sbnd/data/users/" + (TString)UserName + "/CAFAnaOutput/Matrix.root";
     TFile* SaveFile = new TFile(RootFilePath, "recreate");
+
+    //Define set of analysis specific variables
+    static const std::vector<std::tuple<Var, Var, TruthVar>> Vars=GetSISVars();
+    static const std::vector<Binning> VarBins = GetSISBins();
+    static const std::vector<std::string> VarLabels= GetSISVarLabels();
+    static const std::vector<std::string> varnamesshort=GetSISVarNames();
+    
+    //Part thats really for the selection efficency 
+    std::cout<<Vars.size()<<", "<<VarBins.size()<< ", "<<VarLabels.size()<<endl;
 
     // Construct spectra
     std::vector<std::tuple<
