@@ -32,6 +32,10 @@ namespace Constants {
     const int PI_PDG=211;
     const int P_PDG=2212;
 
+    const int MUON_PDG=MU_PDG;
+    const int NEUTRON_PDG=2112;
+    const int PROTON_PDG=P_PDG;
+
     const double M_MU= 0.1056583755; //GeV/c^2
     const double M_NEUTRON = 0.93956;
     const double M_PROTON  = 0.93827;

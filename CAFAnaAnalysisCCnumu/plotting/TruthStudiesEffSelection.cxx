@@ -29,10 +29,12 @@ int main(int args, char* argv[]){
   double sis_minQ2=1.;
 
   string UserName=std::getenv("USER");
-  TString RootFilePath = "/exp/sbnd/data/users/" + UserName + "/CAFAnaOutput/SelectionEfficiency.root";
+  TString RootFilePath = "/exp/sbnd/data/users/" + UserName + "/CAFAnaOutput/SelectionEfficiency.root";//TrueSIS.root";
   TFile* fin=new TFile(RootFilePath);
+  std::vector<std::string> vars=GetSISVarNames();
   std::vector<std::pair<std::string, std::string>> vars2d;//
   vars2d.push_back({"Q2","W"}); 
+  //vars2d.push_back({"EAvail", "ECompleteness"});
   //{{"candPdgs", "ndaughts"}, {"allpdgs", "chi2Ps"}, {"allpdgs", "chi2Mus"}, {"allpdgs", "chi2Pis"}, {"allpdgs", "allpdgs_reco"} };
   //want to plot ccpip_allpdgs_v_chi2Ps in projections 
   /*vector<string> cuts={"kCCNuMu", "kCCPiCharged", "kCCPiProton", "kCCProton"};
@@ -76,6 +78,12 @@ int main(int args, char* argv[]){
     //}
   }
 
+  for( string var: vars){
+    string name="Mig_"+ var;
+    names.push_back(name.c_str());
+    TH2D* hmig=(TH2D*) fin->Get( name.c_str());
+    h2ds[name]=hmig;
+  }
 
   //hists.push_back(npinp);
   MnvPlotter plotter(kNukeCCStyle);
@@ -105,26 +113,27 @@ int main(int args, char* argv[]){
 
     h2ds[name]->Draw("colz");
     plotter.MultiPrint(c, name);
-    plotter.DrawNormalizedMigrationHistogram(h2ds[name]);
+    //DrawColumnNormalizedMigrationHistorgram(h_migration, bool drawAsMatrix, bool coarseContors=false, bool includeUnder/OverFlows=true, bool noText=false)
+    plotter.DrawNormalizedMigrationHistogram(h2ds[name], false, false, true, true );
     plotter.MultiPrint(c, "rownorm_"+name);
-    plotter.DrawColumnNormalizedMigrationHistogram(h2ds[name]);
+    plotter.DrawColumnNormalizedMigrationHistogram(h2ds[name], false, false, true, true );
     plotter.MultiPrint(c, "columnnorm_"+name);
 
 
   }
-
-  //For Q2 and W specifically
-  TH2D* hWQ2=(TH2D*) h2ds["EffNum_W_vs_Q2"]->Clone();
-  double recoTot=h2ds["EffNum_W_vs_Q2"]->Integral();
-  double recoSIS=h2ds["EffNum_W_vs_Q2"]->Integral( hWQ2->GetXaxis()->FindBin(sis_minQ2), hWQ2->GetXaxis()->GetNbins(), hWQ2->GetYaxis()->FindBin(sis_minW), hWQ2->GetYaxis()->FindBin(sis_maxW) );
-
-  double trueTot=h2ds["EffDenom_W_vs_Q2"]->Integral();
-  double trueSIS=h2ds["EffDenom_W_vs_Q2"]->Integral( hWQ2->GetXaxis()->FindBin(sis_minQ2), hWQ2->GetXaxis()->GetNbins(), hWQ2->GetYaxis()->FindBin(sis_minW), hWQ2->GetYaxis()->FindBin(sis_maxW) );
-  
-  cout<<"Numerator CC: "<< recoTot<< "\t Numerator SIS: "<< recoSIS<<endl;
-  cout<<"Denominator CC: "<< trueTot<< "\t Denominator SIS: "<< trueSIS<<endl;
-  cout<<"True MC POT: "<< pot->Y()<<" \t Scaled to MC POT: "<<pot->X()<<endl;
-  
+  if(vars2d[0].first=="Q2" && vars2d[0].second=="W"){
+    //For Q2 and W specifically
+    TH2D* hWQ2=(TH2D*) h2ds["EffNum_W_vs_Q2"]->Clone();
+    double recoTot=h2ds["EffNum_W_vs_Q2"]->Integral();
+    double recoSIS=h2ds["EffNum_W_vs_Q2"]->Integral( hWQ2->GetXaxis()->FindBin(sis_minQ2), hWQ2->GetXaxis()->GetNbins(), hWQ2->GetYaxis()->FindBin(sis_minW), hWQ2->GetYaxis()->FindBin(sis_maxW) );
+    
+    double trueTot=h2ds["EffDenom_W_vs_Q2"]->Integral();
+    double trueSIS=h2ds["EffDenom_W_vs_Q2"]->Integral( hWQ2->GetXaxis()->FindBin(sis_minQ2), hWQ2->GetXaxis()->GetNbins(), hWQ2->GetYaxis()->FindBin(sis_minW), hWQ2->GetYaxis()->FindBin(sis_maxW) );
+    
+    cout<<"Numerator CC: "<< recoTot<< "\t Numerator SIS: "<< recoSIS<<endl;
+    cout<<"Denominator CC: "<< trueTot<< "\t Denominator SIS: "<< trueSIS<<endl;
+    cout<<"True MC POT: "<< pot->Y()<<" \t Scaled to MC POT: "<<pot->X()<<endl;
+  }
   
   //I should fix this function to actually work correctly
   //int pbin=GetPDGBinNum(P_PDG)+2;

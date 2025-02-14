@@ -30,7 +30,7 @@ using namespace std;
 using namespace ana;
 using namespace Constants;
 
-void SelectionEfficiency() {
+void SelectionEfficiencySIS() {
   TH1D::SetDefaultSumw2();
   TH2D::SetDefaultSumw2();
 
@@ -45,7 +45,7 @@ void SelectionEfficiency() {
   // signal events over the total true signal events; these two histograms are plotted
 
   // Root file to store objects in
-  TString RootFilePath = "/exp/sbnd/data/users/" + (TString)UserName + "/CAFAnaOutput/SelectionEfficiency.root";
+  TString RootFilePath = "/exp/sbnd/data/users/" + (TString)UserName + "/CAFAnaOutput/SelectionEfficiencyTrueSIS.root";
   TFile* SaveFile = new TFile(RootFilePath, "recreate");
 
   //Define set of analysis specific variables
@@ -61,8 +61,8 @@ void SelectionEfficiency() {
   std::vector< std::tuple<std::unique_ptr<Spectrum>, std::unique_ptr<Spectrum> > > Spectra2D;
 
   for (std::size_t i = 0; i < Vars.size(); i++) {
-    auto TrueSignals = std::make_unique<Spectrum>(VarLabels.at(i), VarBins.at(i), NuLoader, std::get<2>(Vars.at(i)), kTruthIsSignal, kNoSpillCut);
-    auto RecoTrueSignals = std::make_unique<Spectrum>(VarLabels.at(i), VarBins.at(i), NuLoader, std::get<2>(Vars.at(i)), kTruthIsSignal, kNoSpillCut, kRecoIsSignal);
+    auto TrueSignals = std::make_unique<Spectrum>(VarLabels.at(i), VarBins.at(i), NuLoader, std::get<2>(Vars.at(i)), kTruthIsSIS, kNoSpillCut);
+    auto RecoTrueSignals = std::make_unique<Spectrum>(VarLabels.at(i), VarBins.at(i), NuLoader, std::get<2>(Vars.at(i)), kTruthIsSIS, kNoSpillCut, kRecoIsSignal);
     Spectra.push_back({std::move(TrueSignals), std::move(RecoTrueSignals)});
   }
   /*    for (std::size_t i = 0; i < Vars.size(); i++) {
@@ -74,7 +74,7 @@ void SelectionEfficiency() {
   */
 
   //2D efficency histograms
-  std::vector<std::pair<std::string,std::string>> vars2D={{"Q2", "W"}, {"pMu", "onebin"}};
+  std::vector<std::pair<std::string,std::string>> vars2D={{"pMu", "onebin"}, {"EAvail", "ECompleteness"}, {"Q2", "W"}};
   std::vector< std::pair<string, string>> spectra2d_names;
   std::vector< std::pair<TString, TString>> hist2dtitles;
   for( unsigned i=0; i<vars2D.size(); i++){
@@ -85,8 +85,8 @@ void SelectionEfficiency() {
     //string var=vars[v];
     auto VarX=GetVarTuple(varx);
     auto VarY=GetVarTuple(vary);
-    auto TrueSignals=std::make_unique<Spectrum>(AxisTitle(varx), AxisTitle(vary), NuLoader, VarBinning(varx), std::get<2>(VarX), VarBinning(vary), std::get<2>(VarY), kTruthIsSignal, kNoSpillCut, kNoCut);
-    auto RecoTrueSignals=std::make_unique<Spectrum>(AxisTitle(varx), AxisTitle(vary), NuLoader, VarBinning(varx), std::get<2>(VarX), VarBinning(vary), std::get<2>(VarY), kTruthIsSignal, kNoSpillCut, kRecoIsSignal);
+    auto TrueSignals=std::make_unique<Spectrum>(AxisTitle(varx), AxisTitle(vary), NuLoader, VarBinning(varx), std::get<2>(VarX), VarBinning(vary), std::get<2>(VarY), kTruthIsSIS, kNoSpillCut, kNoCut);
+    auto RecoTrueSignals=std::make_unique<Spectrum>(AxisTitle(varx), AxisTitle(vary), NuLoader, VarBinning(varx), std::get<2>(VarX), VarBinning(vary), std::get<2>(VarY), kTruthIsSIS, kNoSpillCut, kRecoIsSignal);
     
     Spectra2D.push_back({std::move(TrueSignals),std::move(RecoTrueSignals)});
     spectra2d_names.push_back( GetEffSpectrumNames(varxy) );
@@ -104,7 +104,7 @@ void SelectionEfficiency() {
 
         
     //string var=vars[v];
-    auto RecoTrueSignals=std::make_unique<Spectrum>(AxisTitle(var), AxisTitle(var), NuLoader, VarBinning(var), trueVar, VarBinning(var), recoVar, kNoSpillCut, kRecoIsTrueReco);
+    auto RecoTrueSignals=std::make_unique<Spectrum>(AxisTitle(var), AxisTitle(var), NuLoader, VarBinning(var), trueVar, VarBinning(var), recoVar, kNoSpillCut, kRecoIsTrueSIS);
     //kTruthIsSignal, kNoSpillCut, kRecoIsSignal);
         
     SpectraMig.push_back(std::move(RecoTrueSignals));

@@ -49,8 +49,13 @@ namespace ana {
   const float fMuCutLength = 50.0f;
   const float fPrCutPrScore = 100.0f;
 
+  const float minW=1.5;
+  const float maxW=2;
+  const float minQ2=1;
+
+
   const std::map<int, std::tuple<float, float>> PDGToThreshold = {
-    {13, {0.1f, 8.f}},                                 // Muon
+    {13, {0.1f, 7.f}},                                 // Muon
     {2212, {0.3f, 1.0f}},                               // Proton
     {211, {0.07f, std::numeric_limits<float>::max()}},  // Pi plus
     {-211, {0.07f, std::numeric_limits<float>::max()}}, // Pi minus
@@ -846,6 +851,7 @@ namespace ana {
     });
 
   const TruthVar kTruthMuonTheta([](const caf::SRTrueInteractionProxy *nu) -> double { 
+      if(debug) cout<<"kTruthMuonTheta: GetTrueVector"<<endl;
       auto [MuonVec, HadronVector, HadronPDG] = GetTrueVector(nu);
       return MuonVec.Theta();
     });
@@ -981,9 +987,22 @@ namespace ana {
 
   const TruthVar kTruthEAvail([](const caf::SRTrueInteractionProxy *nu) -> double { 
       //auto [Muon, HadronVector, HadronPDG] = GetTrueVector(nu); 
-      //return kTruthVars(nu).at(6); 
-      return kTruthHadronicEnergy(nu);
+      //return kTruthVars(nu).at(6);
+      double EAvail=0;
+      for (auto const &prim : nu->prim) {
+        if(abs(prim.pdg)==MUON_PDG) continue; //dont include muon energy
+        if(abs(prim.pdg)==NEUTRON_PDG) continue;//skip neutrons
+        double E=prim.startE;
+        //if(abs(prim.pdg)==2212) 
+        // I *think* Baryons are even PDGs and mesons are odd 
+        //if(  abs(prim.pdg)>2000 && abs(prim.pdg)%2==0 )//greater then 2000 and even should basically just be a protonbut techincally could catch other stuff that won't exist
+        if(prim.pdg==PROTON_PDG)
+          E= E- M_PROTON;
+        EAvail+=E;
+      }
+      return EAvail;
     });
+
   const Var kRecoTruthEAvail([](const caf::SRSliceProxy *slc) -> double { return kTruthEAvail(&slc->truth); });
   
 
@@ -1015,6 +1034,13 @@ namespace ana {
   const TruthVar kTruthW([](const caf::SRTrueInteractionProxy *nu) -> double { return kTruthInvariantMass(nu);});
   const Var kRecoTruthW([](const caf::SRSliceProxy *slc) -> double { return kTruthInvariantMass(&slc->truth); });
 
+  //EnergyCompleteness
+  const TruthVar kTruthEnergyCompleteness([](const caf::SRTrueInteractionProxy *nu) -> double { 
+      return kTruthInvariantMass(nu);
+    });
+  
+  const Var kRecoTruthEnergyCompleteness([](const caf::SRSliceProxy *slc) -> double { return kTruthEnergyCompleteness(&slc->truth); });
+  const Var kEnergyCompleteness([](const caf::SRSliceProxy *slc) -> double { return kTruthEnergyCompleteness(&slc->truth); });//this is not a meaningful varaible in reco
 
 
   // Leading proton momentum
@@ -1293,6 +1319,17 @@ namespace ana {
 	     ); 
     });
   
+  const TruthCut kTruthIsSIS([](const caf::SRTrueInteractionProxy *nu) {
+      bool isSIS=kTruthIsSignal(nu);
+      if(!isSIS) return isSIS;//break before trying to get variables that might not be defined if its not a cc event
+      if(debug) cout<<"kTruthIsSIS: getting Q2"<<endl;
+      isSIS &= kTruthQ2(nu)>=minQ2;
+      double W=kTruthInvariantMass(nu);
+      isSIS &= (minW <= W) && (W <= maxW);
+      return isSIS;
+      
+    });
+
   const TruthCut kTruthNoSignal([](const caf::SRTrueInteractionProxy *nu) { return !kTruthIsSignal(nu); });
 
   // Truth cuts for other topologies
@@ -1458,6 +1495,8 @@ namespace ana {
     });
 
   const Cut kRecoIsTrueReco([](const caf::SRSliceProxy *slc) { return (kRecoIsSignal(slc) && kTruthIsSignal(&slc->truth)); });
+
+  const Cut kRecoIsTrueSIS([](const caf::SRSliceProxy *slc) { return (kRecoIsSignal(slc) && kTruthIsSIS(&slc->truth)); });
 
   const Cut kRecoIsBackground([](const caf::SRSliceProxy *slc) { return (kRecoIsSignal(slc) && kTruthNoSignal(&slc->truth)); });
 

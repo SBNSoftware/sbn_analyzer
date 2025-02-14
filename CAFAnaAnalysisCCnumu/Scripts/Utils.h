@@ -10,12 +10,14 @@ const Binning VarBinning(string var, bool isTrue = true)
   if (var=="oneBin" || var=="onebin")
     return bEventCount;
   else if (var=="pMu")
-    return Binning::Custom({0.1, 0.283, 0.466, 0.649, 0.832, 1.015, 1.2, 1.8, 2.5, 4., 6., 8.});
+    return Binning::Custom({0.1, 0.283, 0.466, 0.649, 0.832, 1.015, 1.2, 1.8, 2.5, 4., 6.});
     //bMuonMomentumBins;
   else if (var == "Emu" || var == "Enu" )//|| var == "pMu")
     return Binning::Simple(50, 0, 3.5);
   else if (var == "EAvail" || var == "Ehad" )//|| var == "pMu")
-    return Binning::Simple(50, 0, 5);
+    return Binning::Simple(15, 0, 4);
+  else if (var == "ECompleteness" )//|| var == "pMu")
+    return Binning::Simple(25, 0, 1);
   else if (var == "W")
     return Binning::Simple(50, 0, 3);
   else if (var == "Q2")
@@ -59,7 +61,10 @@ std::tuple<Var,Var, TruthVar> GetVarTuple(std::string var){
     return {kEAvail, kRecoTruthEAvail, kTruthEAvail};//tmp fix
     //return {kQ2, kRecoTruthQ2, kTruthQ2};  
   }   
-
+  else if (var=="ECompleteness"){
+    return {kEnergyCompleteness, kRecoTruthEnergyCompleteness, kTruthEnergyCompleteness};//tmp fix
+    //return {kQ2, kRecoTruthQ2, kTruthQ2};  
+  }   
   else if (var=="cosTheta"){
     return {kMuonCosTheta, kRecoTruthMuonCosTheta, kTruthMuonCosTheta};  
   }   
