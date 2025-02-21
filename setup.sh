@@ -37,6 +37,9 @@ me="$(whoami)"
 fig_dir="/exp/sbnd/data/users/${me}"
 
 mkdir ${fig_dir}/cc2p
+mkdir ${fig_dir}/cc2p/Overlay
+mkdir ${fig_dir}/cc2p/Overlay/PreFSI
+mkdir ${fig_dir}/cc2p/Overlay/PostFSI
 mkdir ${fig_dir}/cc2p/Figs
 mkdir ${fig_dir}/cc2p/Figs/Overlay
 mkdir ${fig_dir}/cc2p/Figs/Overlay/Serial
