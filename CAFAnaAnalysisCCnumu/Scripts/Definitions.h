@@ -34,8 +34,11 @@ namespace ana {
 
   // Files with samples
   //const std::string TargetPath = "/pnfs/sbnd/persistent/users/twester/sbnd/v09_78_04/cv";
-  const std::string TargetPath = "/pnfs/sbn/data_add/sbn_nd/poms_production/official/MCP2024B/v09_91_02_02/prodoverlay_corsika_cosmics_proton_genie_rockbox_sce/caf";
+  const std::string TargetPath = "/pnfs/sbn/data_add/sbn_nd/poms_production/official/MCP2024B/v09_91_02_02/prodoverlay_corsika_cosmics_proton_genie_rockbox_sce/caf/00";
   const std::vector<std::string> InputFiles = tools.GetInputFiles(TargetPath);
+
+
+  std::string tag=std::getenv("XSEC_TAG");
 
   // Constants
   const float fFVXMax = 180.f;
@@ -60,9 +63,34 @@ namespace ana {
     {2212, {0.3f, 1.0f}},                               // Proton
     {211, {0.07f, std::numeric_limits<float>::max()}},  // Pi plus
     {-211, {0.07f, std::numeric_limits<float>::max()}}, // Pi minus
-    {111, {0.0f, std::numeric_limits<float>::max()}}    // Pi zero
+    {111, {0.0f, std::numeric_limits<float>::max()}},    // Pi zero
+    {-13, {0.1f, 7.f}}                                 // Mu+ because theyre indistinguishable
   };
 
+  std::vector<int> PDGsWithThresholds={13, 2212, 211,-211, 111, -13};    
+  //I really wish that was a map of pairs instead but I don't want to change it everywhere so I'm just gonna make a copy of it that is
+  /*for(auto it=PDGToTheshold.begin(); it!=PDGToThreshold.end(); it++){
+    int key=it->first;
+    std::tuple<float,float> bounds= it->second;
+    PDGThresholdsTmp[key]= {get<0>(bounds), get<1>(bounds)};
+    PDGsWithThresholds.push_back(key);
+    }*/
+
+  //const std::map<int, std::pair<float, float>> PDGThresholds= PDGThresholdsTmp;
+  
+  std::map<int, std::pair<float, float>> PDGThresholds = {//I really dont like doing this... put it somehwere I can use a for loop or something later
+    {13, {0.1f, 7.f}},                                 // Muon
+    {2212, {0.3f, 1.0f}},                               // Proton
+    {211, {0.07f, std::numeric_limits<float>::max()}},  // Pi plus
+    {-211, {0.07f, std::numeric_limits<float>::max()}}, // Pi minus
+    {111, {0.0f, std::numeric_limits<float>::max()}},    // Pi zero
+    {-13, {0.1f, 7.f}}                                 // Mu+ because theyre indistinguishable
+  };
+
+
+
+    
+  
   bool debug=false;
 
   ///////////
@@ -947,8 +975,17 @@ namespace ana {
       for (auto const &pfp: slc->reco.pfp){
 	if (pfp.id==MuonID) continue;
 	//if(pfp.trackScore<0.5 && pfp.shw.bestplane_energy>0){
-    if(pfp.shw.bestplane_energy>0)
+     
+    if(pfp.shw.bestplane_energy>0){
+       //code from the true version...should I do anything like this? probably? but then that means I need to have proton score cuts and like actually call each particle something....uhhhh 
+        double epart=pfp.shw.bestplane_energy;
+      //if( std::find( PDGsWithThresholds.begin(), PDGsWithThresholds.end(), prim.pdg)){//check if we have a threshold for that PDG
+        if( epart< PDGThresholds[PROTON_PDG].first) continue;
+        if( PDGThresholds[PROTON_PDG].second> epart) continue;//check if energy is within thresholds
+      //}      //I think the solution to this is to put the same minimum threshold on everything? blips will all get tossed though.... ummm
+
 	  eavail+=pfp.shw.bestplane_energy;
+    }
     //lets just look at treating everything as a shower first even though theyre obviously not 
 	/*}//end if shower
 	else{
@@ -993,6 +1030,13 @@ namespace ana {
       for (auto const &prim : nu->prim) {
         if(abs(prim.pdg)==MUON_PDG) continue; //dont include muon energy
         if(abs(prim.pdg)==NEUTRON_PDG) continue;//skip neutrons
+        //if( std::find( PDGsWithThresholds.begin(), PDGsWithThresholds.end(), prim.pdg)){//check if we have a threshold for that PDG
+                //proton threshold is the higest lets just make it that for everything
+            if( prim.startE< PDGThresholds[PROTON_PDG].first) continue;
+            if( PDGThresholds[PROTON_PDG].second> prim.startE) continue;//check if energy is within thresholds
+        //}else{//if we don't idk put out a warning but do nothing for now? 
+        //    cout<<"Not using any threshold for TrueEAvail particle with PDG "<<prim.pdg<<endl;
+        //}
         double E=prim.startE;
         //if(abs(prim.pdg)==2212) 
         // I *think* Baryons are even PDGs and mesons are odd 

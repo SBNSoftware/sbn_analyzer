@@ -110,3 +110,14 @@ std::pair<std::string, std::string> GetEffSpectrumNames(std::string var){
     return{specnameA, specnameB};
 }
 
+//make a function to check if a directory exists and make it if not
+void checkDir(TString histdir){
+  if( 0 != system( Form( "test -d %s", histdir.Data() ) ) )
+    {
+      int madedir = system( Form( "mkdir -m 755 -p %s", histdir.Data() ) );
+            
+      if( 0 != madedir )
+        Error( "checkDir", Form("Could not make directory '%s'", histdir.Data() ) );
+    }
+}
+

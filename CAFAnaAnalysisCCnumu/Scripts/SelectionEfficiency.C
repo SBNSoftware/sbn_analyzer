@@ -45,7 +45,9 @@ void SelectionEfficiency() {
   // signal events over the total true signal events; these two histograms are plotted
 
   // Root file to store objects in
-  TString RootFilePath = "/exp/sbnd/data/users/" + (TString)UserName + "/CAFAnaOutput/SelectionEfficiency.root";
+  TString RootFileDir="/exp/sbnd/data/users/" + (TString)UserName + "/CAFAnaOutput/"+tag.c_str();
+  checkDir(RootFileDir);
+  TString RootFilePath = (TString)RootFileDir+"/SelectionEfficiency.root";
   TFile* SaveFile = new TFile(RootFilePath, "recreate");
 
   //Define set of analysis specific variables
@@ -135,11 +137,11 @@ void SelectionEfficiency() {
     RecoTrueHisto->GetYaxis()->SetTitle(AxisTitle(vary).c_str());
 
     TrueHisto->Draw("colz");
-    c->SaveAs(Form("EffDenom_%s.png",varxy.c_str()));
-    c->SaveAs(Form("EffDenom_%s.C",varxy.c_str()));
+    c->SaveAs(Form("basicplots/EffDenom_%s.png",varxy.c_str()));
+    c->SaveAs(Form("basicplots/EffDenom_%s.C",varxy.c_str()));
     RecoTrueHisto->Draw("colz");
-    c->SaveAs(Form("EffNum_%s.png",varxy.c_str()));
-    c->SaveAs(Form("EffNum_%s.C",varxy.c_str()));
+    c->SaveAs(Form("basicplots/EffNum_%s.png",varxy.c_str()));
+    c->SaveAs(Form("basicplots/EffNum_%s.C",varxy.c_str()));
 
 
     SaveFile->WriteObject(TrueHisto, Form("EffDenom_%s",varxy.c_str() ) );
