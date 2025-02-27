@@ -29,7 +29,7 @@ int main(int args, char* argv[]){
   double sis_minQ2=1.;
 
   string UserName=std::getenv("USER");
-  TString RootFilePath = "/exp/sbnd/data/users/" + UserName + "/CAFAnaOutput/SelectionEfficiency.root";//TrueSIS.root";
+  TString RootFilePath = "/exp/sbnd/data/users/" + UserName + "/CAFAnaOutput/"+tag.c_str()+"/SelectionEfficiency.root";//TrueSIS.root";
   TFile* fin=new TFile(RootFilePath);
   std::vector<std::string> vars=GetSISVarNames();
   std::vector<std::pair<std::string, std::string>> vars2d;//

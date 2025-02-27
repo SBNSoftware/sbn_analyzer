@@ -36,17 +36,17 @@ void SelectionEfficiency() {
 
   int FontStyle = 132;
   double TextSize = 0.06;	
-    
+  //InputFiles={"/pnfs/sbn/data_add/sbn_nd/poms_production/official/MCP2024B/v09_91_02_02/prodoverlay_corsika_cosmics_proton_genie_rockbox_sce/caf/00/0b/caf-72414d0e-f361-4a04-a319-f9b9f169ed70.root"};
   // The SpectrumLoader object handles the loading of CAFs and the creation of Spectrum.
   SpectrumLoader NuLoader(InputFiles);
 
   // We will create efficiency plots using true variables and definining signal efficiency
   // as the number of reconstructed the events that pass our signal definition and are true
   // signal events over the total true signal events; these two histograms are plotted
-
+  
   // Root file to store objects in
   TString RootFileDir="/exp/sbnd/data/users/" + (TString)UserName + "/CAFAnaOutput/"+tag.c_str();
-  checkDir(RootFileDir);
+  //checkDir(RootFileDir);
   TString RootFilePath = (TString)RootFileDir+"/SelectionEfficiency.root";
   TFile* SaveFile = new TFile(RootFilePath, "recreate");
 

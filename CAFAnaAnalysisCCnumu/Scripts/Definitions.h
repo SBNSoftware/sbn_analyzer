@@ -34,11 +34,11 @@ namespace ana {
 
   // Files with samples
   //const std::string TargetPath = "/pnfs/sbnd/persistent/users/twester/sbnd/v09_78_04/cv";
-  const std::string TargetPath = "/pnfs/sbn/data_add/sbn_nd/poms_production/official/MCP2024B/v09_91_02_02/prodoverlay_corsika_cosmics_proton_genie_rockbox_sce/caf/00";
-  const std::vector<std::string> InputFiles = tools.GetInputFiles(TargetPath);
+  const std::string TargetPath = "/pnfs/sbn/data_add/sbn_nd/poms_production/official/MCP2024B/v09_91_02_02/prodoverlay_corsika_cosmics_proton_genie_rockbox_sce/caf";
+  std::vector<std::string> InputFiles = tools.GetInputFiles(TargetPath);
 
 
-  std::string tag=std::getenv("XSEC_TAG");
+  //  std::string tag=std::getenv("XSEC_TAG");
 
   // Constants
   const float fFVXMax = 180.f;
