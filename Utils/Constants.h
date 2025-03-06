@@ -16,7 +16,7 @@ namespace Constants {
     // User to access
     const std::string UserName = std::getenv("USER");
 
-    const TString dir_figs = "/exp/sbnd/data/users/" + TString(UserName) + "/cc2p";
+    const TString dir_figs = "/exp/sbnd/data/users/" + TString(UserName) + "/SISPlots";
 
     const double Units = 1E38;
 

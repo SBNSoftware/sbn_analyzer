@@ -83,7 +83,7 @@ std::string AxisTitle(std::string var)
 
 std::vector<std::string> GetSISVarNames()
 {
-  std::vector<std::string> varnames = {"onebin", "pMu", "EAvail","Q2", "W"};
+  std::vector<std::string> varnames = {"onebin", "pMu", "EAvail"};//,"Q2", "W"};
   return varnames;
 }
 

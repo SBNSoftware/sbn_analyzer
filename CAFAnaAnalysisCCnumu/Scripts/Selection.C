@@ -36,6 +36,7 @@ void Selection() {
     int FontStyle = 132;
     double TextSize = 0.06;	
     if(debug)cout<<"l37"<<endl;
+    std::filesystem::create_directory(plotdir.Data() );
     // The SpectrumLoader object handles the loading of CAFs and the creation of Spectrum.
     SpectrumLoader NuLoader(InputFiles);
     if(debug)cout<<"l40"<<endl;
@@ -45,7 +46,9 @@ void Selection() {
     //     3. reco background events
     
     // Root file to store objects in
-    TString RootFilePath = "/exp/sbnd/data/users/" + (TString)UserName + "/CAFAnaOutput/Selection.root";
+    TString dirPath = "/exp/sbnd/data/users/" + (TString)UserName + Form("/CAFAnaOutput/%s", tag.c_str());
+    std::filesystem::create_directory(dirPath.Data() );
+    TString RootFilePath=dirPath+"/Selection.root";
     TFile* SaveFile = new TFile(RootFilePath, "RECREATE");
     if(debug)  cout<<"l49"<<endl;
     // Construct all spectra
@@ -182,12 +185,12 @@ void Selection() {
 	leg->Draw();
 
 	// Save as pdf
-	PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/"+PlotNames[i]+".pdf");
+	PlotCanvas->SaveAs(dir_figs+Form("/Figs/CAFAna/Selection%s.pdf", var.c_str() ) );
 
 	// Save to root file
-	SaveFile->WriteObject(RecoHisto, PlotNames[i]+"_reco");
-	SaveFile->WriteObject(RecoTrueHisto, PlotNames[i]+"_reco_true");
-	SaveFile->WriteObject(RecoBkgHisto, PlotNames[i]+"_bkg");
+	SaveFile->WriteObject(RecoHisto, Form("%s_reco", var.c_str() ) );
+	SaveFile->WriteObject(RecoTrueHisto, Form("%s_reco_true", var.c_str() ) );//PlotNames[i]+"_reco_true");
+	SaveFile->WriteObject(RecoBkgHisto, Form("%s_bkg", var.c_str() ) );//PlotNames[i]+"_bkg");
 
 	delete PlotCanvas;
     }

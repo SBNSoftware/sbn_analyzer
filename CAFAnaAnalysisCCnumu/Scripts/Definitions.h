@@ -34,9 +34,13 @@ namespace ana {
 
   // Files with samples
   //const std::string TargetPath = "/pnfs/sbnd/persistent/users/twester/sbnd/v09_78_04/cv";
-  const std::string TargetPath = "/pnfs/sbn/data_add/sbn_nd/poms_production/official/MCP2024B/v09_91_02_02/prodoverlay_corsika_cosmics_proton_genie_rockbox_sce/caf";
+  //const std::string TargetPath = "/pnfs/sbn/data_add/sbn_nd/poms_production/official/MCP2024B/v09_91_02_02/prodoverlay_corsika_cosmics_proton_genie_rockbox_sce/caf"; //2024B
+  const std::string TargetPath= "/pnfs/sbn/data_add/sbn_nd/poms_production/official/MCP2025A/v10_04_01_01/prodoverlay_corsika_cosmics_proton_genie_rockbox_sce/MCP2025A/caf"; //2025A
+
   std::vector<std::string> InputFiles = tools.GetInputFiles(TargetPath);
 
+  const std::string TargetPathData= "/pnfs/sbn/data_add/sbn_nd/poms_production/official/MCP2025A/v10_04_01_01/prodoverlay_corsika_cosmics_proton_genie_rockbox_sce/MCP2025A/caf"; //2025A
+  std::vector<std::string> InputFilesData = tools.GetInputFiles(TargetPathData);
 
   //  std::string tag=std::getenv("XSEC_TAG");
 
@@ -57,6 +61,8 @@ namespace ana {
   const float maxW=2;
   const float minQ2=1;
 
+  std::string tagtmp=std::getenv("XSEC_TAG");
+  TString plotdir=dir_figs+Form("/%s/",tagtmp.c_str());
 
   const std::map<int, std::tuple<float, float>> PDGToThreshold = {
     {13, {0.1f, 7.f}},                                 // Muon
