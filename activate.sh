@@ -1,6 +1,6 @@
 source /cvmfs/sbnd.opensciencegrid.org/products/sbnd/setup_sbnd.sh
 
-dirName=v09_93_01_01
+dirName=v10_04_06_01
 cd ${dirName}
 source localProducts_larsoft_*/setup
 
