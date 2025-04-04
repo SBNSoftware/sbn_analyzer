@@ -1,7 +1,7 @@
 source /cvmfs/sbnd.opensciencegrid.org/products/sbnd/setup_sbnd.sh
 
-dirName=v09_93_01_01
-qualifier=e20:prof
+dirName=v10_04_06_01
+qualifier=e26:prof
 
 mkdir ${dirName}; cd ${dirName}
 mrb newDev -v ${dirName} -q ${qualifier}
@@ -9,7 +9,7 @@ source localProducts_larsoft_*/setup
 cd srcs
 
 # this needs to be fixed when Jaesung & Bruce merge things
-mrb g -t v09_75_03 sbnana
+mrb g -t v10_00_00 sbnana
 cd sbnana
 # add your remote; skip if you already have it
 git remote add upstream https://github.com/epelaaez/sbnana.git
