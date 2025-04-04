@@ -33,6 +33,9 @@ namespace Constants {
     // double IntegratedFlux = (HistoFlux->Integral() * (TargetPOT / POTPerSpill / Nominal_UB_XY_Surface));
     double IntegratedFlux = 1.65974e13; // from Henry Lay
 
+    int FontStyle = 132;
+    double TextSize = 0.06;    
+
     // Binning for vertex coordinates
     static const int NBinsVertexX = 18;
     static const std::vector<double> ArrayNBinsVertexX{-180.,-160.,-140.,-120.,-100.,-80.,-60.,-40.,-20.,0.,20.,40.,60.,80.,100.,120.,140.,160.,180.};
@@ -101,19 +104,19 @@ namespace Constants {
         {0.,30.,60.,90.,120.,150.,180.},
         {0.,30.,60.,90.,120.,150.,180.},
     };
-    static const TString LabelXAxisTwoDDeltaAlphaTInMuonCosTheta = ";#delta #alpha_{T} [bin #]";
+    static const TString LabelXAxisTwoDDeltaAlphaTInMuonCosTheta = ";#delta#alpha_{T} [bin #]";
 
     std::vector<std::vector<double>> TwoDArrayNBinsCosOpeningAngleProtonsInMuonCosThetaSlices{
         {-1.,-0.8,-0.6,-0.4,-0.2,0.,0.2,0.4,0.6,0.8,1.},
         {-1.,-0.8,-0.6,-0.4,-0.2,0.,0.2,0.4,0.6,0.8,1.},
     };
-    static const TString LabelXAxisTwoDCosOpeningAngleProtonsInMuonCosTheta = ";cos(#theta_{#vec{p}_{L},#vec{p}_{R}}) [bin #]";
+    static const TString LabelXAxisTwoDCosOpeningAngleProtonsInMuonCosTheta = ";cos(#theta_{p,L-R}) [bin #]";
 
     std::vector<std::vector<double>> TwoDArrayNBinsCosOpeningAngleMuonTotalProtonInMuonCosThetaSlices{
         {-1.,-0.8,-0.6,-0.4,-0.2,0.,0.2,0.4,0.6,0.8,1.},
         {-1.,-0.8,-0.6,-0.4,-0.2,0.,0.2,0.4,0.6,0.8,1.},
     };
-    static const TString LabelXAxisTwoDCosOpeningMuonTotalProtonInMuonCosTheta = ";cos(#theta_{#vec{p}_{#mu},#vec{p}_{sum}}) [bin #]";
+    static const TString LabelXAxisTwoDCosOpeningMuonTotalProtonInMuonCosTheta = ";cos(#theta_{#mu,sum}) [bin #]";
 
     // Variables for double differential analysis - GKI
     static const int TwoDNBinsMissingMomentum = 5;
@@ -171,8 +174,8 @@ namespace Constants {
     };
 
     static std::map<TString, TString> PlotNameToSliceLabel = {
-        {"TrueSerialTransverseMomentum_InMuonCosThetaPlot", "cos(#theta_{#vec{p}_{#mu}})"},
-        {"TrueSerialDeltaAlphaT_InMuonCosThetaPlot", "cos(#theta_{#vec{p}_{#mu}})"},
+        {"TrueSerialTransverseMomentum_InMuonCosThetaPlot", "cos(#theta_{#mu})"},
+        {"TrueSerialDeltaAlphaT_InMuonCosThetaPlot", "cos(#theta_{#mu})"},
         {"TrueSerialCosOpeningAngleProtons_InMuonCosThetaPlot", "cos(#theta_{#vec{p}_{#mu}})"},
         {"TrueSerialCosOpeningAngleMuonTotalProton_InMuonCosThetaPlot", "cos(#theta_{#vec{p}_{#mu}})"},
         // GKI
@@ -203,9 +206,9 @@ namespace Constants {
         "CosOpeningAngleMomentumTransferTotalProton",
         "AlphaThreeD",
         "MissingMomentum",
-	"InvariantMass",
-	"CosOpeningAngleLProtonMuon",
-	"CosOpeningAngleRProtonMuon",
+	    "InvariantMass",
+	    "CosOpeningAngleLProtonMuon",
+	    "CosOpeningAngleRProtonMuon",
         "SerialTransverseMomentum_InMuonCosTheta",
         "SerialDeltaAlphaT_InMuonCosTheta",
         "SerialCosOpeningAngleProtons_InMuonCosTheta",
@@ -227,25 +230,25 @@ namespace Constants {
 
     static const std::vector<std::string> VarLabels = {
         "single bin",
-        "#vec{v}_{x} [cm]",
-        "#vec{v}_{y} [cm]",
-        "#vec{v}_{z} [cm]",
-        "cos(#theta_{#vec{p}_{#mu}})",
-        "cos(#theta_{#vec{p}_{L}})",
-        "cos(#theta_{#vec{p}_{R}})",
-        "cos(#theta_{#vec{p}_{L},#vec{p}_{R}})",
-        "cos(#theta_{#vec{p}_{#mu},#vec{p}_{sum}})",
-        "#delta #alpha_{T} [deg]",
-        "#delta P_{T} [GeV/c]",
+        "vertex x [cm]",
+        "vertex y [cm]",
+        "vertex z [cm]",
+        "cos(#theta_{#mu})",
+        "cos(#theta_{p,L})",
+        "cos(#theta_{p,R})",
+        "cos(#theta_{L,R})",
+        "cos(#theta_{#mu,sum})",
+        "#delta#alpha_{T} [deg]",
+        "#deltap_{T} [GeV/c]",
         "|#vec{p}_{#mu}| [GeV/c]",
         "|#vec{p}_{L}| [GeV/c]",
         "|#vec{p}_{R}| [GeV/c]",
         "cos(#theta_{#vec{q},#vec{p}_{sum}})",
         "#alpha_{3D} [deg]",
         "p_{n} [GeV/c]",
-	"W [GeV]",
-	"cos(#theta_{#vec{p}_{L},#vec{p}_{#mu}})",
-	"cos(#theta_{#vec{p}_{R},#vec{p}_{#mu}})",
+	    "W [GeV]",
+	    "cos(#theta_{#vec{p}_{L},#vec{p}_{#mu}})",
+	    "cos(#theta_{#vec{p}_{R},#vec{p}_{#mu}})",
         "#delta P_{T} [bin #]",
         "#delta #alpha_{T} [bin #]",
         "cos(#theta_{#vec{p}_{L},#vec{p}_{R}}) [bin #]",

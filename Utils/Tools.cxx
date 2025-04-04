@@ -704,7 +704,7 @@ const std::vector<std::string> Tools::GetInputFiles(const std::string TargetPath
 		if (detvar) {
 
 			// MC2023A production or detvars
-			if ((entry.path().string().find("flat.caf.root") != std::string::npos) && (entry.path().extension() == ".root")) {
+			if ( ( (entry.path().string().find("flat.caf.root") != std::string::npos) || ( entry.path().string().find("flatcaf") != std::string::npos ) ) && (entry.path().extension() == ".root")) {
 
 				std::string XRootPath = "root://fndcadoor.fnal.gov:1094/pnfs/fnal.gov/usr/" + entry.path().string().substr(6);
 				if (print == true) std::cout << entry.path().string().substr(6) << std::endl;

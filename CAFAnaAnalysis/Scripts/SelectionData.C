@@ -27,17 +27,15 @@ using namespace ana;
 using namespace Constants;
 
 void SelectionData() {
+    
     // Set defaults and load tools
     TH1D::SetDefaultSumw2();
     TH2D::SetDefaultSumw2();
 
-    int FontStyle = 132;
-    double TextSize = 0.06;	
-
     // The SpectrumLoader object handles the loading of CAFs and the creation of Spectrum.
     //SpectrumLoader DataLoader("/pnfs/sbn/data_add/sbnd/keepup/caf/00/*flat.caf.root");
     //SpectrumLoader DataLoader("/pnfs/sbn/data_add/sbnd/keepup/caf/00/reco2_reco1_filtered_decoded-raw_filtered_data_evb03_EventBuilder3_art4_run14593_5_20240708T030500-008c991b-cf07-bace-f4ee-bfe4d41f0544.flat.caf.root");
-    SpectrumLoader DataLoader("/exp/sbnd/data/users/munjung/SBND/data/recombination/run14737_14755_newCcal.flat.caf.root");
+    SpectrumLoader DataLoader(DataInputFiles);
     SpectrumLoader MCLoader(InputFiles);
 
     // Root file to store objects in
@@ -49,6 +47,7 @@ void SelectionData() {
     // Redefine cosmic cut because there is no flash match variables in data
     kCosmicCut = Cut([](const caf::SRSliceProxy* slc) {
         return (slc->nu_score > 0.4);
+
     });
 
     // Variables after cutting 

@@ -33,10 +33,23 @@ namespace ana
     Tools tools;
 
     // Files with samples
+
+    // Data dev sample spring 2025
+    const std::string DataTargetPath = "/pnfs/sbn/data_add/sbn_nd/poms_production/data/MCP2025Av3/v10_04_06_01/MCP2025Av3_DevSample/flatcaf/bnblight/1d";
+    // Data Golden sample
+    //const std::string DataTargetPath = "/pnfs/sbnd/persistent/users/sungbino/2025_prod/2025A_GoldenRun/bnbzerobias";
+
+    // MC2025A April test samples
+    const std::string TargetPath = "/pnfs/sbn/data_add/sbn_nd/poms_production/mc/MCP2025Av3/v10_04_06_01/prodgenie_corsika_proton_rockbox_sbnd/CV/caf";
+    
+    // MC2025A
+    //const std::string TargetPath = "/pnfs/sbn/data_add/sbn_nd/poms_production/official/MCP2025A/v10_04_03/prodoverlay_corsika_cosmics_proton_genie_rockbox_sce/LArv10/caf";
     // MC2024B
-    const std::string TargetPath = "/pnfs/sbn/data_add/sbn_nd/poms_production/official/MCP2024B/v09_91_02_02/prodoverlay_corsika_cosmics_proton_genie_rockbox_sce/caf";
+    //const std::string TargetPath = "/pnfs/sbn/data_add/sbn_nd/poms_production/official/MCP2024B/v09_91_02_02/prodoverlay_corsika_cosmics_proton_genie_rockbox_sce/caf";
     //const std::string TargetPath = "/pnfs/sbnd/persistent/users/twester/sbnd/v09_78_04/cv";
+ 
     const std::vector<std::string> InputFiles = tools.GetInputFiles(TargetPath);
+    const std::vector<std::string> DataInputFiles = tools.GetInputFiles(DataTargetPath,false,true);
 
     // Constants
     const float fFVXMax = 180.f;
@@ -1244,6 +1257,7 @@ namespace ana
 
     // Check reconstructed event is signal
     const Cut kRecoIsSignal([](const caf::SRSliceProxy* slc) {
+
         std::vector<int> TaggedIDs;
 
         // Reject cosmic events
@@ -1273,11 +1287,15 @@ namespace ana
     });
 
     const Cut kRecoIsTrueReco([](const caf::SRSliceProxy* slc) {
+
         return (kRecoIsSignal(slc) && kTruthIsSignal(&slc->truth));
+
     });
 
     const Cut kRecoIsBackground([](const caf::SRSliceProxy* slc) {
+
         return (kRecoIsSignal(slc) && kTruthNoSignal(&slc->truth));
+        
     });
 
     const Cut kNoInvalidVariables([](const caf::SRSliceProxy* slc) {

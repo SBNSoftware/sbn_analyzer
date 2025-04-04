@@ -11,6 +11,7 @@
 #include "TLegendEntry.h"
 #include "TFile.h"
 #include "TH1D.h"
+#include "TPad.h"
 
 // std includes.
 #include <vector>
@@ -27,15 +28,20 @@ using namespace ana;
 using namespace Constants;
 
 void Selection() {
+
+    //----------------------------------------//
+
     // Set defaults and load tools
     TH1D::SetDefaultSumw2();
     TH2D::SetDefaultSumw2();
 
-    int FontStyle = 132;
-    double TextSize = 0.06;	
+    //----------------------------------------//
+    
+    // MC spectrum loader
 
     // The SpectrumLoader object handles the loading of CAFs and the creation of Spectrum.
     SpectrumLoader NuLoader(InputFiles);
+    SpectrumLoader DataNuLoader(DataInputFiles);
 
     // We now create overlaid plots for several reconstructed variables and three lines:
     //     1. all selected reconstructed events
@@ -52,14 +58,24 @@ void Selection() {
         std::unique_ptr<Spectrum>,
         std::unique_ptr<Spectrum>
     >> Spectra;
+
+    std::vector< std::unique_ptr<Spectrum> > data_Spectra;    
+
     for (std::size_t i = 0; i < Vars.size(); i++) {
+
         auto RecoSignals = std::make_unique<Spectrum>(VarLabels.at(i), VarBins.at(i), NuLoader, std::get<0>(Vars.at(i)), kNoSpillCut, kRecoIsSignal); 
         auto RecoTrueSignals = std::make_unique<Spectrum> (VarLabels.at(i), VarBins.at(i), NuLoader, std::get<0>(Vars.at(i)), kNoSpillCut, kRecoIsTrueReco); 
         auto RecoBkgSignals = std::make_unique<Spectrum>(VarLabels.at(i), VarBins.at(i), NuLoader, std::get<0>(Vars.at(i)), kNoSpillCut, kRecoIsBackground); 
         Spectra.push_back({std::move(RecoSignals), std::move(RecoTrueSignals), std::move(RecoBkgSignals)});
+
+        auto data_RecoSignals = std::make_unique<Spectrum>(VarLabels.at(i), VarBins.at(i), DataNuLoader, std::get<0>(Vars.at(i)), kNoSpillCut, kRecoIsSignal);
+        data_Spectra.push_back( std::move(data_RecoSignals) );        
+
     }
 
-    // We now create spectra that will help us get the efficiency and purity data for each of the cuts
+    // We now create the single-bin spectra that will help us get the efficiency and purity data for each of the cuts
+
+    // MC
 
     // Spectrum with all events
     Spectrum sAllEvents("AllEvents", bEventCount, NuLoader, kTrueEventCount, kNoTruthCut, kNoSpillCut);
@@ -91,38 +107,66 @@ void Selection() {
     Spectrum sRecoSignal("RecoSignal", bEventCount, NuLoader, kEventCount, kNoSpillCut, kRecoIsSignal); 
     Spectrum sRecoTrueSignal("RecoTrueSignal", bEventCount, NuLoader, kEventCount, kNoSpillCut, kRecoIsTrueReco); 
 
+    // Data
+
+    // Spectrum with all events that were reconstructed
+    Spectrum sDataAllRecoEvents("DataAllRecoEvents", bEventCount, DataNuLoader, kEventCount, kNoSpillCut, kNoCut);
+    // Spectrum with first cut (cosmic)
+    Spectrum sDataFirstCut("DataFirstCut", bEventCount, DataNuLoader, kEventCount, kNoSpillCut, kFirstCut);
+    // Spectrum with second cut (cosmic and vertex FV)
+    Spectrum sDataSecondCut("DataSecondCut", bEventCount, DataNuLoader, kEventCount, kNoSpillCut, kSecondCut);
+    // Spectrum with second cut (cosmic, vertex FV, and one muon)
+    Spectrum sDataThirdCut("DataThirdCut", bEventCount, DataNuLoader, kEventCount, kNoSpillCut, kThirdCut);
+    // Spectrum with second cut (cosmic, vertex FV, one muon, and two protons)
+    Spectrum sDataFourthCut("DataFourthCut", bEventCount, DataNuLoader, kEventCount, kNoSpillCut, kFourthCut);
+    // Spectrum with second cut (cosmic, vertex FV, one muon, two protons, and no charged pions)
+    Spectrum sDataFifthCut("DataFifthCut", bEventCount, DataNuLoader, kEventCount, kNoSpillCut, kFifthCut);
+    // Spectrum with second cut (cosmic, vertex FV, one muon, two protons, no charged pions, and no neutral pions)
+    Spectrum sDataSixthCut("DataSixthCut", bEventCount, DataNuLoader, kEventCount, kNoSpillCut, kSixthCut);
+    // Spectrum with overall signal definition
+    Spectrum sDataRecoSignal("DataRecoSignal", bEventCount, DataNuLoader, kEventCount, kNoSpillCut, kRecoIsSignal); 
+
+    DataNuLoader.Go();
     NuLoader.Go();
+
+    //----------------------------------------//    
 
     // Loop over variables
     for (std::size_t i = 0; i < Vars.size(); i++) {
+
         auto& [RecoSignals, RecoTrueSignals, RecoBkgSignals] = Spectra.at(i);
+        auto& data_RecoSignals = data_Spectra.at(i);        
 
         TCanvas* PlotCanvas = new TCanvas("Selection","Selection",205,34,1124,768);
+        PlotCanvas->SetTopMargin(0.13);
+        PlotCanvas->SetLeftMargin(0.15);
+        PlotCanvas->SetRightMargin(0.05);
+        PlotCanvas->SetBottomMargin(0.15);        
+
         TH1D* RecoHisto = RecoSignals->ToTH1(TargetPOT);
         TH1D* RecoTrueHisto = RecoTrueSignals->ToTH1(TargetPOT);
-        TH1D* RecoBkgHisto = RecoBkgSignals->ToTH1(TargetPOT);
+        TH1D* RecoBkgHisto = RecoBkgSignals->ToTH1(TargetPOT);   
+        TH1D* data_RecoHisto = data_RecoSignals->ToTH1(TargetPOT);
 
-        // Manage under/overflow bins
+        //overflow bins
         RecoHisto->SetBinContent(RecoHisto->GetNbinsX(), RecoHisto->GetBinContent(RecoHisto->GetNbinsX()) + RecoHisto->GetBinContent(RecoHisto->GetNbinsX() + 1));
         RecoTrueHisto->SetBinContent(RecoTrueHisto->GetNbinsX(), RecoTrueHisto->GetBinContent(RecoTrueHisto->GetNbinsX()) + RecoTrueHisto->GetBinContent(RecoTrueHisto->GetNbinsX() + 1));
         RecoBkgHisto->SetBinContent(RecoBkgHisto->GetNbinsX(), RecoBkgHisto->GetBinContent(RecoBkgHisto->GetNbinsX()) + RecoBkgHisto->GetBinContent(RecoBkgHisto->GetNbinsX() + 1));
+        data_RecoHisto->SetBinContent(data_RecoHisto->GetNbinsX(), data_RecoHisto->GetBinContent(data_RecoHisto->GetNbinsX()) + data_RecoHisto->GetBinContent(data_RecoHisto->GetNbinsX() + 1));
 
+        // undeflow bins
         RecoHisto->SetBinContent(1, RecoHisto->GetBinContent(0) + RecoHisto->GetBinContent(1));
         RecoTrueHisto->SetBinContent(1, RecoTrueHisto->GetBinContent(0) + RecoTrueHisto->GetBinContent(1));
         RecoBkgHisto->SetBinContent(1, RecoBkgHisto->GetBinContent(0) + RecoBkgHisto->GetBinContent(1));
+        data_RecoHisto->SetBinContent(1, data_RecoHisto->GetBinContent(0) + data_RecoHisto->GetBinContent(1));
 
-        PlotCanvas->SetTopMargin(0.13);
-        PlotCanvas->SetLeftMargin(0.17);
-        PlotCanvas->SetRightMargin(0.05);
-        PlotCanvas->SetBottomMargin(0.16);
-
-        TLegend* leg = new TLegend(0.2,0.73,0.75,0.83);
+        TLegend* leg = new TLegend(0.15,0.9,0.7,0.98);
         leg->SetBorderSize(0);
         leg->SetNColumns(3);
         leg->SetTextSize(TextSize*0.8);
         leg->SetTextFont(FontStyle);
 
-        TLegendEntry* legReco = leg->AddEntry(RecoHisto,"Reconstructed","l");
+        TLegendEntry* legReco = leg->AddEntry(RecoHisto,"MC","l");
         RecoHisto->SetLineColor(kBlue+2);
         RecoHisto->SetLineWidth(4);
 
@@ -134,7 +178,8 @@ void Selection() {
         RecoHisto->GetXaxis()->SetTitleSize(TextSize);
         RecoHisto->GetXaxis()->SetTitleOffset(1.1);
         RecoHisto->GetXaxis()->CenterTitle();
-        RecoHisto->GetXaxis()->SetTitle(("Reco " + VarLabels.at(i)).c_str());
+        RecoHisto->GetXaxis()->SetTitle((VarLabels.at(i)).c_str());
+        RecoHisto->GetXaxis()->SetNdivisions(6);        
 
         RecoHisto->GetYaxis()->SetTitleFont(FontStyle);
         RecoHisto->GetYaxis()->SetLabelFont(FontStyle);
@@ -142,28 +187,65 @@ void Selection() {
         RecoHisto->GetYaxis()->SetLabelSize(TextSize);
         RecoHisto->GetYaxis()->SetTitleSize(TextSize);
         RecoHisto->GetYaxis()->SetTitleOffset(1.3);
-        RecoHisto->GetYaxis()->SetTickSize(0);
         RecoHisto->GetYaxis()->CenterTitle();
+        RecoHisto->GetYaxis()->SetNdivisions(6);             
+
+        TLegendEntry* legRecoTrue = leg->AddEntry(RecoTrueHisto,"CC2p0#pi","l");
+        RecoTrueHisto->SetLineColor(kAzure-4);
+        RecoTrueHisto->SetFillColor(kAzure-4);        
+        RecoTrueHisto->SetLineWidth(4);
+
+        TLegendEntry* legRecoBkg = leg->AddEntry(RecoBkgHisto,"non-CC2p0#pi","l");
+        RecoBkgHisto->SetLineColor(kOrange+7);
+        RecoBkgHisto->SetFillColor(kOrange+7);        
+        RecoBkgHisto->SetLineWidth(4);
+
+        /*TLegendEntry* legRecoData = leg->AddEntry(data_RecoHisto,"Data","ep");*/
+        data_RecoHisto->SetLineColor(kBlack);
+        data_RecoHisto->SetFillColor(kBlack);        
+        data_RecoHisto->SetLineWidth(2);   
+        data_RecoHisto->SetMarkerStyle(8);
+        data_RecoHisto->SetMarkerSize(2.);                        
+
+        PlotCanvas->cd();
+        TH1D* total_mc = (TH1D*)(RecoTrueHisto->Clone());
+        total_mc->Add(RecoBkgHisto);
+
+        //------------------------------------//
+
+        // Area normalized
+        double mc_sf = 1./total_mc->Integral("width");
+        total_mc->Scale(mc_sf);
+        RecoHisto->Scale(mc_sf);
+        RecoTrueHisto->Scale(mc_sf);
+        RecoBkgHisto->Scale(mc_sf);        
+
+        double data_sf = 1./data_RecoHisto->Integral("width");
+        data_RecoHisto->Scale(data_sf);
+
+        //------------------------------------// 
 
         double imax = RecoHisto->GetMaximum();
         double YAxisRange = 1.3*imax;
         RecoHisto->GetYaxis()->SetRangeUser(0.,YAxisRange);
         RecoTrueHisto->GetYaxis()->SetRangeUser(0.,YAxisRange);
         RecoBkgHisto->GetYaxis()->SetRangeUser(0.,YAxisRange);
+        data_RecoHisto->GetYaxis()->SetRangeUser(0.,YAxisRange);           
 
-        TLegendEntry* legRecoTrue = leg->AddEntry(RecoTrueHisto,"True","l");
-        RecoTrueHisto->SetLineColor(kRed+1);
-        RecoTrueHisto->SetLineWidth(4);
+        //------------------------------------//        
 
-        TLegendEntry* legRecoBkg = leg->AddEntry(RecoBkgHisto,"Background","l");
-        RecoBkgHisto->SetLineColor(kOrange+7);
-        RecoBkgHisto->SetLineWidth(4);
-
-        PlotCanvas->cd();
-        RecoHisto->Draw("hist same");
-        RecoTrueHisto->Draw("hist same");
+        RecoHisto->Draw("hist same");        
+        //RecoTrueHisto->Draw("hist same");       
+        total_mc->Draw("hist same");
         RecoBkgHisto->Draw("hist same");
+        //redraw so that it is on top
+        RecoHisto->Draw("hist same");   
+        // finally the data
+        data_RecoHisto->Draw("same e1x0");
+        
         leg->Draw();
+
+        gPad->RedrawAxis();
 
         // Save as pdf
         PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/"+PlotNames[i]+".pdf");
@@ -179,6 +261,9 @@ void Selection() {
     SaveFile->Close();
 
     // Get histograms for all cuts
+
+    // MC
+
     TH1D* AllEventsHisto = sAllEvents.ToTH1(TargetPOT);
     TH1D* AllRecoEventsHisto = sAllRecoEvents.ToTH1(TargetPOT);
     TH1D* AllTrueEventsHisto = sAllTrueEvents.ToTH1(TargetPOT);
@@ -205,36 +290,62 @@ void Selection() {
     TH1D* RecoSignalHisto = sRecoSignal.ToTH1(TargetPOT);
     TH1D* RecoTrueSignalHisto = sRecoTrueSignal.ToTH1(TargetPOT);
 
-    // Get integrals for all cuts
-    double AllEventsInt = AllEventsHisto->Integral();
-    double AllRecoEventsInt = AllRecoEventsHisto->Integral();
-    double AllTrueEventsInt = AllTrueEventsHisto->Integral();
-    double AllTrueRecoEventsInt = AllTrueRecoEventsHisto->Integral();
+    // Data
 
-    double FirstCutInt = FirstCutHisto->Integral();
-    double FirstCutTrueInt = FirstCutTrueHisto->Integral();
+    TH1D* DataAllRecoEventsHisto = sDataAllRecoEvents.ToTH1(TargetPOT);
+    TH1D* DataFirstCutHisto = sDataFirstCut.ToTH1(TargetPOT);
+    TH1D* DataSecondCutHisto = sDataSecondCut.ToTH1(TargetPOT);
+    TH1D* DataThirdCutHisto = sDataThirdCut.ToTH1(TargetPOT);
+    TH1D* DataFourthCutHisto = sDataFourthCut.ToTH1(TargetPOT);
+    TH1D* DataFifthCutHisto = sDataFifthCut.ToTH1(TargetPOT);
+    TH1D* DataSixthCutHisto = sDataSixthCut.ToTH1(TargetPOT);
+    TH1D* DataRecoSignalHisto = sDataRecoSignal.ToTH1(TargetPOT);
 
-    double SecondCutInt = SecondCutHisto->Integral();
-    double SecondCutTrueInt = SecondCutTrueHisto->Integral();
+    // Get integrals for all cuts for efficiency / purity study
 
-    double ThirdCutInt = ThirdCutHisto->Integral();
-    double ThirdCutTrueInt = ThirdCutTrueHisto->Integral();
+    // MC
 
-    double FourthCutInt = FourthCutHisto->Integral();
-    double FourthCutTrueInt = FourthCutTrueHisto->Integral();
+    double AllEventsInt = AllEventsHisto->Integral("width");
+    double AllRecoEventsInt = AllRecoEventsHisto->Integral("width");
+    double AllTrueEventsInt = AllTrueEventsHisto->Integral("width");
+    double AllTrueRecoEventsInt = AllTrueRecoEventsHisto->Integral("width");
 
-    double FifthCutInt = FifthCutHisto->Integral();
-    double FifthCutTrueInt = FifthCutTrueHisto->Integral();
+    double FirstCutInt = FirstCutHisto->Integral("width");
+    double FirstCutTrueInt = FirstCutTrueHisto->Integral("width");
 
-    double SixthCutInt = SixthCutHisto->Integral();
-    double SixthCutTrueInt = SixthCutTrueHisto->Integral();
+    double SecondCutInt = SecondCutHisto->Integral("width");
+    double SecondCutTrueInt = SecondCutTrueHisto->Integral("width");
 
-    double RecoSignalInt = RecoSignalHisto->Integral();
-    double RecoTrueSignalInt = RecoTrueSignalHisto->Integral();
+    double ThirdCutInt = ThirdCutHisto->Integral("width");
+    double ThirdCutTrueInt = ThirdCutTrueHisto->Integral("width");
+
+    double FourthCutInt = FourthCutHisto->Integral("width");
+    double FourthCutTrueInt = FourthCutTrueHisto->Integral("width");
+
+    double FifthCutInt = FifthCutHisto->Integral("width");
+    double FifthCutTrueInt = FifthCutTrueHisto->Integral("width");
+
+    double SixthCutInt = SixthCutHisto->Integral("width");
+    double SixthCutTrueInt = SixthCutTrueHisto->Integral("width");
+
+    double RecoSignalInt = RecoSignalHisto->Integral("width");
+    double RecoTrueSignalInt = RecoTrueSignalHisto->Integral("width");
+
+    // Data
+
+    double DataAllRecoEventsInt = DataAllRecoEventsHisto->Integral("width");
+    double DataFirstCutInt = DataFirstCutHisto->Integral("width");
+    double DataSecondCutInt = DataSecondCutHisto->Integral("width");
+    double DataThirdCutInt = DataThirdCutHisto->Integral("width");
+    double DataFourthCutInt = DataFourthCutHisto->Integral("width");
+    double DataFifthCutInt = DataFifthCutHisto->Integral("width");
+    double DataSixthCutInt = DataSixthCutHisto->Integral("width");
+    double DataRecoSignalInt = DataRecoSignalHisto->Integral("width");    
 
     // Print results
+    // MC
     std::cout << std::endl;
-    std::cout << "================================" << std::endl;
+    std::cout << "============== MC ==================" << std::endl;
     std::cout << "All events: " << AllEventsInt << std::endl;
     std::cout << "Reconstructed events: " << AllRecoEventsInt << std::endl;
     std::cout << "True signal events: " << AllTrueEventsInt << std::endl;
@@ -249,7 +360,26 @@ void Selection() {
     std::cout << "    No neutral pions cut: " << SixthCutInt << ". G.E: " <<  (SixthCutInt / AllRecoEventsInt) * 100. << ". S.E.: " << (SixthCutTrueInt / AllTrueEventsInt) * 100. << ". Purity: " << (SixthCutTrueInt / SixthCutInt) * 100. << std::endl;
     std::cout << std::endl;
     std::cout << "Reconstructed events satisfying signal definition: " << RecoSignalInt << ". Final signal efficiency: " << (RecoTrueSignalInt / AllTrueEventsInt) << ". Purity: " << (RecoTrueSignalInt / RecoSignalInt) * 100. << std::endl;
-    std::cout << "Cross check. Reconstructed true signal: " << RecoTrueSignalInt << ", divided by signal efficiency: " << RecoTrueSignalInt * (AllTrueEventsInt / RecoTrueSignalInt) << std::endl;
+    std::cout << "Cross check!" << endl;
+    std::cout << "Reconstructed true signal: " << RecoTrueSignalInt << ", divided by signal efficiency: " << RecoTrueSignalInt * (AllTrueEventsInt / RecoTrueSignalInt) << std::endl;
+    std::cout << "True signal events: " << AllTrueEventsInt << std::endl;
     std::cout << "================================" << std::endl;
     std::cout << std::endl;
+
+    // Data
+
+    std::cout << std::endl;
+    std::cout << "============== Data ==================" << std::endl;
+    std::cout << "Reconstructed events: " << DataAllRecoEventsInt << std::endl;
+    std::cout << std::endl;
+    std::cout << "Cuts: " << std::endl;
+    std::cout << "    Cosmic cut: " << DataFirstCutInt << ". G.E: " <<  (DataFirstCutInt / DataAllRecoEventsInt) * 100. << std::endl;
+    std::cout << "    Vertex in FV cut: " << DataSecondCutInt << ". G.E: " <<  (DataSecondCutInt / DataAllRecoEventsInt) * 100. << std::endl;
+    std::cout << "    One muon cut: " << DataThirdCutInt << ". G.E: " <<  (DataThirdCutInt / DataAllRecoEventsInt) * 100. << std::endl;
+    std::cout << "    Two protons cut: " << DataFourthCutInt << ". G.E: " <<  (DataFourthCutInt / DataAllRecoEventsInt) * 100.  << std::endl;
+    std::cout << "    No charged pions cut: " << DataFifthCutInt << ". G.E: " <<  (DataFifthCutInt / DataAllRecoEventsInt) * 100. << std::endl;
+    std::cout << "    No neutral pions cut: " << DataSixthCutInt << ". G.E: " <<  (DataSixthCutInt / DataAllRecoEventsInt) * 100. << std::endl;
+    std::cout << "================================" << std::endl;
+    std::cout << std::endl;   
+
 }

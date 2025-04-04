@@ -78,5 +78,3 @@ mkdir ${fig_dir}/cc2p/Figs/CAFAna/DataCounts
 mkdir ${fig_dir}/cc2p/Figs/CAFAna/DataCounts/NoCut
 mkdir ${fig_dir}/cc2p/Figs/CAFAna/Resolution
 mkdir ${fig_dir}/cc2p/Figs/CAFAna/CutScan
-
-
