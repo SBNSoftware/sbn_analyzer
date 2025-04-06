@@ -190,6 +190,7 @@ void Selection() {
         RecoHisto->GetYaxis()->CenterTitle();
         RecoHisto->GetYaxis()->SetNdivisions(6);             
 
+        TLegendEntry* legRecoData = leg->AddEntry(data_RecoHisto,"Data","ep");
         TLegendEntry* legRecoTrue = leg->AddEntry(RecoTrueHisto,"CC2p0#pi","l");
         RecoTrueHisto->SetLineColor(kAzure-4);
         RecoTrueHisto->SetFillColor(kAzure-4);        
@@ -200,7 +201,6 @@ void Selection() {
         RecoBkgHisto->SetFillColor(kOrange+7);        
         RecoBkgHisto->SetLineWidth(4);
 
-        /*TLegendEntry* legRecoData = leg->AddEntry(data_RecoHisto,"Data","ep");*/
         data_RecoHisto->SetLineColor(kBlack);
         data_RecoHisto->SetFillColor(kBlack);        
         data_RecoHisto->SetLineWidth(2);   
@@ -343,7 +343,9 @@ void Selection() {
     double DataRecoSignalInt = DataRecoSignalHisto->Integral("width");    
 
     // Print results
+
     // MC
+
     std::cout << std::endl;
     std::cout << "============== MC ==================" << std::endl;
     std::cout << "All events: " << AllEventsInt << std::endl;

@@ -1206,13 +1206,18 @@ namespace ana
 
     // Check for cosmics (not const for data script)
     Cut kCosmicCut([](const caf::SRSliceProxy* slc) {
-        return (
-            slc->nu_score > 0.4 &&     // check how neutrino like slice is
+        
+	return (
+
+            slc->nu_score > 0.4 /*&&     // check how neutrino like slice is
             slc->fmatch.score < 7.0 && // check flash match score
             slc->fmatch.time > 0. &&   // check flash is in beam
-            slc->fmatch.time < 1.8
+            slc->fmatch.time < 1.8*/
+
         );
+
     });
+
     const Cut kIsCosmic([](const caf::SRSliceProxy* slc) {
         return (slc->truth.genie_mode == -1);
     });
@@ -1335,10 +1340,15 @@ namespace ana
     //     6. No neutral pions cut
 
     const Cut kFirstCut([](const caf::SRSliceProxy* slc) {
+
         return kCosmicCut(slc);
+
     });
+
     const Cut kFirstCutTrue([](const caf::SRSliceProxy* slc) {
+
         return (kFirstCut(slc) && kTruthIsSignal(&slc->truth));
+
     });
 
     const Cut kSecondCut([](const caf::SRSliceProxy* slc) {

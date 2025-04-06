@@ -8,5 +8,6 @@ mrbsetenv
 cd ..
 
 kx509
-voms-proxy-init -noregen -rfc -voms 'fermilab:/fermilab/sbnd/Role=Analysis'
+httokensh -a htvaultprod.fnal.gov -i sbnd -- /bin/bash
+
 export TERM=screen
