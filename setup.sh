@@ -12,7 +12,7 @@ cd srcs
 mrb g -t v10_00_00 sbnana
 cd sbnana
 # add your remote; skip if you already have it
-git remote add upstream https://github.com/afropapp13/sbnana_true_spectrum.gitt
+git remote add upstream https://github.com/afropapp13/sbnana_true_spectrum.git
 # pull your feature branch
 git pull upstream feature/epelaez_TrueEnsembleSpectrum
 
@@ -25,9 +25,9 @@ mrb i -j4
 # go back to main directory
 cd ../../..
 
-#kx509
-#voms-proxy-init -noregen -rfc -voms 'fermilab:/fermilab/sbnd/Role=Analysis'
+kx509
 httokensh -a htvaultprod.fnal.gov -i sbnd -- /bin/bash
+
 export TERM=screen
 
 #####################################
