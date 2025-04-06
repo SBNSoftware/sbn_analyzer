@@ -1,7 +1,10 @@
 source /cvmfs/sbnd.opensciencegrid.org/products/sbnd/setup_sbnd.sh
 
-dirName=v10_04_06_01
-qualifier=e26:prof
+#dirName=v10_04_06_01
+#qualifier=e26:prof
+
+dirName=v09_93_01_01
+qualifier=e20:prof
 
 mkdir ${dirName}; cd ${dirName}
 mrb newDev -v ${dirName} -q ${qualifier}
@@ -12,9 +15,10 @@ cd srcs
 mrb g -t v10_00_00 sbnana
 cd sbnana
 # add your remote; skip if you already have it
-git remote add upstream https://github.com/afropapp13/sbnana_true_spectrum.git
+git remote set-url origin https://github.com/afropapp13/sbn_true_spectrum.git
 # pull your feature branch
-git pull upstream feature/epelaez_TrueEnsembleSpectrum
+git fetch origin
+git checkout true_ensemble_spectrum
 
 # setup
 mrbsetenv

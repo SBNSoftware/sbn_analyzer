@@ -166,7 +166,6 @@ void Selection() {
         leg->SetTextSize(TextSize*0.8);
         leg->SetTextFont(FontStyle);
 
-        TLegendEntry* legReco = leg->AddEntry(RecoHisto,"MC","l");
         RecoHisto->SetLineColor(kBlue+2);
         RecoHisto->SetLineWidth(4);
 
@@ -190,13 +189,10 @@ void Selection() {
         RecoHisto->GetYaxis()->CenterTitle();
         RecoHisto->GetYaxis()->SetNdivisions(6);             
 
-        TLegendEntry* legRecoData = leg->AddEntry(data_RecoHisto,"Data","ep");
-        TLegendEntry* legRecoTrue = leg->AddEntry(RecoTrueHisto,"CC2p0#pi","l");
         RecoTrueHisto->SetLineColor(kAzure-4);
         RecoTrueHisto->SetFillColor(kAzure-4);        
         RecoTrueHisto->SetLineWidth(4);
 
-        TLegendEntry* legRecoBkg = leg->AddEntry(RecoBkgHisto,"non-CC2p0#pi","l");
         RecoBkgHisto->SetLineColor(kOrange+7);
         RecoBkgHisto->SetFillColor(kOrange+7);        
         RecoBkgHisto->SetLineWidth(4);
@@ -210,6 +206,11 @@ void Selection() {
         PlotCanvas->cd();
         TH1D* total_mc = (TH1D*)(RecoTrueHisto->Clone());
         total_mc->Add(RecoBkgHisto);
+
+        TLegendEntry* legRecoData = leg->AddEntry(data_RecoHisto,"Data","ep");
+        TLegendEntry* legReco = leg->AddEntry(RecoHisto,"MC","l");
+        TLegendEntry* legRecoTrue = leg->AddEntry(RecoTrueHisto,"CC2p0#pi","l");
+        TLegendEntry* legRecoBkg = leg->AddEntry(RecoBkgHisto,"non-CC2p0#pi","l");
 
         //------------------------------------//
 
