@@ -67,14 +67,14 @@ void SelectionEfficiencySIS() {
   }
   /*    for (std::size_t i = 0; i < Vars.size(); i++) {
         cout<<"l57 i:"<<i<<"  VarBins.NBins(): "<<VarBins[i].NBins()<<" ["<<VarBins[i].Min()<<","<<VarBins[i].Max()<<"]"<<endl;
-	auto RecoSignals = std::make_unique<Spectrum>(VarLabels.at(i), VarBins.at(i), NuLoader, std::get<2>(Vars.at(i)), kTruthIsSignal, kNoSpillCut, kRecoIsSignal);   
-	auto RecoTrueSignals = std::make_unique<Spectrum> (VarLabels.at(i), VarBins.at(i), NuLoader, std::get<0>(Vars.at(i)), kNoSpillCut, kRecoIsTrueReco); 
-	Spectra.push_back({std::move(RecoSignals), std::move(RecoTrueSignals)});
-	}
+        auto RecoSignals = std::make_unique<Spectrum>(VarLabels.at(i), VarBins.at(i), NuLoader, std::get<2>(Vars.at(i)), kTruthIsSignal, kNoSpillCut, kRecoIsSignal);   
+        auto RecoTrueSignals = std::make_unique<Spectrum> (VarLabels.at(i), VarBins.at(i), NuLoader, std::get<0>(Vars.at(i)), kNoSpillCut, kRecoIsTrueReco); 
+        Spectra.push_back({std::move(RecoSignals), std::move(RecoTrueSignals)});
+        }
   */
 
   //2D efficency histograms
-  std::vector<std::pair<std::string,std::string>> vars2D={{"pMu", "onebin"}, {"EAvail", "ECompleteness"}, {"Q2", "W"}};
+  std::vector<std::pair<std::string,std::string>> vars2D={{"pMu", "onebin"}, {"EAvail", "ECompleteness"}, {"Q2", "W"}, {"EAvail", "Enu"}, {"EAvail","Ehad"}, {"pMu", "Enu"}, {"sumE", "Enu"}};
   std::vector< std::pair<string, string>> spectra2d_names;
   std::vector< std::pair<TString, TString>> hist2dtitles;
   for( unsigned i=0; i<vars2D.size(); i++){
@@ -103,9 +103,11 @@ void SelectionEfficiencySIS() {
     Var trueVar=get<1>(Vars[i]);
 
         
-    //string var=vars[v];
-    auto RecoTrueSignals=std::make_unique<Spectrum>(AxisTitle(var), AxisTitle(var), NuLoader, VarBinning(var), trueVar, VarBinning(var), recoVar, kNoSpillCut, kRecoIsTrueSIS);
+    //string var=vars[v];   
+    //auto RecoTrueSignals=std::make_unique<Spectrum>(AxisTitle(var), AxisTitle(var), NuLoader, VarBinning(var), trueVar, VarBinning(var), recoVar, kNoSpillCut, kRecoIsTrueSIS);
     //kTruthIsSignal, kNoSpillCut, kRecoIsSignal);
+    //trueVar on X axis, recoVar on Y thats weird I'm swapping them 
+    auto RecoTrueSignals=std::make_unique<Spectrum>(AxisTitle(var), AxisTitle(var), NuLoader, VarBinning(var), recoVar, VarBinning(var), trueVar, kNoSpillCut, kRecoIsTrueSIS); //truevar on Y axis, recoVar on X 
         
     SpectraMig.push_back(std::move(RecoTrueSignals));
 
@@ -116,7 +118,7 @@ void SelectionEfficiencySIS() {
   NuLoader.Go();
   cout<<"l67"<<endl;
   double mcPOT;
-    TCanvas* c=new TCanvas;
+  TCanvas* c=new TCanvas;
   //2D histograms loop
   for(int i=0; i<vars2D.size(); i++){
     string varx=get<0>(vars2D[i]);
@@ -124,7 +126,7 @@ void SelectionEfficiencySIS() {
     string varxy=vary+"_vs_"+varx;
 
     auto& [TrueSignals, RecoTrueSignals] = Spectra2D.at(i);   
-    TCanvas* PlotCanvas = new TCanvas("Selection","Selection",205,34,1124,768);
+    //TCanvas* PlotCanvas = new TCanvas("Selection","Selection",205,34,1124,768);
     TH2* TrueHisto = TrueSignals->ToTH2(TargetPOT);
     TH2* RecoTrueHisto = RecoTrueSignals->ToTH2(TargetPOT);
 
@@ -134,7 +136,9 @@ void SelectionEfficiencySIS() {
     TrueHisto->GetYaxis()->SetTitle(AxisTitle(vary).c_str());
     RecoTrueHisto->GetYaxis()->SetTitle(AxisTitle(vary).c_str());
 
+    c->cd();    
     TrueHisto->Draw("colz");
+    //TrueHisto->Print("all");
     c->SaveAs(Form("EffDenom_%s.png",varxy.c_str()));
     c->SaveAs(Form("EffDenom_%s.C",varxy.c_str()));
     RecoTrueHisto->Draw("colz");
@@ -157,8 +161,8 @@ void SelectionEfficiencySIS() {
     
     TrueHisto->GetXaxis()->SetTitle(VarLabels[i].c_str());
     RecoTrueHisto->GetXaxis()->SetTitle(VarLabels[i].c_str());
-    MigHisto->GetXaxis()->SetTitle(Form("True %s", VarLabels[i].c_str() ));
-    MigHisto->GetYaxis()->SetTitle(Form("Reconstructed %s", VarLabels[i].c_str()) );
+    MigHisto->GetYaxis()->SetTitle(Form("True %s", VarLabels[i].c_str() ));
+    MigHisto->GetXaxis()->SetTitle(Form("Reconstructed %s", VarLabels[i].c_str()) );
     
     SaveFile->WriteObject(TrueHisto, Form("EffDenom_%s",varnamesshort[i].c_str() ) );
     SaveFile->WriteObject(RecoTrueHisto, Form("EffNum_%s",varnamesshort[i].c_str() ) );
@@ -263,7 +267,7 @@ void SelectionEfficiencySIS() {
         textSlice->DrawLatexNDC(0.4,0.92,SliceLabel);
 
         // Save as pdf
-        PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/Efficiency/"+SlicePlotName+".pdf");
+        PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/Efficiency_TrueSIS/"+SlicePlotName+".pdf");
 
         // Save to root file
         SaveFile->WriteObject(Eff, SlicePlotName+"_eff");
@@ -303,7 +307,7 @@ void SelectionEfficiencySIS() {
       Eff->GetPaintedGraph()->GetYaxis()->SetTickSize(0);
 
       // Save as pdf
-      PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/Efficiency/"+PlotNames[i]+".pdf");
+      PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/Efficiency_TrueSIS/"+PlotNames[i]+".pdf");
 
       // Save to root file
       SaveFile->WriteObject(Eff, PlotNames[i]+"_eff");

@@ -34,8 +34,8 @@ namespace ana {
 
   // Files with samples
   //const std::string TargetPath = "/pnfs/sbnd/persistent/users/twester/sbnd/v09_78_04/cv";
-  //const std::string TargetPath = "/pnfs/sbn/data_add/sbn_nd/poms_production/official/MCP2024B/v09_91_02_02/prodoverlay_corsika_cosmics_proton_genie_rockbox_sce/caf"; //2024B
-  const std::string TargetPath= "/pnfs/sbn/data_add/sbn_nd/poms_production/official/MCP2025A/v10_04_01_01/prodoverlay_corsika_cosmics_proton_genie_rockbox_sce/MCP2025A/caf"; //2025A
+  const std::string TargetPath = "/pnfs/sbn/data_add/sbn_nd/poms_production/official/MCP2024B/v09_91_02_02/prodoverlay_corsika_cosmics_proton_genie_rockbox_sce/caf"; //2024B
+  //const std::string TargetPath= "/pnfs/sbn/data_add/sbn_nd/poms_production/official/MCP2025A/v10_04_01_01/prodoverlay_corsika_cosmics_proton_genie_rockbox_sce/MCP2025A/caf"; //2025A
 
   std::vector<std::string> InputFiles = tools.GetInputFiles(TargetPath);
 
@@ -66,7 +66,7 @@ namespace ana {
 
   const std::map<int, std::tuple<float, float>> PDGToThreshold = {
     {13, {0.1f, 7.f}},                                 // Muon
-    {2212, {0.3f, 1.0f}},                               // Proton
+    {2212, {0.3f, 7.0f}}, //1.0f}},          1GeV is a real low threshold, is that really a detector limitaion?                      // Proton
     {211, {0.07f, std::numeric_limits<float>::max()}},  // Pi plus
     {-211, {0.07f, std::numeric_limits<float>::max()}}, // Pi minus
     {111, {0.0f, std::numeric_limits<float>::max()}},    // Pi zero
@@ -134,18 +134,18 @@ namespace ana {
 
   // Double differential bins
   const Binning bTransverseMomentumInMuonCosTheta = Binning::Custom(
-								    tools.Return2DBinIndices(TwoDArrayNBinsTransverseMomentumInMuonCosThetaSlices));
+                                                                    tools.Return2DBinIndices(TwoDArrayNBinsTransverseMomentumInMuonCosThetaSlices));
   const Binning bDeltaAlphaTInMuonCosTheta = Binning::Custom(
-							     tools.Return2DBinIndices(TwoDArrayNBinsDeltaAlphaTInMuonCosThetaSlices));
+                                                             tools.Return2DBinIndices(TwoDArrayNBinsDeltaAlphaTInMuonCosThetaSlices));
   const Binning bCosOpeningAngleProtonsInMuonCosTheta = Binning::Custom(
-									tools.Return2DBinIndices(TwoDArrayNBinsCosOpeningAngleProtonsInMuonCosThetaSlices));
+                                                                        tools.Return2DBinIndices(TwoDArrayNBinsCosOpeningAngleProtonsInMuonCosThetaSlices));
   const Binning bCosOpeningAngleMuonTotalProtonInMuonCosTheta = Binning::Custom(
-										tools.Return2DBinIndices(TwoDArrayNBinsCosOpeningAngleMuonTotalProtonInMuonCosThetaSlices));
+                                                                                tools.Return2DBinIndices(TwoDArrayNBinsCosOpeningAngleMuonTotalProtonInMuonCosThetaSlices));
   // GKI
   const Binning bMissingMomentumInMuonCosTheta = Binning::Custom(
-								 tools.Return2DBinIndices(TwoDArrayNBinsMissingMomentumInMuonCosThetaSlices));
+                                                                 tools.Return2DBinIndices(TwoDArrayNBinsMissingMomentumInMuonCosThetaSlices));
   const Binning bAlphaThreeDInMuonCosTheta = Binning::Custom(
-							     tools.Return2DBinIndices(TwoDArrayNBinsAlphaThreeDInMuonCosThetaSlices));
+                                                             tools.Return2DBinIndices(TwoDArrayNBinsAlphaThreeDInMuonCosThetaSlices));
   const Binning bCosOpeningAngleMomentumTransferTotalProtonInMuonCosTheta = Binning::Custom(tools.Return2DBinIndices(TwoDArrayNBinsCosOpeningAngleMomentumTransferTotalProtonInMuonCosThetaSlices));
 
   //////////////
@@ -157,9 +157,9 @@ namespace ana {
     if (std::isnan(data->x) || std::isnan(data->y) || std::isnan(data->z))
       return false;
     return (
-	    (TMath::Abs(data->x) > fFVXMin) && (TMath::Abs(data->x) < fFVXMax) &&
-	    (TMath::Abs(data->y) > fFVYMin) && (TMath::Abs(data->y) < fFVYMax) &&
-	    (data->z > fFVZMin) && (data->z < fFVZMax));
+            (TMath::Abs(data->x) > fFVXMin) && (TMath::Abs(data->x) < fFVXMax) &&
+            (TMath::Abs(data->y) > fFVYMin) && (TMath::Abs(data->y) < fFVYMax) &&
+            (data->z > fFVZMin) && (data->z < fFVZMax));
   }
 
   // Check multiplicity of particles in a given pdg
@@ -168,7 +168,7 @@ namespace ana {
     for (auto const &prim : nu->prim) {
       float totp = std::sqrt(std::pow(prim.genp.x, 2) + std::pow(prim.genp.y, 2) + std::pow(prim.genp.z, 2));
       if (prim.pdg == pdg && totp >= lb && totp < up) {
-	count++;
+        count++;
       }
     }
     return count;
@@ -188,44 +188,44 @@ namespace ana {
       float fMuAverage = 0.0f;
       float fPrAverage = 0.0f;
       for (int i = 0; i < 3; i++) {
-	// Skip events with Nan's or 0's in chi squared values
-	if (
-	    std::isnan(pfp.trk.chi2pid[i].chi2_muon) ||
-	    pfp.trk.chi2pid[i].chi2_muon == 0. ||
-	    std::isnan(pfp.trk.chi2pid[i].chi2_proton) ||
-	    pfp.trk.chi2pid[i].chi2_proton == 0.) {
-	  bSkipPFP = true;
-	  break;
-	}
-	fMuAverage += pfp.trk.chi2pid[i].chi2_muon / 3;
-	fPrAverage += pfp.trk.chi2pid[i].chi2_proton / 3;
+        // Skip events with Nan's or 0's in chi squared values
+        if (
+            std::isnan(pfp.trk.chi2pid[i].chi2_muon) ||
+            pfp.trk.chi2pid[i].chi2_muon == 0. ||
+            std::isnan(pfp.trk.chi2pid[i].chi2_proton) ||
+            pfp.trk.chi2pid[i].chi2_proton == 0.) {
+          bSkipPFP = true;
+          break;
+        }
+        fMuAverage += pfp.trk.chi2pid[i].chi2_muon / 3;
+        fPrAverage += pfp.trk.chi2pid[i].chi2_proton / 3;
       }
       if (bSkipPFP)
-	continue;
+        continue;
 
       // Check start point is in FV and assign momentum based on end point
       if (!bIsInFV(&pfp.trk.start))
-	continue;
+        continue;
 
       float fMomentum;
       if (!bIsInFV(&pfp.trk.end)) {
-	if (std::isnan(pfp.trk.mcsP.fwdP_muon))
-	  continue;
-	fMomentum = pfp.trk.mcsP.fwdP_muon;
+        if (std::isnan(pfp.trk.mcsP.fwdP_muon))
+          continue;
+        fMomentum = pfp.trk.mcsP.fwdP_muon;
       } else {
-	fMomentum = pfp.trk.rangeP.p_muon;
+        fMomentum = pfp.trk.rangeP.p_muon;
       }
 
       if (std::isnan(pfp.trk.len))
-	continue;
+        continue;
       if (
-	  fMuAverage < fMuCutMuScore &&
-	  fPrAverage > fMuCutPrScore &&
-	  pfp.trk.len > fMuCutLength &&
-	  fMomentum >= lb &&
-	  fMomentum < ub) {
-	CandidateMuons.push_back(pfp.id);
-	CandidateMuonsTrkLen.push_back(pfp.trk.len);
+          fMuAverage < fMuCutMuScore &&
+          fPrAverage > fMuCutPrScore &&
+          pfp.trk.len > fMuCutLength &&
+          fMomentum >= lb &&
+          fMomentum < ub) {
+        CandidateMuons.push_back(pfp.id);
+        CandidateMuonsTrkLen.push_back(pfp.trk.len);
       }
     }
 
@@ -237,8 +237,8 @@ namespace ana {
     int iMuonIndex = CandidateMuons.at(0);
     for (std::size_t i = 1; i < CandidateMuons.size(); i++) {
       if (CandidateMuonsTrkLen.at(i) > fLongestTrack) {
-	fLongestTrack = CandidateMuonsTrkLen.at(i);
-	iMuonIndex = CandidateMuons.at(i);
+        fLongestTrack = CandidateMuonsTrkLen.at(i);
+        iMuonIndex = CandidateMuons.at(i);
       }
     }
     return {true, iMuonIndex};
@@ -253,34 +253,34 @@ namespace ana {
     std::vector<int> ProtonIDs;
     for (auto const &pfp : slc->reco.pfp) {
       if (pfp.id == MuonID)
-	continue; // skip pfp tagged as muon
+        continue; // skip pfp tagged as muon
       
       float fPrAverage = 0.0f;
       bool bSkipPFP = false;
 
       for (int i = 0; i < 3; i++) {
-	// Skip events with Nan's or 0's in chi squared values
-	if (
-	    std::isnan(pfp.trk.chi2pid[i].chi2_muon) ||
-	    pfp.trk.chi2pid[i].chi2_muon == 0.) {
-	  bSkipPFP = true;
-	  break;
-	}
+        // Skip events with Nan's or 0's in chi squared values
+        if (
+            std::isnan(pfp.trk.chi2pid[i].chi2_muon) ||
+            pfp.trk.chi2pid[i].chi2_muon == 0.) {
+          bSkipPFP = true;
+          break;
+        }
       	fPrAverage += pfp.trk.chi2pid[i].chi2_proton / 3;
       }
       if (bSkipPFP)
-	continue;
+        continue;
 
       // Check full track is in FV
       if (!(bIsInFV(&pfp.trk.start) && bIsInFV(&pfp.trk.end)))
-	continue;
+        continue;
       float fMomentum = pfp.trk.rangeP.p_proton;
 
       if (
-	  fPrAverage < fPrCutPrScore &&
-	  fMomentum >= lb &&
-	  fMomentum < ub)
-	ProtonIDs.push_back(pfp.id);
+          fPrAverage < fPrCutPrScore &&
+          fMomentum >= lb &&
+          fMomentum < ub)
+        ProtonIDs.push_back(pfp.id);
     }
     return {ProtonIDs.size() == 2, ProtonIDs};
   }
@@ -292,13 +292,13 @@ namespace ana {
 
     for (auto const &pfp : slc->reco.pfp) {
       if (std::find(TaggedIDs.begin(), TaggedIDs.end(), pfp.id) != TaggedIDs.end())
-	continue;
+        continue;
       if (!(bIsInFV(&pfp.trk.start) && bIsInFV(&pfp.trk.end)))
-	continue;
+        continue;
 
       float fMomentum = pfp.trk.rangeP.p_pion;
       if (fMomentum >= lb && fMomentum < ub)
-	return false; // tag pion
+        return false; // tag pion
     }
     return true;
   }
@@ -306,11 +306,11 @@ namespace ana {
   bool bNoShowers(const caf::SRSliceProxy *slc, std::vector<int> TaggedIDs) {
     for (auto const &pfp : slc->reco.pfp) {
       if (std::find(TaggedIDs.begin(), TaggedIDs.end(), pfp.id) != TaggedIDs.end())
-	continue;
+        continue;
       if (pfp.trackScore == -5.f)
-	continue; // clear cosmic
+        continue; // clear cosmic
       if (pfp.trackScore < 0.5)
-	return false;
+        return false;
     }
     return true;
   }
@@ -322,59 +322,67 @@ namespace ana {
     TVector3 RecoilProton(1, 1, 1);
 
     for (auto const &pfp : slc->reco.pfp) {
+      //cout<<"GetVectors::l325 \t MuonID: "<<MuonID<<"\t pfp.id"<< pfp.id<<endl;
+
       if (pfp.id == MuonID) {
-	Muon.SetTheta(TMath::ACos(pfp.trk.costh));
-	Muon.SetPhi(pfp.trk.phi);
-	if (bIsInFV(&pfp.trk.end)) {
-	  Muon.SetMag(pfp.trk.rangeP.p_muon);
-	} else {
-	  Muon.SetMag(pfp.trk.mcsP.fwdP_muon);
-	}
+        Muon.SetTheta(TMath::ACos(pfp.trk.costh));
+        Muon.SetPhi(pfp.trk.phi);
+        if (bIsInFV(&pfp.trk.end)) {
+          Muon.SetMag(pfp.trk.rangeP.p_muon);
+        } else {
+          Muon.SetMag(pfp.trk.mcsP.fwdP_muon);
+        }
       } else if (pfp.id == ProtonID1) {
-	LeadingProton.SetTheta(TMath::ACos(pfp.trk.costh));
-	LeadingProton.SetPhi(pfp.trk.phi);
-	LeadingProton.SetMag(pfp.trk.rangeP.p_proton);
+        LeadingProton.SetTheta(TMath::ACos(pfp.trk.costh));
+        LeadingProton.SetPhi(pfp.trk.phi);
+        LeadingProton.SetMag(pfp.trk.rangeP.p_proton);
       } else if (pfp.id == ProtonID2) {
-	RecoilProton.SetTheta(TMath::ACos(pfp.trk.costh));
-	RecoilProton.SetPhi(pfp.trk.phi);
-	RecoilProton.SetMag(pfp.trk.rangeP.p_proton);
+        RecoilProton.SetTheta(TMath::ACos(pfp.trk.costh));
+        RecoilProton.SetPhi(pfp.trk.phi);
+        RecoilProton.SetMag(pfp.trk.rangeP.p_proton);
       }
     }
     return {Muon, LeadingProton, RecoilProton};
   }
 
   TVector3 GetParticleVector(const caf::SRSliceProxy *slc, int PID, int partPDG) {
+    //cout<<"GetParticleVector::l347"<<endl;
     TVector3 partVec(-999, -999, -999);
     // This is really only gonna work for track based particles and needs new caveats for like electrons etc
     for (auto const &pfp : slc->reco.pfp) {
+      //cout<<"GetParticleVector::l351 \t PID: "<<PID<<"\t pfp.id"<< pfp.id<<endl;
       if (pfp.id == PID) {
-	//If its a track
+        //If its a track
         //if(pfp.trackScore>0.5){//this def needs to be optimized... 
-
-	  partVec.SetTheta(TMath::ACos(pfp.trk.costh));
-	  partVec.SetPhi(pfp.trk.phi);
-	  if (abs(partPDG) == 13) {
-            if (bIsInFV(&pfp.trk.end)) {
-	      partVec.SetMag(pfp.trk.rangeP.p_muon);
-            } else {
-	      partVec.SetMag(pfp.trk.mcsP.fwdP_muon);
-            }
-	  } else if (abs(partPDG) == 2212) {
-            partVec.SetMag(pfp.trk.rangeP.p_proton);
-	  } else if (abs(partPDG) == 211) {
-            partVec.SetMag(pfp.trk.rangeP.p_pion);
-	  } else {
-            cout << "This PDG doesn't have a well defined momentum, using rangeP.p_muon. PDG: " << partPDG << endl;
+        //cout<<"GetParticleVector::l355"<<endl;
+        partVec.SetTheta(TMath::ACos(pfp.trk.costh));
+        partVec.SetPhi(pfp.trk.phi);
+        //cout<<"GetParticleVector::partPDG: "<<partPDG<<endl;
+        if (abs(partPDG) == 13) {
+          //cout<<"GetParticleVector::l359"<<endl;
+          if (bIsInFV(&pfp.trk.end)) {
             partVec.SetMag(pfp.trk.rangeP.p_muon);
-	  }
+          } else {
+            partVec.SetMag(pfp.trk.mcsP.fwdP_muon);
+          }
+          //std::cout<<"GetParticleVector::Muon Mag: "<<partVec.Mag()<< "\t pfp.slcID: "<< pfp.slcID<<std::endl;
+        } else if (abs(partPDG) == 2212) {
+          partVec.SetMag(pfp.trk.rangeP.p_proton);
+        } else if (abs(partPDG) == 211) {
+          partVec.SetMag(pfp.trk.rangeP.p_pion);
+        } else {
+          cout << "This PDG doesn't have a well defined momentum, using rangeP.p_muon. PDG: " << partPDG << endl;
+          partVec.SetMag(pfp.trk.rangeP.p_muon);
         }
-	/*      }
-      else{//shower like -- I think we really need a case for looking like a cosmic though?
-	pfp.shw.bestplane_energy
-	}*/
-      return partVec;
+        //If we've found the right pfp already return the vector now.
+        return partVec;
+      }//end if pfp.id==PID
+      /*      }
+              else{//shower like -- I think we really need a case for looking like a cosmic though?
+              pfp.shw.bestplane_energy
+              }*/     
     }//end loop over pfps 
-    cout<<"PFP with PID ="<< PID<<"not found."<<endl;
+    cout<<"PFP with PID ="<< PID<<"not found."<<endl; // would only get here if the right pfp was never found 
     return partVec;//return -999 vec if i didnt find the PID
   }
 
@@ -382,9 +390,9 @@ namespace ana {
     double energy=-999.;
     for (auto const &pfp: slc->reco.pfp){
       if(pfp.id==PID){
-	energy=pfp.shw.bestplane_energy;
-	//seriously don't know about this
-	break;
+        energy=pfp.shw.bestplane_energy;
+        //seriously don't know about this
+        break;
       }
     }
       
@@ -408,29 +416,29 @@ namespace ana {
       int pdg = prim.pdg;
       if(debug) cout<<"GetTrueVector:l347 pdg: "<<prim.pdg<<"\t totp: "<<totp<<endl;   
       if (
-	  (prim.pdg == 13) &&
-	  (totp >= std::get<0>(PDGToThreshold.at(13))) &&
-	  (totp < std::get<1>(PDGToThreshold.at(13)))) {
+          (prim.pdg == 13) &&
+          (totp >= std::get<0>(PDGToThreshold.at(13))) &&
+          (totp < std::get<1>(PDGToThreshold.at(13)))) {
 
 	    Muon.SetXYZ(prim.genp.x, prim.genp.y, prim.genp.z);
 	    FirstMuon = true;
       } else if (
-		 (prim.pdg == 2212) &&
-		 (totp >= std::get<0>(PDGToThreshold.at(2212))) &&
-		 (totp < std::get<1>(PDGToThreshold.at(2212)))) {
-                  if(debug) cout<<"GetTrueVector:l359"<<endl;   
+                 (prim.pdg == 2212) &&
+                 (totp >= std::get<0>(PDGToThreshold.at(2212))) &&
+                 (totp < std::get<1>(PDGToThreshold.at(2212)))) {
+        if(debug) cout<<"GetTrueVector:l359"<<endl;   
 
 	    HadronVectors.push_back({1, 1, 1});
 	    HadronVectors.back().SetXYZ(prim.genp.x, prim.genp.y, prim.genp.z);
 	    FirstProton = true;
 	    HadronPIDs.push_back(pdg);
       } else  {//need some sort of if for other pdgs but that involves setting a threshold for every possible particle type? or i just need to make a blanket statement for other particles or something
-            if(debug) cout<<"GetTrueVector:l369"<<endl;   
+        if(debug) cout<<"GetTrueVector:l369"<<endl;   
 	    HadronVectors.push_back({1, 1, 1});
 	    HadronVectors.back().SetXYZ(prim.genp.x, prim.genp.y, prim.genp.z);
 	    HadronPIDs.push_back(pdg);
       }
-            if(debug) cout<<"GetTrueVector:l370"<<endl;    
+      if(debug) cout<<"GetTrueVector:l370"<<endl;    
     }
 
     if(debug) cout<<"l371"<<endl;
@@ -632,88 +640,88 @@ namespace ana {
   // Mu chi2 for muon
   const Var kMuMuChi2([](const caf::SRSliceProxy *slc) -> double {
       for (auto const& pfp : slc -> reco.pfp) {
-	if (pfp.trk.truth.p.pdg == 13) {
-	  bool bSkipPFP = false;
-	  double fMuAverage = 0.;
-	  for (int i = 0; i < 3; i++) { 
-	    if (
-		std::isnan(pfp.trk.chi2pid[i].chi2_muon) ||
-		pfp.trk.chi2pid[i].chi2_muon == 0.
-		) {
-	      bSkipPFP = true;
-	      break;
-	    } else {
-	      fMuAverage += pfp.trk.chi2pid[i].chi2_muon / 3;
-	    }
-	  }
-	  if (!bSkipPFP) return fMuAverage;
-	}
+        if (pfp.trk.truth.p.pdg == 13) {
+          bool bSkipPFP = false;
+          double fMuAverage = 0.;
+          for (int i = 0; i < 3; i++) { 
+            if (
+                std::isnan(pfp.trk.chi2pid[i].chi2_muon) ||
+                pfp.trk.chi2pid[i].chi2_muon == 0.
+                ) {
+              bSkipPFP = true;
+              break;
+            } else {
+              fMuAverage += pfp.trk.chi2pid[i].chi2_muon / 3;
+            }
+          }
+          if (!bSkipPFP) return fMuAverage;
+        }
       }
       return 0; });
 
   // Proton chi2 for muon
   const Var kMuProtonChi2([](const caf::SRSliceProxy *slc) -> double {
       for (auto const& pfp : slc -> reco.pfp) {
-	if (pfp.trk.truth.p.pdg == 13) {
-	  bool bSkipPFP = false;
-	  double fPrAverage = 0.;
-	  for (int i = 0; i < 3; i++) { 
-	    if (
-		std::isnan(pfp.trk.chi2pid[i].chi2_proton) ||
-		pfp.trk.chi2pid[i].chi2_proton == 0.
-		) {
-	      bSkipPFP = true;
-	      break;
-	    } else {
-	      fPrAverage += pfp.trk.chi2pid[i].chi2_proton / 3;
-	    }
-	  }
-	  if (!bSkipPFP) return fPrAverage;
-	}
+        if (pfp.trk.truth.p.pdg == 13) {
+          bool bSkipPFP = false;
+          double fPrAverage = 0.;
+          for (int i = 0; i < 3; i++) { 
+            if (
+                std::isnan(pfp.trk.chi2pid[i].chi2_proton) ||
+                pfp.trk.chi2pid[i].chi2_proton == 0.
+                ) {
+              bSkipPFP = true;
+              break;
+            } else {
+              fPrAverage += pfp.trk.chi2pid[i].chi2_proton / 3;
+            }
+          }
+          if (!bSkipPFP) return fPrAverage;
+        }
       }
       return 0; });
 
   // Mu chi2 for proton
   const Var kProtonMuChi2([](const caf::SRSliceProxy *slc) -> double {
       for (auto const& pfp : slc -> reco.pfp) {
-	if (pfp.trk.truth.p.pdg == 2212) {
-	  bool bSkipPFP = false;
-	  double fMuAverage = 0.;
-	  for (int i = 0; i < 3; i++) { 
-	    if (
-		std::isnan(pfp.trk.chi2pid[i].chi2_muon) ||
-		pfp.trk.chi2pid[i].chi2_muon == 0.
-		) {
-	      bSkipPFP = true;
-	      break;
-	    } else {
-	      fMuAverage += pfp.trk.chi2pid[i].chi2_muon / 3;
-	    }
-	  }
-	  if (!bSkipPFP) return fMuAverage;
-	}
+        if (pfp.trk.truth.p.pdg == 2212) {
+          bool bSkipPFP = false;
+          double fMuAverage = 0.;
+          for (int i = 0; i < 3; i++) { 
+            if (
+                std::isnan(pfp.trk.chi2pid[i].chi2_muon) ||
+                pfp.trk.chi2pid[i].chi2_muon == 0.
+                ) {
+              bSkipPFP = true;
+              break;
+            } else {
+              fMuAverage += pfp.trk.chi2pid[i].chi2_muon / 3;
+            }
+          }
+          if (!bSkipPFP) return fMuAverage;
+        }
       }
       return 0; });
 
   // Proton chi2 for proton
   const Var kProtonProtonChi2([](const caf::SRSliceProxy *slc) -> double {
       for (auto const& pfp : slc -> reco.pfp) {
-	if (pfp.trk.truth.p.pdg == 2212) {
-	  bool bSkipPFP = false;
-	  double fPrAverage = 0.;
-	  for (int i = 0; i < 3; i++) { 
-	    if (
-		std::isnan(pfp.trk.chi2pid[i].chi2_proton) ||
-		pfp.trk.chi2pid[i].chi2_proton == 0.
-		) {
-	      bSkipPFP = true;
-	      break;
-	    } else {
-	      fPrAverage += pfp.trk.chi2pid[i].chi2_proton / 3;
-	    }
-	  }
-	  if (!bSkipPFP) return fPrAverage;
-	}
+        if (pfp.trk.truth.p.pdg == 2212) {
+          bool bSkipPFP = false;
+          double fPrAverage = 0.;
+          for (int i = 0; i < 3; i++) { 
+            if (
+                std::isnan(pfp.trk.chi2pid[i].chi2_proton) ||
+                pfp.trk.chi2pid[i].chi2_proton == 0.
+                ) {
+              bSkipPFP = true;
+              break;
+            } else {
+              fPrAverage += pfp.trk.chi2pid[i].chi2_proton / 3;
+            }
+          }
+          if (!bSkipPFP) return fPrAverage;
+        }
       }
       return 0; });
 
@@ -721,23 +729,23 @@ namespace ana {
   const Var kSecondProtonMuChi2([](const caf::SRSliceProxy *slc) -> double {
       bool firstProton = false;
       for (auto const& pfp : slc -> reco.pfp) {
-	if (pfp.trk.truth.p.pdg == 2212) {
-	  bool bSkipPFP = false;
-	  double fMuAverage = 0.;
-	  for (int i = 0; i < 3; i++) { 
-	    if (
-		std::isnan(pfp.trk.chi2pid[i].chi2_muon) ||
-		pfp.trk.chi2pid[i].chi2_muon == 0.
-		) {
-	      bSkipPFP = true;
-	      break;
-	    } else {
-	      fMuAverage += pfp.trk.chi2pid[i].chi2_muon / 3;
-	    }
-	  }
-	  if (!firstProton && !bSkipPFP) firstProton = true;
-	  else if (firstProton && !bSkipPFP) return fMuAverage;
-	}
+        if (pfp.trk.truth.p.pdg == 2212) {
+          bool bSkipPFP = false;
+          double fMuAverage = 0.;
+          for (int i = 0; i < 3; i++) { 
+            if (
+                std::isnan(pfp.trk.chi2pid[i].chi2_muon) ||
+                pfp.trk.chi2pid[i].chi2_muon == 0.
+                ) {
+              bSkipPFP = true;
+              break;
+            } else {
+              fMuAverage += pfp.trk.chi2pid[i].chi2_muon / 3;
+            }
+          }
+          if (!firstProton && !bSkipPFP) firstProton = true;
+          else if (firstProton && !bSkipPFP) return fMuAverage;
+        }
       }
       return 0; });
 
@@ -745,23 +753,23 @@ namespace ana {
   const Var kSecondProtonProtonChi2([](const caf::SRSliceProxy *slc) -> double {
       bool firstProton = false;
       for (auto const& pfp : slc -> reco.pfp) {
-	if (pfp.trk.truth.p.pdg == 2212) {
-	  bool bSkipPFP = false;
-	  double fPrAverage = 0.;
-	  for (int i = 0; i < 3; i++) { 
-	    if (
-		std::isnan(pfp.trk.chi2pid[i].chi2_proton) ||
-		pfp.trk.chi2pid[i].chi2_proton == 0.
-		) {
-	      bSkipPFP = true;
-	      break;
-	    } else {
-	      fPrAverage += pfp.trk.chi2pid[i].chi2_proton / 3;
-	    }
-	  }
-	  if (!firstProton && !bSkipPFP) firstProton = true;
-	  else if (firstProton && !bSkipPFP) return fPrAverage;
-	}
+        if (pfp.trk.truth.p.pdg == 2212) {
+          bool bSkipPFP = false;
+          double fPrAverage = 0.;
+          for (int i = 0; i < 3; i++) { 
+            if (
+                std::isnan(pfp.trk.chi2pid[i].chi2_proton) ||
+                pfp.trk.chi2pid[i].chi2_proton == 0.
+                ) {
+              bSkipPFP = true;
+              break;
+            } else {
+              fPrAverage += pfp.trk.chi2pid[i].chi2_proton / 3;
+            }
+          }
+          if (!firstProton && !bSkipPFP) firstProton = true;
+          else if (firstProton && !bSkipPFP) return fPrAverage;
+        }
       }
       return 0; });
 
@@ -770,22 +778,22 @@ namespace ana {
       bool firstProton = false;
       for (auto const &pfp : slc->reco.pfp) {
         if (pfp.trk.truth.p.pdg == 211 || pfp.trk.truth.p.pdg == -211) {
-	  bool bSkipPFP = false;
-	  double fMuAverage = 0.;
-	  for (int i = 0; i < 3; i++) {
-	    if (
-		std::isnan(pfp.trk.chi2pid[i].chi2_muon) ||
-		pfp.trk.chi2pid[i].chi2_muon == 0.) {
-	      bSkipPFP = true;
-	      break;
-	    } else {
-	      fMuAverage += pfp.trk.chi2pid[i].chi2_muon / 3;
-	    }
-	  }
-	  if (!firstProton && !bSkipPFP)
-	    firstProton = true;
-	  else if (firstProton && !bSkipPFP)
-	    return fMuAverage;
+          bool bSkipPFP = false;
+          double fMuAverage = 0.;
+          for (int i = 0; i < 3; i++) {
+            if (
+                std::isnan(pfp.trk.chi2pid[i].chi2_muon) ||
+                pfp.trk.chi2pid[i].chi2_muon == 0.) {
+              bSkipPFP = true;
+              break;
+            } else {
+              fMuAverage += pfp.trk.chi2pid[i].chi2_muon / 3;
+            }
+          }
+          if (!firstProton && !bSkipPFP)
+            firstProton = true;
+          else if (firstProton && !bSkipPFP)
+            return fMuAverage;
         }
       }
       return 0;
@@ -796,22 +804,22 @@ namespace ana {
       bool firstProton = false;
       for (auto const &pfp : slc->reco.pfp) {
         if (pfp.trk.truth.p.pdg == 211 || pfp.trk.truth.p.pdg == -211) {
-	  bool bSkipPFP = false;
-	  double fPrAverage = 0.;
-	  for (int i = 0; i < 3; i++) {
-	    if (
-		std::isnan(pfp.trk.chi2pid[i].chi2_proton) ||
-		pfp.trk.chi2pid[i].chi2_proton == 0.) {
-	      bSkipPFP = true;
-	      break;
-	    } else {
-	      fPrAverage += pfp.trk.chi2pid[i].chi2_proton / 3;
-	    }
-	  }
-	  if (!firstProton && !bSkipPFP)
-	    firstProton = true;
-	  else if (firstProton && !bSkipPFP)
-	    return fPrAverage;
+          bool bSkipPFP = false;
+          double fPrAverage = 0.;
+          for (int i = 0; i < 3; i++) {
+            if (
+                std::isnan(pfp.trk.chi2pid[i].chi2_proton) ||
+                pfp.trk.chi2pid[i].chi2_proton == 0.) {
+              bSkipPFP = true;
+              break;
+            } else {
+              fPrAverage += pfp.trk.chi2pid[i].chi2_proton / 3;
+            }
+          }
+          if (!firstProton && !bSkipPFP)
+            firstProton = true;
+          else if (firstProton && !bSkipPFP)
+            return fPrAverage;
         }
       }
       return 0;
@@ -934,7 +942,14 @@ namespace ana {
   const Var kMuonMomentum([](const caf::SRSliceProxy *slc) -> double {
       std::vector<int> TaggedIDs;
       auto [OneMuon, MuonID] = bOneMuon(slc);
-      return GetParticleVector(slc, MuonID, 13).Mag();
+      //std::cout<<"kMuonMomentum... gonna GetParticleVector for MuonID "<<MuonID<<endl;
+      TVector3 mVec=GetParticleVector(slc, MuonID, 13);
+      //std::cout<<"kMuonMomentum:GotParticleVector ..."<<std::endl;
+      //mVec.Print("all");
+      TVector3 nullVec(-999,-999,-999);
+      if(mVec.Mag() == nullVec.Mag()) return -999;
+      //return GetParticleVector(slc, MuonID, 13).Mag();
+      return mVec.Mag();
     });
 
   const TruthVar kTruthMuonMomentum([](const caf::SRTrueInteractionProxy *nu) -> double {
@@ -952,12 +967,48 @@ namespace ana {
       return kTruthMuonMomentum(&slc->truth);
     });
 
-
   //Neutrino energy
   const TruthVar kTruthNeutrinoEnergy([](const caf::SRTrueInteractionProxy *nu) -> double {
       if(debug) cout<<"entering kTruthNeutrinoEnergy"<<endl;
       double Enu=nu->E;
       return Enu;
+    });
+
+  const Var kRecoTruthNeutrinoEnergy([](const caf::SRSliceProxy *slc) -> double {
+      return kTruthNeutrinoEnergy(&slc->truth);
+    });
+
+
+
+    
+  const Var kEhad([](const caf::SRSliceProxy *slc) -> double { 
+      double ehad=0;
+      double p=-999; 
+      auto [OneMuon, MuonID] = bOneMuon(slc);
+      for (auto const &pfp: slc->reco.pfp){
+        if (pfp.id==MuonID) continue;
+        //if(pfp.trackScore<0.5 && pfp.shw.bestplane_energy>0){
+     
+        if(pfp.shw.bestplane_energy>0){
+          //code from the true version...should I do anything like this? probably? but then that means I need to have proton score cuts and like actually call each particle something....uhhhh 
+          double epart=pfp.shw.bestplane_energy;
+          //if( std::find( PDGsWithThresholds.begin(), PDGsWithThresholds.end(), prim.pdg)){//check if we have a threshold for that PDG
+          //if( epart< PDGThresholds[PROTON_PDG].first) continue;
+          //if( PDGThresholds[PROTON_PDG].second> epart) continue;//check if energy is within thresholds
+          //}      //I think the solution to this is to put the same minimum threshold on everything? blips will all get tossed though.... ummm
+
+          ehad+=pfp.shw.bestplane_energy;
+        }
+      }//end loop over pfps
+      return ehad; 
+    });
+
+  const Var kNeutrinoEnergy([](const caf::SRSliceProxy *slc) -> double {
+      double Ehad= kEhad(slc);
+      double Emu=   std::sqrt( std::pow(kMuonMomentum(slc),2) + M_MU*M_MU);
+      //std::cout<<"pmu: "<< kMuonMomentum(slc)<< "\t pmu^2: "<<std::pow(kMuonMomentum(slc),2)<< " \t M_MU^2: "<<M_MU*M_MU<< "\t Emu"<<std::endl;
+      //std::cout<<"Ehad: "<<Ehad<< "\t Emu: "<<Emu<<"\t Enu_reco: "<< Ehad+Emu<<endl;
+      return Ehad+Emu;
     });
 
 
@@ -969,8 +1020,8 @@ namespace ana {
       return (Enu-Emu);
     });
   
-  const Var kRecoTruthHadronicEnergy([](const caf::SRSliceProxy *slc) -> double{
-      return kTruthHadronicEnergy(&slc->truth);
+  const Var kRecoTruthHadronicEnergy([](const caf::SRSliceProxy *slc) -> double { 
+      return kTruthHadronicEnergy(&slc->truth);  
     });
 
   //EAvaialable
@@ -979,52 +1030,53 @@ namespace ana {
       double p=-999; 
       auto [OneMuon, MuonID] = bOneMuon(slc);
       for (auto const &pfp: slc->reco.pfp){
-	if (pfp.id==MuonID) continue;
-	//if(pfp.trackScore<0.5 && pfp.shw.bestplane_energy>0){
+        if (pfp.id==MuonID) continue;
+        //if(pfp.trackScore<0.5 && pfp.shw.bestplane_energy>0){
      
-    if(pfp.shw.bestplane_energy>0){
-       //code from the true version...should I do anything like this? probably? but then that means I need to have proton score cuts and like actually call each particle something....uhhhh 
-        double epart=pfp.shw.bestplane_energy;
-      //if( std::find( PDGsWithThresholds.begin(), PDGsWithThresholds.end(), prim.pdg)){//check if we have a threshold for that PDG
-        if( epart< PDGThresholds[PROTON_PDG].first) continue;
-        if( PDGThresholds[PROTON_PDG].second> epart) continue;//check if energy is within thresholds
-      //}      //I think the solution to this is to put the same minimum threshold on everything? blips will all get tossed though.... ummm
+        if(pfp.shw.bestplane_energy>0){
+          //code from the true version...should I do anything like this? probably? but then that means I need to have proton score cuts and like actually call each particle something....uhhhh 
+          double epart=pfp.shw.bestplane_energy;
+          //if( std::find( PDGsWithThresholds.begin(), PDGsWithThresholds.end(), prim.pdg)){//check if we have a threshold for that PDG
+          if( epart< PDGThresholds[PROTON_PDG].first) continue;  //if less then mnimum threshold ignore
+          if( PDGThresholds[PROTON_PDG].second> epart) continue;//check if energy is within thresholds //if greater then max threshold ignore
+          //}      //I think the solution to this is to put the same minimum threshold on everything? blips will all get tossed though.... ummm
 
-	  eavail+=pfp.shw.bestplane_energy;
-    }
-    //lets just look at treating everything as a shower first even though theyre obviously not 
-	/*}//end if shower
-	else{
-	  //GetParticleVector(slc, pfp.id, pfp.pdg);
-	  int bestplane=pfp.trk.bestplane;
-	  if (bestplane==-1){ cout<<"No calorimetry found for PID "<<pfp.id<<endl;
-	    continue;
-	  }
-	  int partPDG=pfp.trk.chi2pid[bestplane].pdg;//no idea if this is relieabe but minimum particle chi2 seems reasonable enough to me 
-	  double caloT=pfp.trk.calo[bestplane].ke*mev_to_gev; //these numbers are huge like 200... must be in MeV? or is really not what I think it is. 
-      if(std::is_nan(caloT)){ 
-        cout<<"caloT is a nan. partpdg"<<partPDG<<endl;
-        continue;
-      }
-	  eavail+=caloT;
-	  //Get a momentum here too 
+          eavail+=pfp.shw.bestplane_energy;
+        }
+    
+        //lets just look at treating everything as a shower first even though theyre obviously not 
+        /*}//end if shower
+          else{
+          //GetParticleVector(slc, pfp.id, pfp.pdg);
+          int bestplane=pfp.trk.bestplane;
+          if (bestplane==-1){ cout<<"No calorimetry found for PID "<<pfp.id<<endl;
+          continue;
+          }
+          int partPDG=pfp.trk.chi2pid[bestplane].pdg;//no idea if this is relieabe but minimum particle chi2 seems reasonable enough to me 
+          double caloT=pfp.trk.calo[bestplane].ke*mev_to_gev; //these numbers are huge like 200... must be in MeV? or is really not what I think it is. 
+          if(std::is_nan(caloT)){ 
+          cout<<"caloT is a nan. partpdg"<<partPDG<<endl;
+          continue;
+          }
+          eavail+=caloT;
+          //Get a momentum here too 
 	  
-	  if (abs(partPDG) == 13) {
-            if (bIsInFV(&pfp.trk.end)) {
+          if (abs(partPDG) == 13) {
+          if (bIsInFV(&pfp.trk.end)) {
 	      p+=pfp.trk.rangeP.p_muon;
-            } else {
+          } else {
 	      p+=pfp.trk.mcsP.fwdP_muon;
-            }
-	  } else if (abs(partPDG) == 2212) {
-            p+=pfp.trk.rangeP.p_proton;
-	  } else if (abs(partPDG) == 211) {
-            p+=pfp.trk.rangeP.p_pion;
-	  } else {
-            cout << "This PDG doesn't have a well defined momentum, using rangeP.p_muon. PDG: " << partPDG << endl;
-            p+=pfp.trk.rangeP.p_muon;
-	  }
-	    cout<<"calo T: "<<caloT<<" p: "<<p<< " PDG: "<<partPDG<< endl;
-	}//end if track*/
+          }
+          } else if (abs(partPDG) == 2212) {
+          p+=pfp.trk.rangeP.p_proton;
+          } else if (abs(partPDG) == 211) {
+          p+=pfp.trk.rangeP.p_pion;
+          } else {
+          cout << "This PDG doesn't have a well defined momentum, using rangeP.p_muon. PDG: " << partPDG << endl;
+          p+=pfp.trk.rangeP.p_muon;
+          }
+          cout<<"calo T: "<<caloT<<" p: "<<p<< " PDG: "<<partPDG<< endl;
+          }//end if track*/
       }//end loop over pfps
       return eavail; 
     });
@@ -1037,9 +1089,9 @@ namespace ana {
         if(abs(prim.pdg)==MUON_PDG) continue; //dont include muon energy
         if(abs(prim.pdg)==NEUTRON_PDG) continue;//skip neutrons
         //if( std::find( PDGsWithThresholds.begin(), PDGsWithThresholds.end(), prim.pdg)){//check if we have a threshold for that PDG
-                //proton threshold is the higest lets just make it that for everything
-            if( prim.startE< PDGThresholds[PROTON_PDG].first) continue;
-            if( PDGThresholds[PROTON_PDG].second> prim.startE) continue;//check if energy is within thresholds
+        //proton threshold is the higest lets just make it that for everything
+        if( prim.startE< PDGThresholds[PROTON_PDG].first) continue;
+        if( PDGThresholds[PROTON_PDG].second> prim.startE) continue;//check if energy is within thresholds
         //}else{//if we don't idk put out a warning but do nothing for now? 
         //    cout<<"Not using any threshold for TrueEAvail particle with PDG "<<prim.pdg<<endl;
         //}
@@ -1047,8 +1099,8 @@ namespace ana {
         //if(abs(prim.pdg)==2212) 
         // I *think* Baryons are even PDGs and mesons are odd 
         //if(  abs(prim.pdg)>2000 && abs(prim.pdg)%2==0 )//greater then 2000 and even should basically just be a protonbut techincally could catch other stuff that won't exist
-        if(prim.pdg==PROTON_PDG)
-          E= E- M_PROTON;
+        //if(prim.pdg==PROTON_PDG) //Idk why I would want to do this?
+        //E= E- M_PROTON;
         EAvail+=E;
       }
       return EAvail;
@@ -1056,6 +1108,24 @@ namespace ana {
 
   const Var kRecoTruthEAvail([](const caf::SRSliceProxy *slc) -> double { return kTruthEAvail(&slc->truth); });
   
+
+
+  // Sum Energy ie Emu+ Ehad 
+  const Var kSumEnergy([](const caf::SRSliceProxy *slc) -> double {
+      double Emu= kMuonMomentum(slc) + M_MU*M_MU;
+      return Emu + kEhad(slc);
+    });
+
+  const TruthVar kTruthSumEnergy([](const caf::SRTrueInteractionProxy *nu) -> double {
+      if(debug) cout<<"entering kTruthSumEnergy"<<endl;
+      double Emu= kTruthMuonMomentum(nu) +M_MU*M_MU;
+      return Emu+ kTruthHadronicEnergy(nu);
+    });
+
+  const Var kRecoTruthSumEnergy([](const caf::SRSliceProxy *slc) -> double {
+      return kTruthSumEnergy(&slc->truth);
+    });
+
 
   //Q2
   
@@ -1149,9 +1219,9 @@ namespace ana {
 
       int MuonCosThetaTwoDIndex = tools.ReturnIndex(kMuonCosTheta(slc), TwoDArrayNBinsMuonCosTheta);
       int SerialTransverseMomentumInMuonCosThetaIndex = tools.ReturnIndexIn2DList(
-										  TwoDArrayNBinsTransverseMomentumInMuonCosThetaSlices,
-										  MuonCosThetaTwoDIndex,
-										  fTransverseMomentum);
+                                                                                  TwoDArrayNBinsTransverseMomentumInMuonCosThetaSlices,
+                                                                                  MuonCosThetaTwoDIndex,
+                                                                                  fTransverseMomentum);
       return SerialTransverseMomentumInMuonCosThetaIndex;
     });
 
@@ -1163,10 +1233,10 @@ namespace ana {
 
       int MuonCosThetaTwoDIndex = tools.ReturnIndex(kTruthMuonCosTheta(nu), TwoDArrayNBinsMuonCosTheta);
       int SerialTransverseMomentumInMuonCosThetaIndex = tools.ReturnIndexIn2DList(
-										  TwoDArrayNBinsTransverseMomentumInMuonCosThetaSlices,
-										  MuonCosThetaTwoDIndex,
-										  fTransverseMomentum
-										  );
+                                                                                  TwoDArrayNBinsTransverseMomentumInMuonCosThetaSlices,
+                                                                                  MuonCosThetaTwoDIndex,
+                                                                                  fTransverseMomentum
+                                                                                  );
       return SerialTransverseMomentumInMuonCosThetaIndex; 
     });
 
@@ -1182,10 +1252,10 @@ namespace ana {
 
       int MuonCosThetaTwoDIndex = tools.ReturnIndex(kMuonCosTheta(slc), TwoDArrayNBinsMuonCosTheta);
       int SerialDeltaAlphaTInMuonCosThetaIndex = tools.ReturnIndexIn2DList(
-									   TwoDArrayNBinsDeltaAlphaTInMuonCosThetaSlices,
-									   MuonCosThetaTwoDIndex,
-									   fDeltaAlphaT
-									   );
+                                                                           TwoDArrayNBinsDeltaAlphaTInMuonCosThetaSlices,
+                                                                           MuonCosThetaTwoDIndex,
+                                                                           fDeltaAlphaT
+                                                                           );
       return SerialDeltaAlphaTInMuonCosThetaIndex; });
   const TruthVar kTruthDeltaAlphaTInMuonCosTheta([](const caf::SRTrueInteractionProxy *nu) -> double {
       float fDeltaAlphaT = kTruthDeltaAlphaT(nu);
@@ -1195,10 +1265,10 @@ namespace ana {
 
       int MuonCosThetaTwoDIndex = tools.ReturnIndex(kTruthMuonCosTheta(nu), TwoDArrayNBinsMuonCosTheta);
       int SerialDeltaAlphaTInMuonCosThetaIndex = tools.ReturnIndexIn2DList(
-									   TwoDArrayNBinsDeltaAlphaTInMuonCosThetaSlices,
-									   MuonCosThetaTwoDIndex,
-									   fDeltaAlphaT
-									   );
+                                                                           TwoDArrayNBinsDeltaAlphaTInMuonCosThetaSlices,
+                                                                           MuonCosThetaTwoDIndex,
+                                                                           fDeltaAlphaT
+                                                                           );
       return SerialDeltaAlphaTInMuonCosThetaIndex;
     });
 
@@ -1210,10 +1280,10 @@ namespace ana {
 
       int MuonCosThetaTwoDIndex = tools.ReturnIndex(kMuonCosTheta(slc), TwoDArrayNBinsMuonCosTheta);
       int SerialCosOpeningAngleProtonsInMuonCosThetaIndex = tools.ReturnIndexIn2DList(
-										      TwoDArrayNBinsCosOpeningAngleProtonsInMuonCosThetaSlices,
-										      MuonCosThetaTwoDIndex,
-										      fCosOpeningAngleProtons
-										      );
+                                                                                      TwoDArrayNBinsCosOpeningAngleProtonsInMuonCosThetaSlices,
+                                                                                      MuonCosThetaTwoDIndex,
+                                                                                      fCosOpeningAngleProtons
+                                                                                      );
       return SerialCosOpeningAngleProtonsInMuonCosThetaIndex; 
     });
 
@@ -1222,10 +1292,10 @@ namespace ana {
 
       int MuonCosThetaTwoDIndex = tools.ReturnIndex(kTruthMuonCosTheta(nu), TwoDArrayNBinsMuonCosTheta);
       int SerialCosOpeningAngleProtonsInMuonCosThetaIndex = tools.ReturnIndexIn2DList(
-										      TwoDArrayNBinsCosOpeningAngleProtonsInMuonCosThetaSlices,
-										      MuonCosThetaTwoDIndex,
-										      fCosOpeningAngleProtons
-										      );
+                                                                                      TwoDArrayNBinsCosOpeningAngleProtonsInMuonCosThetaSlices,
+                                                                                      MuonCosThetaTwoDIndex,
+                                                                                      fCosOpeningAngleProtons
+                                                                                      );
       return SerialCosOpeningAngleProtonsInMuonCosThetaIndex; 
     });
  
@@ -1237,10 +1307,10 @@ namespace ana {
 
       int MuonCosThetaTwoDIndex = tools.ReturnIndex(kMuonCosTheta(slc), TwoDArrayNBinsMuonCosTheta);
       int SerialCosOpeningAngleMuonTotalProtonInMuonCosThetaIndex = tools.ReturnIndexIn2DList(
-											      TwoDArrayNBinsCosOpeningAngleMuonTotalProtonInMuonCosThetaSlices,
-											      MuonCosThetaTwoDIndex,
-											      fCosOpeningAngleMuonTotalProton
-											      );
+                                                                                              TwoDArrayNBinsCosOpeningAngleMuonTotalProtonInMuonCosThetaSlices,
+                                                                                              MuonCosThetaTwoDIndex,
+                                                                                              fCosOpeningAngleMuonTotalProton
+                                                                                              );
       return SerialCosOpeningAngleMuonTotalProtonInMuonCosThetaIndex; 
     });
 
@@ -1250,10 +1320,10 @@ namespace ana {
 
       int MuonCosThetaTwoDIndex = tools.ReturnIndex(kTruthMuonCosTheta(nu), TwoDArrayNBinsMuonCosTheta);
       int SerialCosOpeningAngleMuonTotalProtonInMuonCosThetaIndex = tools.ReturnIndexIn2DList(
-											      TwoDArrayNBinsCosOpeningAngleMuonTotalProtonInMuonCosThetaSlices,
-											      MuonCosThetaTwoDIndex,
-											      fCosOpeningAngleMuonTotalProton
-											      );
+                                                                                              TwoDArrayNBinsCosOpeningAngleMuonTotalProtonInMuonCosThetaSlices,
+                                                                                              MuonCosThetaTwoDIndex,
+                                                                                              fCosOpeningAngleMuonTotalProton
+                                                                                              );
       return SerialCosOpeningAngleMuonTotalProtonInMuonCosThetaIndex; });
 
 
@@ -1268,10 +1338,10 @@ namespace ana {
 
       int MuonCosThetaTwoDIndex = tools.ReturnIndex(kMuonCosTheta(slc), TwoDArrayNBinsMuonCosTheta);
       int SerialMissingMomentumInMuonCosThetaIndex = tools.ReturnIndexIn2DList(
-									       TwoDArrayNBinsMissingMomentumInMuonCosThetaSlices,
-									       MuonCosThetaTwoDIndex,
-									       fMissingMomentum
-									       );
+                                                                               TwoDArrayNBinsMissingMomentumInMuonCosThetaSlices,
+                                                                               MuonCosThetaTwoDIndex,
+                                                                               fMissingMomentum
+                                                                               );
       return SerialMissingMomentumInMuonCosThetaIndex; });
 
   const TruthVar kTruthMissingMomentumInMuonCosTheta([](const caf::SRTrueInteractionProxy *nu) -> double {
@@ -1282,10 +1352,10 @@ namespace ana {
 
       int MuonCosThetaTwoDIndex = tools.ReturnIndex(kTruthMuonCosTheta(nu), TwoDArrayNBinsMuonCosTheta);
       int SerialMissingMomentumInMuonCosThetaIndex = tools.ReturnIndexIn2DList(
-									       TwoDArrayNBinsMissingMomentumInMuonCosThetaSlices,
-									       MuonCosThetaTwoDIndex,
-									       fMissingMomentum
-									       );
+                                                                               TwoDArrayNBinsMissingMomentumInMuonCosThetaSlices,
+                                                                               MuonCosThetaTwoDIndex,
+                                                                               fMissingMomentum
+                                                                               );
       return SerialMissingMomentumInMuonCosThetaIndex; 
     });
 
@@ -1301,10 +1371,10 @@ namespace ana {
 
       int MuonCosThetaTwoDIndex = tools.ReturnIndex(kMuonCosTheta(slc), TwoDArrayNBinsMuonCosTheta);
       int SerialAlphaThreeDInMuonCosThetaIndex = tools.ReturnIndexIn2DList(
-									   TwoDArrayNBinsAlphaThreeDInMuonCosThetaSlices,
-									   MuonCosThetaTwoDIndex,
-									   fAlphaThreeD
-									   );
+                                                                           TwoDArrayNBinsAlphaThreeDInMuonCosThetaSlices,
+                                                                           MuonCosThetaTwoDIndex,
+                                                                           fAlphaThreeD
+                                                                           );
       return SerialAlphaThreeDInMuonCosThetaIndex; 
     });
 
@@ -1316,10 +1386,10 @@ namespace ana {
 
       int MuonCosThetaTwoDIndex = tools.ReturnIndex(kTruthMuonCosTheta(nu), TwoDArrayNBinsMuonCosTheta);
       int SerialAlphaThreeDInMuonCosThetaIndex = tools.ReturnIndexIn2DList(
-									   TwoDArrayNBinsAlphaThreeDInMuonCosThetaSlices,
-									   MuonCosThetaTwoDIndex,
-									   fAlphaThreeD
-									   );
+                                                                           TwoDArrayNBinsAlphaThreeDInMuonCosThetaSlices,
+                                                                           MuonCosThetaTwoDIndex,
+                                                                           fAlphaThreeD
+                                                                           );
       return SerialAlphaThreeDInMuonCosThetaIndex; 
     });
 
@@ -1330,10 +1400,10 @@ namespace ana {
       float fCosOpeningAngleMomentumTransferTotalProton = kCosOpeningAngleMomentumTransferTotalProton(slc);
       int MuonCosThetaTwoDIndex = tools.ReturnIndex(kMuonCosTheta(slc), TwoDArrayNBinsMuonCosTheta);
       int SerialCosOpeningAngleMomentumTransferTotalProtonInMuonCosThetaIndex = tools.ReturnIndexIn2DList(
-													  TwoDArrayNBinsCosOpeningAngleMomentumTransferTotalProtonInMuonCosThetaSlices,
-													  MuonCosThetaTwoDIndex,
-													  fCosOpeningAngleMomentumTransferTotalProton
-													  );
+                                                                                                          TwoDArrayNBinsCosOpeningAngleMomentumTransferTotalProtonInMuonCosThetaSlices,
+                                                                                                          MuonCosThetaTwoDIndex,
+                                                                                                          fCosOpeningAngleMomentumTransferTotalProton
+                                                                                                          );
       return SerialCosOpeningAngleMomentumTransferTotalProtonInMuonCosThetaIndex;
     });
 
@@ -1342,10 +1412,10 @@ namespace ana {
       float fCosOpeningAngleMomentumTransferTotalProton = kTruthCosOpeningAngleMomentumTransferTotalProton(nu);
       int MuonCosThetaTwoDIndex = tools.ReturnIndex(kTruthMuonCosTheta(nu), TwoDArrayNBinsMuonCosTheta);
       int SerialCosOpeningAngleMomentumTransferTotalProtonInMuonCosThetaIndex = tools.ReturnIndexIn2DList(
-													  TwoDArrayNBinsCosOpeningAngleMomentumTransferTotalProtonInMuonCosThetaSlices,
-													  MuonCosThetaTwoDIndex,
-													  fCosOpeningAngleMomentumTransferTotalProton
-													  );
+                                                                                                          TwoDArrayNBinsCosOpeningAngleMomentumTransferTotalProtonInMuonCosThetaSlices,
+                                                                                                          MuonCosThetaTwoDIndex,
+                                                                                                          fCosOpeningAngleMomentumTransferTotalProton
+                                                                                                          );
       return SerialCosOpeningAngleMomentumTransferTotalProtonInMuonCosThetaIndex; 
     });
   
@@ -1359,15 +1429,15 @@ namespace ana {
 
   const TruthCut kTruthIsSignal([](const caf::SRTrueInteractionProxy *nu) {
       return(
-	     bIsInFV(&nu->position) &&                                                                               // check position is in fiducial volume
-	     nu->iscc &&                                                                                             // check it is charged current interaction
-	     nu->pdg == 14 &&                                                                                        // check neutrino is muon neutrino
-	     iCountMultParticle(nu, 13, std::get<0>(PDGToThreshold.at(13)), std::get<1>(PDGToThreshold.at(13))) == 1 //&&       // check for one muon
-	     // iCountMultParticle(nu, 2212, std::get<0>(PDGToThreshold.at(2212)), std::get<1>(PDGToThreshold.at(2212))) == 2 && // check for two protons
-	     // iCountMultParticle(nu, 211, std::get<0>(PDGToThreshold.at(211)), std::get<1>(PDGToThreshold.at(211))) == 0 &&    // no positively charged pions
-	     // iCountMultParticle(nu, -211, std::get<0>(PDGToThreshold.at(-211)), std::get<1>(PDGToThreshold.at(-211))) == 0 && // no negatively charged pions
-	     // iCountMultParticle(nu, 111, std::get<0>(PDGToThreshold.at(111)), std::get<1>(PDGToThreshold.at(111))) == 0       // no neutral pions
-	     ); 
+             bIsInFV(&nu->position) &&                                                                               // check position is in fiducial volume
+             nu->iscc &&                                                                                             // check it is charged current interaction
+             nu->pdg == 14 &&                                                                                        // check neutrino is muon neutrino
+             iCountMultParticle(nu, 13, std::get<0>(PDGToThreshold.at(13)), std::get<1>(PDGToThreshold.at(13))) == 1 //&&       // check for one muon
+             // iCountMultParticle(nu, 2212, std::get<0>(PDGToThreshold.at(2212)), std::get<1>(PDGToThreshold.at(2212))) == 2 && // check for two protons
+             // iCountMultParticle(nu, 211, std::get<0>(PDGToThreshold.at(211)), std::get<1>(PDGToThreshold.at(211))) == 0 &&    // no positively charged pions
+             // iCountMultParticle(nu, -211, std::get<0>(PDGToThreshold.at(-211)), std::get<1>(PDGToThreshold.at(-211))) == 0 && // no negatively charged pions
+             // iCountMultParticle(nu, 111, std::get<0>(PDGToThreshold.at(111)), std::get<1>(PDGToThreshold.at(111))) == 0       // no neutral pions
+             ); 
     });
   
   const TruthCut kTruthIsSIS([](const caf::SRTrueInteractionProxy *nu) {
@@ -1389,73 +1459,73 @@ namespace ana {
   const TruthCut kCCNgt0p1pi([](const caf::SRTrueInteractionProxy *nu) {
       int nChargedPions = iCountMultParticle(nu, 211, std::get<0>(PDGToThreshold.at(211)), std::get<1>(PDGToThreshold.at(211))) + iCountMultParticle(nu, -211, std::get<0>(PDGToThreshold.at(-211)), std::get<1>(PDGToThreshold.at(-211)));
       return (
-	      bIsInFV(&nu->position) &&
-	      nu->iscc &&
-	      nu->pdg == 14 &&
-	      iCountMultParticle(nu, 13, std::get<0>(PDGToThreshold.at(13)), std::get<1>(PDGToThreshold.at(13))) == 1 && // check for one muon
-	      nChargedPions == 1 &&                                                                                      // one charged pion
-	      iCountMultParticle(nu, 111, std::get<0>(PDGToThreshold.at(111)), std::get<1>(PDGToThreshold.at(111))) == 0 // no neutral pions
-	      ); });
+              bIsInFV(&nu->position) &&
+              nu->iscc &&
+              nu->pdg == 14 &&
+              iCountMultParticle(nu, 13, std::get<0>(PDGToThreshold.at(13)), std::get<1>(PDGToThreshold.at(13))) == 1 && // check for one muon
+              nChargedPions == 1 &&                                                                                      // one charged pion
+              iCountMultParticle(nu, 111, std::get<0>(PDGToThreshold.at(111)), std::get<1>(PDGToThreshold.at(111))) == 0 // no neutral pions
+              ); });
 
   const TruthCut kCCNg2p0pi([](const caf::SRTrueInteractionProxy *nu) { 
       return (
-	      bIsInFV(&nu->position) &&
-	      nu->iscc &&
-	      nu->pdg == 14 &&
-	      iCountMultParticle(nu, 13, std::get<0>(PDGToThreshold.at(13)), std::get<1>(PDGToThreshold.at(13))) == 1 &&       // check for one muon
-	      iCountMultParticle(nu, 2212, std::get<0>(PDGToThreshold.at(2212)), std::get<1>(PDGToThreshold.at(2212))) > 2 &&  // check for more than two protons
-	      iCountMultParticle(nu, 211, std::get<0>(PDGToThreshold.at(211)), std::get<1>(PDGToThreshold.at(211))) == 0 &&    // no positively charged pion
-	      iCountMultParticle(nu, -211, std::get<0>(PDGToThreshold.at(-211)), std::get<1>(PDGToThreshold.at(-211))) == 0 && // no negatively charged pion
-	      iCountMultParticle(nu, 111, std::get<0>(PDGToThreshold.at(111)), std::get<1>(PDGToThreshold.at(111))) == 0       // no neutral pions
-	      ); 
+              bIsInFV(&nu->position) &&
+              nu->iscc &&
+              nu->pdg == 14 &&
+              iCountMultParticle(nu, 13, std::get<0>(PDGToThreshold.at(13)), std::get<1>(PDGToThreshold.at(13))) == 1 &&       // check for one muon
+              iCountMultParticle(nu, 2212, std::get<0>(PDGToThreshold.at(2212)), std::get<1>(PDGToThreshold.at(2212))) > 2 &&  // check for more than two protons
+              iCountMultParticle(nu, 211, std::get<0>(PDGToThreshold.at(211)), std::get<1>(PDGToThreshold.at(211))) == 0 &&    // no positively charged pion
+              iCountMultParticle(nu, -211, std::get<0>(PDGToThreshold.at(-211)), std::get<1>(PDGToThreshold.at(-211))) == 0 && // no negatively charged pion
+              iCountMultParticle(nu, 111, std::get<0>(PDGToThreshold.at(111)), std::get<1>(PDGToThreshold.at(111))) == 0       // no neutral pions
+              ); 
     });
 
   const TruthCut kCC1p0pi([](const caf::SRTrueInteractionProxy *nu) { 
       return (
-	      bIsInFV(&nu->position) &&
-	      nu->iscc &&
-	      nu->pdg == 14 &&
-	      iCountMultParticle(nu, 13, std::get<0>(PDGToThreshold.at(13)), std::get<1>(PDGToThreshold.at(13))) == 1 &&       // check for one muon
-	      iCountMultParticle(nu, 2212, std::get<0>(PDGToThreshold.at(2212)), std::get<1>(PDGToThreshold.at(2212))) == 1 && // check for one proton
-	      iCountMultParticle(nu, 211, std::get<0>(PDGToThreshold.at(211)), std::get<1>(PDGToThreshold.at(211))) == 0 &&    // no positively charged pion
-	      iCountMultParticle(nu, -211, std::get<0>(PDGToThreshold.at(-211)), std::get<1>(PDGToThreshold.at(-211))) == 0 && // no negatively charged pion
-	      iCountMultParticle(nu, 111, std::get<0>(PDGToThreshold.at(111)), std::get<1>(PDGToThreshold.at(111))) == 0       // no neutral pions
-	      ); });
+              bIsInFV(&nu->position) &&
+              nu->iscc &&
+              nu->pdg == 14 &&
+              iCountMultParticle(nu, 13, std::get<0>(PDGToThreshold.at(13)), std::get<1>(PDGToThreshold.at(13))) == 1 &&       // check for one muon
+              iCountMultParticle(nu, 2212, std::get<0>(PDGToThreshold.at(2212)), std::get<1>(PDGToThreshold.at(2212))) == 1 && // check for one proton
+              iCountMultParticle(nu, 211, std::get<0>(PDGToThreshold.at(211)), std::get<1>(PDGToThreshold.at(211))) == 0 &&    // no positively charged pion
+              iCountMultParticle(nu, -211, std::get<0>(PDGToThreshold.at(-211)), std::get<1>(PDGToThreshold.at(-211))) == 0 && // no negatively charged pion
+              iCountMultParticle(nu, 111, std::get<0>(PDGToThreshold.at(111)), std::get<1>(PDGToThreshold.at(111))) == 0       // no neutral pions
+              ); });
 
   const TruthCut kCC0p0pi([](const caf::SRTrueInteractionProxy *nu) { 
       return (
-	      bIsInFV(&nu->position) &&
-	      nu->iscc &&
-	      nu->pdg == 14 &&
-	      iCountMultParticle(nu, 13, std::get<0>(PDGToThreshold.at(13)), std::get<1>(PDGToThreshold.at(13))) == 1 &&       // check for one muon
-	      iCountMultParticle(nu, 2212, std::get<0>(PDGToThreshold.at(2212)), std::get<1>(PDGToThreshold.at(2212))) == 0 && // no protons
-	      iCountMultParticle(nu, 211, std::get<0>(PDGToThreshold.at(211)), std::get<1>(PDGToThreshold.at(211))) == 0 &&    // no positively charged pion
-	      iCountMultParticle(nu, -211, std::get<0>(PDGToThreshold.at(-211)), std::get<1>(PDGToThreshold.at(-211))) == 0 && // no negatively charged pion
-	      iCountMultParticle(nu, 111, std::get<0>(PDGToThreshold.at(111)), std::get<1>(PDGToThreshold.at(111))) == 0       // no neutral pions
-	      ); 
+              bIsInFV(&nu->position) &&
+              nu->iscc &&
+              nu->pdg == 14 &&
+              iCountMultParticle(nu, 13, std::get<0>(PDGToThreshold.at(13)), std::get<1>(PDGToThreshold.at(13))) == 1 &&       // check for one muon
+              iCountMultParticle(nu, 2212, std::get<0>(PDGToThreshold.at(2212)), std::get<1>(PDGToThreshold.at(2212))) == 0 && // no protons
+              iCountMultParticle(nu, 211, std::get<0>(PDGToThreshold.at(211)), std::get<1>(PDGToThreshold.at(211))) == 0 &&    // no positively charged pion
+              iCountMultParticle(nu, -211, std::get<0>(PDGToThreshold.at(-211)), std::get<1>(PDGToThreshold.at(-211))) == 0 && // no negatively charged pion
+              iCountMultParticle(nu, 111, std::get<0>(PDGToThreshold.at(111)), std::get<1>(PDGToThreshold.at(111))) == 0       // no neutral pions
+              ); 
     });
 
   const TruthCut kCCNgt0pNg1pi([](const caf::SRTrueInteractionProxy *nu) {
       int nChargedPions = iCountMultParticle(nu, 211, std::get<0>(PDGToThreshold.at(211)), std::get<1>(PDGToThreshold.at(211))) + iCountMultParticle(nu, -211, std::get<0>(PDGToThreshold.at(-211)), std::get<1>(PDGToThreshold.at(-211)));
       return (
-	      bIsInFV(&nu->position) &&
-	      nu->iscc &&
-	      nu->pdg == 14 &&
-	      iCountMultParticle(nu, 13, std::get<0>(PDGToThreshold.at(13)), std::get<1>(PDGToThreshold.at(13))) == 1 && // check for one muon
-	      nChargedPions > 1 &&                                                                                       // more than one charged pion
-	      iCountMultParticle(nu, 111, std::get<0>(PDGToThreshold.at(111)), std::get<1>(PDGToThreshold.at(111))) == 0 // no neutral pions
-	      ); 
+              bIsInFV(&nu->position) &&
+              nu->iscc &&
+              nu->pdg == 14 &&
+              iCountMultParticle(nu, 13, std::get<0>(PDGToThreshold.at(13)), std::get<1>(PDGToThreshold.at(13))) == 1 && // check for one muon
+              nChargedPions > 1 &&                                                                                       // more than one charged pion
+              iCountMultParticle(nu, 111, std::get<0>(PDGToThreshold.at(111)), std::get<1>(PDGToThreshold.at(111))) == 0 // no neutral pions
+              ); 
     });
 
   const TruthCut kOtherTopology([](const caf::SRTrueInteractionProxy *nu) { 
       return !(
-	       kTruthIsSignal(nu) ||
-	       kCC1p0pi(nu) ||
-	       kCCNg2p0pi(nu) ||
-	       kCCNgt0p1pi(nu) ||
-	       kCC0p0pi(nu)
-	       // kCCNgt0pNg1pi
-	       ); 
+               kTruthIsSignal(nu) ||
+               kCC1p0pi(nu) ||
+               kCCNg2p0pi(nu) ||
+               kCCNgt0p1pi(nu) ||
+               kCC0p0pi(nu)
+               // kCCNgt0pNg1pi
+               ); 
     });
 
   //////////////
@@ -1468,10 +1538,10 @@ namespace ana {
   // Check for cosmics (not const for data script)
   Cut kCosmicCut([](const caf::SRSliceProxy *slc) { 
       return (
-	      slc->nu_score > 0.4 &&     // check how neutrino like slice is
-	      slc->fmatch.score < 7.0 && // check flash match score
-	      slc->fmatch.time > 0. &&   // check flash is in beam
-	      slc->fmatch.time < 1.8); 
+              slc->nu_score > 0.4 &&     // check how neutrino like slice is
+              slc->fmatch.score < 7.0 && // check flash match score
+              slc->fmatch.time > 0. &&   // check flash is in beam
+              slc->fmatch.time < 1.8); 
     });
   
   const Cut kIsCosmic([](const caf::SRSliceProxy *slc) { return (slc->truth.genie_mode == -1); });
@@ -1479,18 +1549,18 @@ namespace ana {
 
   const Cut kHasMuon([](const caf::SRSliceProxy *slc) {
       for (auto const& pfp : slc -> reco.pfp) {
-	if (pfp.trk.truth.p.pdg == 13) {
-	  return true;
-	}
+        if (pfp.trk.truth.p.pdg == 13) {
+          return true;
+        }
       }
       return false;
     });
   
   const Cut kHasProton([](const caf::SRSliceProxy *slc) {
       for (auto const& pfp : slc -> reco.pfp) {
-	if (pfp.trk.truth.p.pdg == 2212) {
-	  return true;
-	}
+        if (pfp.trk.truth.p.pdg == 2212) {
+          return true;
+        }
       }
       return false; 
     });
@@ -1498,19 +1568,19 @@ namespace ana {
   const Cut kHasSecondProton([](const caf::SRSliceProxy *slc) {
       bool firstProton = false;
       for (auto const& pfp : slc -> reco.pfp) {
-	if (pfp.trk.truth.p.pdg == 2212) {
-	  if (!firstProton) firstProton = true;
-	  else if (firstProton) return true;
-	}
+        if (pfp.trk.truth.p.pdg == 2212) {
+          if (!firstProton) firstProton = true;
+          else if (firstProton) return true;
+        }
       }
       return false; 
     });
 
   const Cut kHasPion([](const caf::SRSliceProxy *slc) {
       for (auto const& pfp : slc -> reco.pfp) {
-	if (pfp.trk.truth.p.pdg == 211 || pfp.trk.truth.p.pdg == -211) {
-	  return true;
-	}
+        if (pfp.trk.truth.p.pdg == 211 || pfp.trk.truth.p.pdg == -211) {
+          return true;
+        }
       }
       return false; 
     });
@@ -1650,13 +1720,13 @@ namespace ana {
       std::string FileName = "/exp/sbnd/data/users/" + UserName + "/CAFAnaOutput/EventData.csv";
       file.open(FileName, fstream::out | fstream::app);
       for (auto const& slc : sr->slc) {
-	if (kRecoIsSignal(&slc)) {
-	  file << sr->hdr.fno << ",";
-	  file << sr->hdr.run << ",";
-	  file << sr->hdr.subrun << ",";
-	  file << sr->hdr.evt << ",";
-	  file << sr->hdr.subevt << std::endl;       
-	}
+        if (kRecoIsSignal(&slc)) {
+          file << sr->hdr.fno << ",";
+          file << sr->hdr.run << ",";
+          file << sr->hdr.subrun << ",";
+          file << sr->hdr.evt << ",";
+          file << sr->hdr.subevt << std::endl;       
+        }
       }
       return 0.5; 
     });

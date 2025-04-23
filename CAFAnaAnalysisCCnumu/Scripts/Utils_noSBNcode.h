@@ -73,6 +73,8 @@ std::string AxisTitle(std::string var)
     return "#chi^{2} for Pion Hypothesis";
   else if (var == "chi2Mus")
     return "#chi^{2} for Muon Hypothesis";
+  else if (var=="sumE")
+    return "E_{#mu} + E_{had} (GeV)";
   //else if (var == "W")
     //return "W (GeV)";
   //else if (var == "Q2")
@@ -83,7 +85,7 @@ std::string AxisTitle(std::string var)
 
 std::vector<std::string> GetSISVarNames()
 {
-  std::vector<std::string> varnames = {"onebin", "pMu", "EAvail"};//,"Q2", "W"};
+  std::vector<std::string> varnames = {"onebin", "pMu", "EAvail", "Enu", "sumE", "Ehad"};//,"Q2", "W"};
   return varnames;
 }
 
