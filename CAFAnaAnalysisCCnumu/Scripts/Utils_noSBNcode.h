@@ -16,7 +16,10 @@ std::string AxisTitle(std::string var)
   else if (var=="EAvail" || var=="Eavail")
     return "Available Energy (Gev)";
   else if (var=="EHad" || var== "Ehad")
-    return ("Hadronic Energy");
+    return "E_{#nu}-E_{#mu} (GeV)";
+    //return ("Hadronic Energy");
+  else if (var=="EhadSummed" )
+    return "#Sigma T_{had} (Gev)";
   else if (var == "Tp")
     return "Proton Kinetic Energy (GeV)";
   else if (var == "Tpi")

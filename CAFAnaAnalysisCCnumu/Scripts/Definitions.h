@@ -86,16 +86,19 @@ namespace ana {
   
   std::map<int, std::pair<float, float>> PDGThresholds = {//I really dont like doing this... put it somehwere I can use a for loop or something later
     {13, {0.1f, 7.f}},                                 // Muon
-    {2212, {0.3f, 1.0f}},                               // Proton
+    {2212, {0.3f, 7.0f}},                               // Proton
     {211, {0.07f, std::numeric_limits<float>::max()}},  // Pi plus
     {-211, {0.07f, std::numeric_limits<float>::max()}}, // Pi minus
     {111, {0.0f, std::numeric_limits<float>::max()}},    // Pi zero
     {-13, {0.1f, 7.f}}                                 // Mu+ because theyre indistinguishable
   };
 
-
-
-    
+//std::map<int, double> M_by_PDG={
+//    {13, M_MU},
+//    {PROTON_PDG, M_PROTON},
+//    {NEUTRON_PDG, M_NEUTRON}
+//} // jk wrote GetMass function in constants instead
+   
   
   bool debug=false;
 
@@ -978,7 +981,7 @@ namespace ana {
       return kTruthNeutrinoEnergy(&slc->truth);
     });
 
-
+//Reco Neutrino energy defined after Ehad 
 
     
   const Var kEhad([](const caf::SRSliceProxy *slc) -> double { 
@@ -1038,7 +1041,7 @@ namespace ana {
           double epart=pfp.shw.bestplane_energy;
           //if( std::find( PDGsWithThresholds.begin(), PDGsWithThresholds.end(), prim.pdg)){//check if we have a threshold for that PDG
           if( epart< PDGThresholds[PROTON_PDG].first) continue;  //if less then mnimum threshold ignore
-          if( PDGThresholds[PROTON_PDG].second> epart) continue;//check if energy is within thresholds //if greater then max threshold ignore
+          if( epart> PDGThresholds[PROTON_PDG].second) continue;//check if energy is within thresholds //if greater then max threshold ignore
           //}      //I think the solution to this is to put the same minimum threshold on everything? blips will all get tossed though.... ummm
 
           eavail+=pfp.shw.bestplane_energy;
@@ -1085,23 +1088,32 @@ namespace ana {
       //auto [Muon, HadronVector, HadronPDG] = GetTrueVector(nu); 
       //return kTruthVars(nu).at(6);
       double EAvail=0;
+        
       for (auto const &prim : nu->prim) {
         if(abs(prim.pdg)==MUON_PDG) continue; //dont include muon energy
         if(abs(prim.pdg)==NEUTRON_PDG) continue;//skip neutrons
+        double M_part= GetMass(prim.pdg); 
+        double KE=prim.genE - M_part; //prim.genP;
+        if(KE<0){
+            cout<<"Negative kinentic energy calcuated. PDG: "<<prim.pdg<<", genE: "<<prim.genE<<", M:"<<M_part<<endl;
+            continue;
+        }
         //if( std::find( PDGsWithThresholds.begin(), PDGsWithThresholds.end(), prim.pdg)){//check if we have a threshold for that PDG
         //proton threshold is the higest lets just make it that for everything
-        if( prim.startE< PDGThresholds[PROTON_PDG].first) continue;
-        if( PDGThresholds[PROTON_PDG].second> prim.startE) continue;//check if energy is within thresholds
+        //cout<<"prim.startE: "<<prim.startE<< "\t low threshold: "<<PDGThresholds[PROTON_PDG].first<< "\t high threshold:"<< PDGThresholds[PROTON_PDG].second<<endl;
+        if( KE< PDGThresholds[PROTON_PDG].first) continue;
+        if( KE> PDGThresholds[PROTON_PDG].second) continue;//check if energy is within thresholds
+        //cout<<"passed"<<endl;
         //}else{//if we don't idk put out a warning but do nothing for now? 
         //    cout<<"Not using any threshold for TrueEAvail particle with PDG "<<prim.pdg<<endl;
         //}
-        double E=prim.startE;
+        
         //if(abs(prim.pdg)==2212) 
         // I *think* Baryons are even PDGs and mesons are odd 
         //if(  abs(prim.pdg)>2000 && abs(prim.pdg)%2==0 )//greater then 2000 and even should basically just be a protonbut techincally could catch other stuff that won't exist
         //if(prim.pdg==PROTON_PDG) //Idk why I would want to do this?
         //E= E- M_PROTON;
-        EAvail+=E;
+        EAvail+=KE;
       }
       return EAvail;
     });
@@ -1109,17 +1121,54 @@ namespace ana {
   const Var kRecoTruthEAvail([](const caf::SRSliceProxy *slc) -> double { return kTruthEAvail(&slc->truth); });
   
 
+  const TruthVar kTruthEhadSummed([](const caf::SRTrueInteractionProxy *nu) -> double { 
+    //auto [Muon, HadronVector, HadronPDG] = GetTrueVector(nu); 
+    //return kTruthVars(nu).at(6);
+    double EhadSummed=0;
+    double Ehad=kTruthHadronicEnergy(nu);
+    for (auto const &prim : nu->prim) {
+        if(abs(prim.pdg)==MUON_PDG) continue; //dont include muon energy
+        double M_part= GetMass(prim.pdg); 
+        double KE=prim.genE - M_part; //prim.genP;
+        if(KE<0){
+            cout<<"Negative kinentic energy calcuated. PDG: "<<prim.pdg<<", genE: "<<prim.genE<<", M:"<<M_part<<endl;
+            continue;
+        }
+      //if(abs(prim.pdg)==NEUTRON_PDG) continue;//skip neutrons
+      //if( std::find( PDGsWithThresholds.begin(), PDGsWithThresholds.end(), prim.pdg)){//check if we have a threshold for that PDG
+      //proton threshold is the higest lets just make it that for everything
+      //cout<<"prim.startE: "<<prim.startE<< "\t low threshold: "<<PDGThresholds[PROTON_PDG].first<< "\t high threshold:"<< PDGThresholds[PROTON_PDG].second<<endl;
+      //if( KE< PDGThresholds[PROTON_PDG].first) continue;
+      //if( KE> PDGThresholds[PROTON_PDG].second) continue;//check if energy is within thresholds
+      //cout<<"passed"<<endl;
+      //}else{//if we don't idk put out a warning but do nothing for now? 
+      //    cout<<"Not using any threshold for TrueEhadSummed particle with PDG "<<prim.pdg<<endl;
+      //}
+
+      //if(abs(prim.pdg)==2212) 
+      // I *think* Baryons are even PDGs and mesons are odd 
+      //if(  abs(prim.pdg)>2000 && abs(prim.pdg)%2==0 )//greater then 2000 and even should basically just be a protonbut techincally could catch other stuff that won't exist
+      //if(prim.pdg==PROTON_PDG) //Idk why I would want to do this?
+      //E= E- M_PROTON;
+      EhadSummed+=KE;
+    }
+    cout<<"EhadSummed: "<<EhadSummed<< "\t Enu-Emu: "<<Ehad<<endl;
+    return EhadSummed;
+  });
+
+const Var kRecoTruthEhadSummed([](const caf::SRSliceProxy *slc) -> double { return kTruthEhadSummed(&slc->truth); });
+
 
   // Sum Energy ie Emu+ Ehad 
   const Var kSumEnergy([](const caf::SRSliceProxy *slc) -> double {
-      double Emu= kMuonMomentum(slc) + M_MU*M_MU;
+      double Emu= std::hypot(kMuonMomentum(slc),M_MU);
       return Emu + kEhad(slc);
     });
 
   const TruthVar kTruthSumEnergy([](const caf::SRTrueInteractionProxy *nu) -> double {
       if(debug) cout<<"entering kTruthSumEnergy"<<endl;
-      double Emu= kTruthMuonMomentum(nu) +M_MU*M_MU;
-      return Emu+ kTruthHadronicEnergy(nu);
+      double Emu= std::hypot(kTruthMuonMomentum(nu), M_MU);
+      return Emu+ kTruthHadronicEnergy(nu); //this actually should be definitionally the same/entirely diagonal? why isnt it. Truth Ehad= Enu-Emu.... 
     });
 
   const Var kRecoTruthSumEnergy([](const caf::SRSliceProxy *slc) -> double {

@@ -27,13 +27,25 @@ int main(int args, char* argv[]){
   double sis_minW=1.5;
   double sis_maxW=2.;
   double sis_minQ2=1.;
+  
+  bool useTrueSIS=true;
+  if(args> 1){
+    useTrueSIS=atoi(argv[1]); 
+  }
 
-  string UserName=std::getenv("USER");
-  TString RootFilePath = "/exp/sbnd/data/users/" + UserName + "/CAFAnaOutput/"+tag.c_str()+"/SelectionEfficiency.root";//TrueSIS.root";
+  string UserName=std::getenv("USER"); 
+  TString RootFilePath = "/exp/sbnd/data/users/" + UserName + "/CAFAnaOutput/CC_25Feb25/SelectionEfficiency.root";//tag.c_str()+"/SelectionEfficiency.root";
+  if(useTrueSIS) RootFilePath = "/exp/sbnd/data/users/" + UserName + "/CAFAnaOutput/SelectionEfficiencyTrueSIS.root";
   TFile* fin=new TFile(RootFilePath);
   std::vector<std::string> vars=GetSISVarNames();
-  std::vector<std::pair<std::string, std::string>> vars2d;//
-  vars2d.push_back({"Q2","W"}); 
+  //std::vector<std::pair<std::string, std::string>> vars2d;//
+  //vars2d.push_back({"Q2","W"}); 
+  std::vector<std::pair<std::string,std::string>> vars2d={{"pMu", "onebin"}, {"EAvail", "ECompleteness"}, {"Q2", "W"}, {"EAvail", "Enu"}, {"EAvail","Ehad"}, {"pMu", "Enu"}, {"sumE", "Enu"}, {"Ehad", "EhadSummed"}};
+  if(useTrueSIS==false) vars2d={{"pMu", "onebin"}};
+
+  string plotTitleNum= useTrueSIS? "Reco CC #nu_{#mu} & True SIS" : "Reco & True CC #nu_{#mu}" ;
+  string plotTitleDen= useTrueSIS? "True SIS" : "True CC #nu_{#mu}" ;
+  
   //vars2d.push_back({"EAvail", "ECompleteness"});
   //{{"candPdgs", "ndaughts"}, {"allpdgs", "chi2Ps"}, {"allpdgs", "chi2Mus"}, {"allpdgs", "chi2Pis"}, {"allpdgs", "allpdgs_reco"} };
   //want to plot ccpip_allpdgs_v_chi2Ps in projections 
@@ -64,6 +76,7 @@ int main(int args, char* argv[]){
     TH2D* hnum=(TH2D*) fin->Get(nameNum.c_str() );
     assert(hnum || Form("Didn't find TH2D %s", nameNum.c_str() ) );
     //h2ds.push_back(h);
+    hnum->SetTitle(plotTitleNum.c_str());
     h2ds[nameNum]=hnum;
 
     string nameDen= "EffDenom_"+var.second+"_vs_"+var.first;
@@ -72,6 +85,7 @@ int main(int args, char* argv[]){
     TH2D* hden=(TH2D*) fin->Get(nameDen.c_str() );
     if(hden==NULL) cout<<"denom histogram does not exist"<<endl;
     assert(hden || Form("Didn't find TH2D %s", nameDen.c_str() ) );
+    hden->SetTitle(plotTitleDen.c_str());
     //h2ds.push_back(h);
     h2ds[nameDen]=hden;
 
@@ -82,13 +96,15 @@ int main(int args, char* argv[]){
     string name="Mig_"+ var;
     names.push_back(name.c_str());
     TH2D* hmig=(TH2D*) fin->Get( name.c_str());
+    hmig->SetTitle(plotTitleNum.c_str());
     h2ds[name]=hmig;
   }
 
   //hists.push_back(npinp);
   MnvPlotter plotter(kNukeCCStyle);
-  plotter.print_topdir="/exp/sbnd/data/users/afilkins/SISPlots";
-
+  gStyle->SetOptTitle(1);//I want titles even though plotutils defaults to them off
+  plotter.print_topdir="/exp/sbnd/data/users/afilkins/SISPlots/"+tag;
+  if(useTrueSIS) plotter.print_topdir="/exp/sbnd/data/users/afilkins/SISPlots/TrueSIS/";//+tag.c_str();
  
   TCanvas* c= new TCanvas("c", "c",1280, 800);
   gStyle->SetPalette(kCool);

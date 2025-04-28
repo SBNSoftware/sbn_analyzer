@@ -74,7 +74,7 @@ void SelectionEfficiencySIS() {
   */
 
   //2D efficency histograms
-  std::vector<std::pair<std::string,std::string>> vars2D={{"pMu", "onebin"}, {"EAvail", "ECompleteness"}, {"Q2", "W"}, {"EAvail", "Enu"}, {"EAvail","Ehad"}, {"pMu", "Enu"}, {"sumE", "Enu"}};
+  std::vector<std::pair<std::string,std::string>> vars2D={{"pMu", "onebin"}, {"EAvail", "ECompleteness"}, {"Q2", "W"}, {"EAvail", "Enu"}, {"EAvail","Ehad"}, {"pMu", "Enu"}, {"sumE", "Enu"}, {"Ehad", "EhadSummed"}};
   std::vector< std::pair<string, string>> spectra2d_names;
   std::vector< std::pair<TString, TString>> hist2dtitles;
   for( unsigned i=0; i<vars2D.size(); i++){
@@ -130,11 +130,14 @@ void SelectionEfficiencySIS() {
     TH2* TrueHisto = TrueSignals->ToTH2(TargetPOT);
     TH2* RecoTrueHisto = RecoTrueSignals->ToTH2(TargetPOT);
 
-    TrueHisto->GetXaxis()->SetTitle(AxisTitle(varx).c_str());
-    RecoTrueHisto->GetXaxis()->SetTitle(AxisTitle(varx).c_str());
+    TrueHisto->GetXaxis()->SetTitle(Form("True %s", AxisTitle(varx).c_str()));
+    RecoTrueHisto->GetXaxis()->SetTitle(Form("True %s", AxisTitle(varx).c_str()));
 
-    TrueHisto->GetYaxis()->SetTitle(AxisTitle(vary).c_str());
-    RecoTrueHisto->GetYaxis()->SetTitle(AxisTitle(vary).c_str());
+    TrueHisto->GetYaxis()->SetTitle(Form("True %s", AxisTitle(vary).c_str()));
+    RecoTrueHisto->GetYaxis()->SetTitle(Form("True %s", AxisTitle(vary).c_str()));
+
+    TrueHisto->SetTitle("True CC #nu_{#mu} SIS");
+    RecoTrueHisto->SetTitle("Reco & True CC #nu_{#mu}, True SIS");
 
     c->cd();    
     TrueHisto->Draw("colz");
@@ -163,6 +166,7 @@ void SelectionEfficiencySIS() {
     RecoTrueHisto->GetXaxis()->SetTitle(VarLabels[i].c_str());
     MigHisto->GetYaxis()->SetTitle(Form("True %s", VarLabels[i].c_str() ));
     MigHisto->GetXaxis()->SetTitle(Form("Reconstructed %s", VarLabels[i].c_str()) );
+    MigHisto->SetTitle("Reco & True CC #nu_{#mu}, True SIS");
     
     SaveFile->WriteObject(TrueHisto, Form("EffDenom_%s",varnamesshort[i].c_str() ) );
     SaveFile->WriteObject(RecoTrueHisto, Form("EffNum_%s",varnamesshort[i].c_str() ) );

@@ -4,6 +4,7 @@
 #include "TString.h"
 #include "TMath.h"
 #include "TH1D.h"
+#include "TDatabasePDG.h"
 
 #include <iostream>
 #include <fstream>
@@ -11,6 +12,7 @@
 #include <vector>
 #include <map>
 #include <tuple>
+
 
 namespace Constants {
     // User to access
@@ -40,6 +42,16 @@ namespace Constants {
     const double M_NEUTRON = 0.93956;
     const double M_PROTON  = 0.93827;
     const double M_NUCLEON  = ( 1.5*M_NEUTRON + M_PROTON ) / 2.5; //weighted average because xsec is bigger on n  
+
+    TDatabasePDG *pdg_db = new TDatabasePDG();
+
+    double GetMass(int pdg){
+      TParticlePDG* part=pdg_db->GetParticle(pdg);
+      double mass= -999;
+      if(part) mass=part->Mass(); // returns in GeV
+      else cout<<"Constants::GetMass -- Mass of particle with PDG "<<pdg<<" not found in database, setting to -999"<<endl;
+      return mass;
+    }
 
     // Integrated flux
     // TFile* FluxFile = TFile::Open("../Utils/MCC9_FluxHist_volTPCActive.root"); // make sure file is in path

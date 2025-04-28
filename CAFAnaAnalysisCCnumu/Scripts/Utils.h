@@ -10,11 +10,12 @@ const Binning VarBinning(string var, bool isTrue = true)
   if (var=="oneBin" || var=="onebin")
     return bEventCount;
   else if (var=="pMu" || var=="Emu" || var=="Enu" || var=="sumE") //might not be worth doing this but whatever 
-    return Binning::Custom({0.1, 0.283, 0.466, 0.649, 0.832, 1.015, 1.2, 1.8, 2.5, 4., 6.});
+    return Binning::Simple(24,0,6);
+    //Binning::Custom({0.1, 0.283, 0.466, 0.649, 0.832, 1.015, 1.2, 1.8, 2.5, 4., 6.});
     //bMuonMomentumBins;
   //else if (var == "Emu" || var == "Enu" )//|| var == "pMu")
  //   return Binning::Simple(50, 0, 3.5);
-  else if (var == "EAvail" || var == "Ehad" )//|| var == "pMu")
+  else if (var == "EAvail" || var == "Ehad" || var=="EhadSummed")//|| var == "pMu")
     return Binning::Simple(15, 0, 4);
   else if (var == "ECompleteness" )//|| var == "pMu")
     return Binning::Simple(25, 0, 1);
@@ -61,6 +62,11 @@ std::tuple<Var,Var, TruthVar> GetVarTuple(std::string var){
     return {kEAvail, kRecoTruthEAvail, kTruthEAvail};//tmp fix
     //return {kQ2, kRecoTruthQ2, kTruthQ2};  
   }   
+  else if (var=="EhadSummed"){
+    return {kEAvail, kRecoTruthEhadSummed, kTruthEhadSummed};//tmp fix
+    //return {kQ2, kRecoTruthQ2, kTruthQ2};  
+  }   
+
   else if (var=="ECompleteness"){
     return {kEnergyCompleteness, kRecoTruthEnergyCompleteness, kTruthEnergyCompleteness};//tmp fix
     //return {kQ2, kRecoTruthQ2, kTruthQ2};  
