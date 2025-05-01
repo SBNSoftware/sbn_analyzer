@@ -30,7 +30,8 @@ mrb i -j4
 cd ../../..
 
 kx509
-httokensh -a htvaultprod.fnal.gov -i sbnd -- /bin/bash
+#httokensh -a htvaultprod.fnal.gov -i sbnd -- /bin/bash
+voms-proxy-init -noregen -rfc -voms 'fermilab:/fermilab/sbnd/Role=Analysis'
 
 export TERM=screen
 

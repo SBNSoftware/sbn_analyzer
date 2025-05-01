@@ -28,8 +28,12 @@ using namespace ana;
 using namespace Constants;
 
 void SelectionRunData() {
+
     // The SpectrumLoader object handles the loading of CAFs and the creation of Spectrum.
-    SpectrumLoader NuLoader(InputFiles);
+    // MC
+    //SpectrumLoader NuLoader(InputFiles);
+    // Data
+    SpectrumLoader NuLoader(data_wc);    
 
     // Open csv file to store data
     TString FilePath = "/exp/sbnd/data/users/" + (TString)UserName + "/CAFAnaOutput/EventData.csv";
@@ -46,4 +50,6 @@ void SelectionRunData() {
     );
 
     NuLoader.Go();
+
+    cout << "data run, sub, and evt can be found in " << FilePath << endl;
 }

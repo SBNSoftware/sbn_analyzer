@@ -515,18 +515,6 @@ TString Tools::to_string_with_precision(double a_value, const int n = 2) {
 
 //----------------------------------------//
 
-TString Tools::ConvertToString(double value) {
-
-	TString StringValue = Tools::to_string_with_precision(value, 2);
-	StringValue.ReplaceAll(".","_");
-	StringValue.ReplaceAll("-","Minus");	
-
-	return StringValue;
-
-}
-
-//----------------------------------------//
-
 int Tools::ReturnIndex(double value, std::vector<double> vec) {
 
 	int length = vec.size();
@@ -695,7 +683,7 @@ void Tools::CalcChiSquared(TH1D* h_model, TH1D* h_data, TH2D* cov, double &chi, 
 
 //---------------------//
 
-const std::vector<std::string> Tools::GetInputFiles(const std::string TargetPath, bool print = false, bool detvar = false) {
+const std::vector<std::string> Tools::GetInputFiles(const std::string TargetPath, bool print = false, bool detvar = false, bool data = false) {
 
 	std::vector<std::string> Input;
 
@@ -712,7 +700,25 @@ const std::vector<std::string> Tools::GetInputFiles(const std::string TargetPath
 
 			}
 
-		} else {
+		} 
+
+		else if (data) {
+
+			for (const auto & subentry : std::filesystem::directory_iterator(entry)) {
+
+				if ((subentry.path().string().find("caf.flat.caf") != std::string::npos) && (subentry.path().extension() == ".root")) {
+
+					std::string XRootPath = "root://fndcadoor.fnal.gov:1094/pnfs/fnal.gov/usr/" + subentry.path().string().substr(6);
+					if (print == true) std::cout << subentry.path().string().substr(6) << std::endl;
+					Input.push_back(XRootPath);
+
+				} // end of requirement that the naming scheme is satisfied				
+
+			}
+
+		}
+		
+		else {
 
 			//MC2024B production
 			//2nd iterator bc we have subdirectories

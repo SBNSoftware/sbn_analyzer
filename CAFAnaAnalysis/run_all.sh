@@ -1,9 +1,11 @@
-cafe -bq Scripts/Selection.C
+#cafe -bq Scripts/SelectionRunCosmic.C # prints out run, sub, evt of selected cosmic data events
+cafe -bq Scripts/SelectionCutPlots.C # develop the event selection
+
+cafe -bq Scripts/Selection.C # apply event selection
+cafe -bq Scripts/SelectionRunData.C # prints out run, sub, evt of selected data events
 cafe -bq Scripts/SelectionInteBreakdown.C
 cafe -bq Scripts/SelectionTopologyBreakdown.C
-cafe -bq Scripts/SelectionCutPlots.C
 root -b -q Scripts/SerialPlotGenerator.cpp
-cafe -bq Scripts/SelectionRunData.C
 cafe -bq Scripts/SelectionResolution.C
 cafe -bq Scripts/SelectionCutScan.C
 cafe -bq Scripts/SelectionEfficiency.C

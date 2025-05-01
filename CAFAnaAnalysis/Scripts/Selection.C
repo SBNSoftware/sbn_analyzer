@@ -22,6 +22,7 @@
 
 // Utils includes.
 #include "../../Utils/Constants.h"
+#include "../../Utils/Tools.h"
 
 using namespace std;
 using namespace ana;
@@ -37,11 +38,17 @@ void Selection() {
 
     //----------------------------------------//
     
-    // MC spectrum loader
+    SpectrumLoader NuLoader(mc_wc);
+    SpectrumLoader DataNuLoader(data_wc);
+    SpectrumLoader CosmicNuLoader(cosmic_wc);
 
-    // The SpectrumLoader object handles the loading of CAFs and the creation of Spectrum.
-    SpectrumLoader NuLoader(InputFiles);
-    SpectrumLoader DataNuLoader(DataInputFiles);
+    //SpectrumLoader NuLoader(InputFiles);
+    //SpectrumLoader DataNuLoader(DataInputFiles);
+    //SpectrumLoader CosmicNuLoader(CosmicInputFiles);    
+
+	//SpectrumLoader NuLoader("/pnfs/sbn/data_add/sbn_nd/poms_production/mc/MCP2025Av3/v10_04_06_01/prodgenie_corsika_proton_rockbox_sbnd/CV/caf/00/02/caf-46414215-0544-42a7-b617-88835bbd7c30.root");
+	//SpectrumLoader DataNuLoader("/pnfs/sbn/data_add/sbn_nd/poms_production/data/MCP2025Av3/v10_04_06_01/MCP2025Av3_DevSample/flatcaf/bnblight/1d/reco2_reco1_filtered_decoded-raw_filtered_data_EventBuilder2_art2_run18255_64_strmBNBLight_20250218T121038-1da89634-988e-9dce-f4bb-b0336e22b333.flat.caf.root");
+	//SpectrumLoader CosmicNuLoader("/pnfs/sbn/data_add/sbn_nd/poms_production/mc/MCP2025Av3/v10_04_06_01/prodcorsika_proton_intime_sbnd/CV/caf/da/68/caf.flat.caf-7c765d51-47f1-485c-aded-244f5d04a2c1.root"); 
 
     // We now create overlaid plots for several reconstructed variables and three lines:
     //     1. all selected reconstructed events
@@ -60,6 +67,7 @@ void Selection() {
     >> Spectra;
 
     std::vector< std::unique_ptr<Spectrum> > data_Spectra;    
+    std::vector< std::unique_ptr<Spectrum> > cosmic_Spectra;    
 
     for (std::size_t i = 0; i < Vars.size(); i++) {
 
@@ -70,6 +78,9 @@ void Selection() {
 
         auto data_RecoSignals = std::make_unique<Spectrum>(VarLabels.at(i), VarBins.at(i), DataNuLoader, std::get<0>(Vars.at(i)), kNoSpillCut, kRecoIsSignal);
         data_Spectra.push_back( std::move(data_RecoSignals) );        
+        
+	    auto cosmic_RecoSignals = std::make_unique<Spectrum>(VarLabels.at(i), VarBins.at(i), CosmicNuLoader, std::get<0>(Vars.at(i)), kNoSpillCut, kRecoIsSignal);
+        cosmic_Spectra.push_back( std::move(cosmic_RecoSignals) );        
 
     }
 
@@ -126,7 +137,29 @@ void Selection() {
     // Spectrum with overall signal definition
     Spectrum sDataRecoSignal("DataRecoSignal", bEventCount, DataNuLoader, kEventCount, kNoSpillCut, kRecoIsSignal); 
 
+    // Cosmic
+
+    // Spectrum with all events that were reconstructed
+    Spectrum sCosmicAllRecoEvents("CosmicAllRecoEvents", bEventCount, CosmicNuLoader, kEventCount, kNoSpillCut, kNoCut);
+    // Spectrum with first cut (cosmic)
+    Spectrum sCosmicFirstCut("CosmicFirstCut", bEventCount, CosmicNuLoader, kEventCount, kNoSpillCut, kFirstCut);
+    // Spectrum with second cut (cosmic and vertex FV)
+    Spectrum sCosmicSecondCut("CosmicSecondCut", bEventCount, CosmicNuLoader, kEventCount, kNoSpillCut, kSecondCut);
+    // Spectrum with second cut (cosmic, vertex FV, and one muon)
+    Spectrum sCosmicThirdCut("CosmicThirdCut", bEventCount, CosmicNuLoader, kEventCount, kNoSpillCut, kThirdCut);
+    // Spectrum with second cut (cosmic, vertex FV, one muon, and two protons)
+    Spectrum sCosmicFourthCut("CosmicFourthCut", bEventCount, CosmicNuLoader, kEventCount, kNoSpillCut, kFourthCut);
+    // Spectrum with second cut (cosmic, vertex FV, one muon, two protons, and no charged pions)
+    Spectrum sCosmicFifthCut("CosmicFifthCut", bEventCount, CosmicNuLoader, kEventCount, kNoSpillCut, kFifthCut);
+    // Spectrum with second cut (cosmic, vertex FV, one muon, two protons, no charged pions, and no neutral pions)
+    Spectrum sCosmicSixthCut("CosmicSixthCut", bEventCount, CosmicNuLoader, kEventCount, kNoSpillCut, kSixthCut);
+    // Spectrum with overall signal definition
+    Spectrum sCosmicRecoSignal("CosmicRecoSignal", bEventCount, CosmicNuLoader, kEventCount, kNoSpillCut, kRecoIsSignal); 
+
+    //----------------------------------------//    
+    
     DataNuLoader.Go();
+    CosmicNuLoader.Go();
     NuLoader.Go();
 
     //----------------------------------------//    
@@ -136,6 +169,7 @@ void Selection() {
 
         auto& [RecoSignals, RecoTrueSignals, RecoBkgSignals] = Spectra.at(i);
         auto& data_RecoSignals = data_Spectra.at(i);        
+        auto& cosmic_RecoSignals = cosmic_Spectra.at(i);        
 
         TCanvas* PlotCanvas = new TCanvas("Selection","Selection",205,34,1124,768);
         PlotCanvas->SetTopMargin(0.13);
@@ -147,22 +181,25 @@ void Selection() {
         TH1D* RecoTrueHisto = RecoTrueSignals->ToTH1(TargetPOT);
         TH1D* RecoBkgHisto = RecoBkgSignals->ToTH1(TargetPOT);   
         TH1D* data_RecoHisto = data_RecoSignals->ToTH1(TargetPOT);
+        TH1D* cosmic_RecoHisto = cosmic_RecoSignals->ToTH1(TargetPOT);
 
         //overflow bins
         RecoHisto->SetBinContent(RecoHisto->GetNbinsX(), RecoHisto->GetBinContent(RecoHisto->GetNbinsX()) + RecoHisto->GetBinContent(RecoHisto->GetNbinsX() + 1));
         RecoTrueHisto->SetBinContent(RecoTrueHisto->GetNbinsX(), RecoTrueHisto->GetBinContent(RecoTrueHisto->GetNbinsX()) + RecoTrueHisto->GetBinContent(RecoTrueHisto->GetNbinsX() + 1));
         RecoBkgHisto->SetBinContent(RecoBkgHisto->GetNbinsX(), RecoBkgHisto->GetBinContent(RecoBkgHisto->GetNbinsX()) + RecoBkgHisto->GetBinContent(RecoBkgHisto->GetNbinsX() + 1));
         data_RecoHisto->SetBinContent(data_RecoHisto->GetNbinsX(), data_RecoHisto->GetBinContent(data_RecoHisto->GetNbinsX()) + data_RecoHisto->GetBinContent(data_RecoHisto->GetNbinsX() + 1));
+        cosmic_RecoHisto->SetBinContent(cosmic_RecoHisto->GetNbinsX(), cosmic_RecoHisto->GetBinContent(cosmic_RecoHisto->GetNbinsX()) + cosmic_RecoHisto->GetBinContent(cosmic_RecoHisto->GetNbinsX() + 1));
 
         // undeflow bins
         RecoHisto->SetBinContent(1, RecoHisto->GetBinContent(0) + RecoHisto->GetBinContent(1));
         RecoTrueHisto->SetBinContent(1, RecoTrueHisto->GetBinContent(0) + RecoTrueHisto->GetBinContent(1));
         RecoBkgHisto->SetBinContent(1, RecoBkgHisto->GetBinContent(0) + RecoBkgHisto->GetBinContent(1));
         data_RecoHisto->SetBinContent(1, data_RecoHisto->GetBinContent(0) + data_RecoHisto->GetBinContent(1));
+        cosmic_RecoHisto->SetBinContent(1, cosmic_RecoHisto->GetBinContent(0) + cosmic_RecoHisto->GetBinContent(1));
 
-        TLegend* leg = new TLegend(0.15,0.9,0.7,0.98);
+        TLegend* leg = new TLegend(0.15,0.9,0.95,0.98);
         leg->SetBorderSize(0);
-        leg->SetNColumns(3);
+        leg->SetNColumns(2);
         leg->SetTextSize(TextSize*0.8);
         leg->SetTextFont(FontStyle);
 
@@ -203,45 +240,64 @@ void Selection() {
         data_RecoHisto->SetMarkerStyle(8);
         data_RecoHisto->SetMarkerSize(2.);                        
 
-        PlotCanvas->cd();
-        TH1D* total_mc = (TH1D*)(RecoTrueHisto->Clone());
-        total_mc->Add(RecoBkgHisto);
+        cosmic_RecoHisto->SetLineColor(kGray);
+        cosmic_RecoHisto->SetFillColor(kGray);        
+        cosmic_RecoHisto->SetFillStyle(3244);        
+        cosmic_RecoHisto->SetLineWidth(2);   
 
-        TLegendEntry* legRecoData = leg->AddEntry(data_RecoHisto,"Data","ep");
-        TLegendEntry* legReco = leg->AddEntry(RecoHisto,"MC","l");
-        TLegendEntry* legRecoTrue = leg->AddEntry(RecoTrueHisto,"CC2p0#pi","l");
-        TLegendEntry* legRecoBkg = leg->AddEntry(RecoBkgHisto,"non-CC2p0#pi","l");
+        PlotCanvas->cd();
+
+        TH1D* total_mc_cosmic = (TH1D*)(RecoTrueHisto->Clone());
+        total_mc_cosmic->Add(RecoBkgHisto);
+        total_mc_cosmic->Add(cosmic_RecoHisto);
+
+        TH1D* mc_bkg_cosmic  = (TH1D*)(RecoBkgHisto->Clone());
+        mc_bkg_cosmic->Add(cosmic_RecoHisto);
+
+        //------------------------------------//
+       
+	    Tools tools; 
+	    TString cc2p_frac = tools.to_string_with_precision(RecoTrueHisto->Integral() / total_mc_cosmic->Integral() * 100. ,1);
+	    TString noncc2p_frac = tools.to_string_with_precision(RecoBkgHisto->Integral() / total_mc_cosmic->Integral() * 100. ,1);
+	    TString cosmic_frac = tools.to_string_with_precision(cosmic_RecoHisto->Integral() / total_mc_cosmic->Integral() * 100. ,1);
+
+        TString data_events = tools.to_string_with_precision( data_RecoHisto->Integral(),0);
+	    TLegendEntry* legRecoData = leg->AddEntry(data_RecoHisto,"Data [" + data_events + "]","ep");
+        TLegendEntry* leg_cosmic = leg->AddEntry(cosmic_RecoHisto,"cosmics (" + cosmic_frac + "%)","f");
+        //TLegendEntry* legReco = leg->AddEntry(RecoHisto,"MC","l");
+        TLegendEntry* legRecoTrue = leg->AddEntry(RecoTrueHisto,"MC CC2p0#pi (" + cc2p_frac + "%)","f");
+        TLegendEntry* legRecoBkg = leg->AddEntry(RecoBkgHisto,"MC non-CC2p0#pi (" + noncc2p_frac + "%)","f");
 
         //------------------------------------//
 
-        // Area normalized
-        double mc_sf = 1./total_mc->Integral("width");
-        total_mc->Scale(mc_sf);
+        // area normalize mc to data
+        double mc_sf = data_RecoHisto->Integral()/total_mc_cosmic->Integral();
+        total_mc_cosmic->Scale(mc_sf);
+        mc_bkg_cosmic->Scale(mc_sf);
         RecoHisto->Scale(mc_sf);
         RecoTrueHisto->Scale(mc_sf);
         RecoBkgHisto->Scale(mc_sf);        
+        cosmic_RecoHisto->Scale(mc_sf);        
 
-        double data_sf = 1./data_RecoHisto->Integral("width");
-        data_RecoHisto->Scale(data_sf);
+        //double data_sf = 1./data_RecoHisto->Integral();
+        //data_RecoHisto->Scale(data_sf);
 
         //------------------------------------// 
 
-        double imax = RecoHisto->GetMaximum();
-        double YAxisRange = 1.3*imax;
+        double imax = data_RecoHisto->GetMaximum();
+        double YAxisRange = 1.2*imax;
         RecoHisto->GetYaxis()->SetRangeUser(0.,YAxisRange);
         RecoTrueHisto->GetYaxis()->SetRangeUser(0.,YAxisRange);
         RecoBkgHisto->GetYaxis()->SetRangeUser(0.,YAxisRange);
         data_RecoHisto->GetYaxis()->SetRangeUser(0.,YAxisRange);           
+        cosmic_RecoHisto->GetYaxis()->SetRangeUser(0.,YAxisRange);           
 
         //------------------------------------//        
 
-        RecoHisto->Draw("hist same");        
-        //RecoTrueHisto->Draw("hist same");       
-        total_mc->Draw("hist same");
-        RecoBkgHisto->Draw("hist same");
-        //redraw so that it is on top
-        RecoHisto->Draw("hist same");   
-        // finally the data
+        RecoHisto->Draw("hist same");     
+        total_mc_cosmic->Draw("hist same");     
+        mc_bkg_cosmic->Draw("hist same");
+        cosmic_RecoHisto->Draw("hist same"); 
         data_RecoHisto->Draw("same e1x0");
         
         leg->Draw();
@@ -255,8 +311,10 @@ void Selection() {
         SaveFile->WriteObject(RecoHisto, PlotNames[i]+"_reco");
         SaveFile->WriteObject(RecoTrueHisto, PlotNames[i]+"_reco_true");
         SaveFile->WriteObject(RecoBkgHisto, PlotNames[i]+"_bkg");
+        SaveFile->WriteObject(cosmic_RecoHisto, PlotNames[i]+"_cosmic");
 
         delete PlotCanvas;
+
     }
     // Close file
     SaveFile->Close();
@@ -302,46 +360,69 @@ void Selection() {
     TH1D* DataSixthCutHisto = sDataSixthCut.ToTH1(TargetPOT);
     TH1D* DataRecoSignalHisto = sDataRecoSignal.ToTH1(TargetPOT);
 
+    // Cosmic
+
+    TH1D* CosmicAllRecoEventsHisto = sCosmicAllRecoEvents.ToTH1(TargetPOT);
+    TH1D* CosmicFirstCutHisto = sCosmicFirstCut.ToTH1(TargetPOT);
+    TH1D* CosmicSecondCutHisto = sCosmicSecondCut.ToTH1(TargetPOT);
+    TH1D* CosmicThirdCutHisto = sCosmicThirdCut.ToTH1(TargetPOT);
+    TH1D* CosmicFourthCutHisto = sCosmicFourthCut.ToTH1(TargetPOT);
+    TH1D* CosmicFifthCutHisto = sCosmicFifthCut.ToTH1(TargetPOT);
+    TH1D* CosmicSixthCutHisto = sCosmicSixthCut.ToTH1(TargetPOT);
+    TH1D* CosmicRecoSignalHisto = sCosmicRecoSignal.ToTH1(TargetPOT);
+
     // Get integrals for all cuts for efficiency / purity study
 
     // MC
 
-    double AllEventsInt = AllEventsHisto->Integral("width");
-    double AllRecoEventsInt = AllRecoEventsHisto->Integral("width");
-    double AllTrueEventsInt = AllTrueEventsHisto->Integral("width");
-    double AllTrueRecoEventsInt = AllTrueRecoEventsHisto->Integral("width");
+    double AllEventsInt = AllEventsHisto->Integral();
+    double AllRecoEventsInt = AllRecoEventsHisto->Integral();
+    double AllTrueEventsInt = AllTrueEventsHisto->Integral();
+    double AllTrueRecoEventsInt = AllTrueRecoEventsHisto->Integral();
 
-    double FirstCutInt = FirstCutHisto->Integral("width");
-    double FirstCutTrueInt = FirstCutTrueHisto->Integral("width");
+    double FirstCutInt = FirstCutHisto->Integral();
+    double FirstCutTrueInt = FirstCutTrueHisto->Integral();
 
-    double SecondCutInt = SecondCutHisto->Integral("width");
-    double SecondCutTrueInt = SecondCutTrueHisto->Integral("width");
+    double SecondCutInt = SecondCutHisto->Integral();
+    double SecondCutTrueInt = SecondCutTrueHisto->Integral();
 
-    double ThirdCutInt = ThirdCutHisto->Integral("width");
-    double ThirdCutTrueInt = ThirdCutTrueHisto->Integral("width");
+    double ThirdCutInt = ThirdCutHisto->Integral();
+    double ThirdCutTrueInt = ThirdCutTrueHisto->Integral();
 
-    double FourthCutInt = FourthCutHisto->Integral("width");
-    double FourthCutTrueInt = FourthCutTrueHisto->Integral("width");
+    double FourthCutInt = FourthCutHisto->Integral();
+    double FourthCutTrueInt = FourthCutTrueHisto->Integral();
 
-    double FifthCutInt = FifthCutHisto->Integral("width");
-    double FifthCutTrueInt = FifthCutTrueHisto->Integral("width");
+    double FifthCutInt = FifthCutHisto->Integral();
+    double FifthCutTrueInt = FifthCutTrueHisto->Integral();
 
-    double SixthCutInt = SixthCutHisto->Integral("width");
-    double SixthCutTrueInt = SixthCutTrueHisto->Integral("width");
+    double SixthCutInt = SixthCutHisto->Integral();
+    double SixthCutTrueInt = SixthCutTrueHisto->Integral();
 
-    double RecoSignalInt = RecoSignalHisto->Integral("width");
-    double RecoTrueSignalInt = RecoTrueSignalHisto->Integral("width");
+    double RecoSignalInt = RecoSignalHisto->Integral();
+    double RecoTrueSignalInt = RecoTrueSignalHisto->Integral();
 
     // Data
 
-    double DataAllRecoEventsInt = DataAllRecoEventsHisto->Integral("width");
-    double DataFirstCutInt = DataFirstCutHisto->Integral("width");
-    double DataSecondCutInt = DataSecondCutHisto->Integral("width");
-    double DataThirdCutInt = DataThirdCutHisto->Integral("width");
-    double DataFourthCutInt = DataFourthCutHisto->Integral("width");
-    double DataFifthCutInt = DataFifthCutHisto->Integral("width");
-    double DataSixthCutInt = DataSixthCutHisto->Integral("width");
-    double DataRecoSignalInt = DataRecoSignalHisto->Integral("width");    
+    double DataAllRecoEventsInt = DataAllRecoEventsHisto->Integral();
+    double DataFirstCutInt = DataFirstCutHisto->Integral();
+    double DataSecondCutInt = DataSecondCutHisto->Integral();
+    double DataThirdCutInt = DataThirdCutHisto->Integral();
+    double DataFourthCutInt = DataFourthCutHisto->Integral();
+    double DataFifthCutInt = DataFifthCutHisto->Integral();
+    double DataSixthCutInt = DataSixthCutHisto->Integral();
+    double DataRecoSignalInt = DataRecoSignalHisto->Integral();    
+
+    // Cosmic
+
+    double CosmicAllRecoEventsInt = CosmicAllRecoEventsHisto->Integral();
+    double CosmicFirstCutInt = CosmicFirstCutHisto->Integral();
+    double CosmicSecondCutInt = CosmicSecondCutHisto->Integral();
+    double CosmicThirdCutInt = CosmicThirdCutHisto->Integral();
+    double CosmicFourthCutInt = CosmicFourthCutHisto->Integral();
+    double CosmicFifthCutInt = CosmicFifthCutHisto->Integral();
+    double CosmicSixthCutInt = CosmicSixthCutHisto->Integral();
+    double CosmicRecoSignalInt = CosmicRecoSignalHisto->Integral();    
+
 
     // Print results
 
@@ -381,6 +462,22 @@ void Selection() {
     std::cout << "    One muon cut: " << DataThirdCutInt << ". G.E: " <<  (DataThirdCutInt / DataAllRecoEventsInt) * 100. << std::endl;
     std::cout << "    Two protons cut: " << DataFourthCutInt << ". G.E: " <<  (DataFourthCutInt / DataAllRecoEventsInt) * 100.  << std::endl;
     std::cout << "    No charged pions cut: " << DataFifthCutInt << ". G.E: " <<  (DataFifthCutInt / DataAllRecoEventsInt) * 100. << std::endl;
+    std::cout << "    No neutral pions cut: " << DataSixthCutInt << ". G.E: " <<  (DataSixthCutInt / DataAllRecoEventsInt) * 100. << std::endl;
+    std::cout << "================================" << std::endl;
+    std::cout << std::endl;   
+
+    // Cosmic
+
+    std::cout << std::endl;
+    std::cout << "============== Cosmic ==================" << std::endl;
+    std::cout << "Reconstructed events: " << CosmicAllRecoEventsInt << std::endl;
+    std::cout << std::endl;
+    std::cout << "Cuts: " << std::endl;
+    std::cout << "    Cosmic cut: " << CosmicFirstCutInt << ". G.E: " <<  (CosmicFirstCutInt / CosmicAllRecoEventsInt) * 100. << std::endl;
+    std::cout << "    Vertex in FV cut: " << CosmicSecondCutInt << ". G.E: " <<  (CosmicSecondCutInt / CosmicAllRecoEventsInt) * 100. << std::endl;
+    std::cout << "    One muon cut: " << CosmicThirdCutInt << ". G.E: " <<  (CosmicThirdCutInt / CosmicAllRecoEventsInt) * 100. << std::endl;
+    std::cout << "    Two protons cut: " << CosmicFourthCutInt << ". G.E: " <<  (CosmicFourthCutInt / CosmicAllRecoEventsInt) * 100.  << std::endl;
+    std::cout << "    No charged pions cut: " << CosmicFifthCutInt << ". G.E: " <<  (CosmicFifthCutInt / CosmicAllRecoEventsInt) * 100. << std::endl;
     std::cout << "    No neutral pions cut: " << DataSixthCutInt << ". G.E: " <<  (DataSixthCutInt / DataAllRecoEventsInt) * 100. << std::endl;
     std::cout << "================================" << std::endl;
     std::cout << std::endl;   

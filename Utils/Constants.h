@@ -20,7 +20,10 @@ namespace Constants {
 
     const double Units = 1E38;
 
-    const double TargetPOT = 1e21;
+    //const double TargetPOT = 1e21; // 3y exposure
+    //const double TargetPOT = 4.91e18; 
+    const double TargetPOT = 1e18; // needs to be changed
+    const double cosmic_pot = 1.01e20;
     const double NTargets = 1.05E30; // Argon nuclei, not nucleons
     // const double NTargets = 4.6712e31; // Nucleons
 

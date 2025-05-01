@@ -34,11 +34,18 @@ namespace ana
 
     // Files with samples
 
+    // wildcards
+
+    const std::string data_wc = "/pnfs/sbn/data_add/sbn_nd/poms_production/data/MCP2025Av3/v10_04_06_01/MCP2025Av3_DevSample/flatcaf/bnblight/*/*.root";
+    const std::string cosmic_wc = "/pnfs/sbn/data_add/sbn_nd/poms_production/mc/MCP2025Av3/v10_04_06_01/prodcorsika_proton_intime_sbnd/CV/caf/*/*/*.root";
+    const std::string mc_wc = "/pnfs/sbn/data_add/sbn_nd/poms_production/mc/MCP2025Av3/v10_04_06_01/prodgenie_corsika_proton_rockbox_sbnd/CV/caf/*/*/*.root";    
+
+    // In time cosmics, April 2025
+    const std::string CosmicTargetPath = "/pnfs/sbn/data_add/sbn_nd/poms_production/mc/MCP2025Av3/v10_04_06_01/prodcorsika_proton_intime_sbnd/CV/caf";    
     // Data dev sample spring 2025
-    const std::string DataTargetPath = "/pnfs/sbn/data_add/sbn_nd/poms_production/data/MCP2025Av3/v10_04_06_01/MCP2025Av3_DevSample/flatcaf/bnblight/1d";
+    const std::string DataTargetPath = "/pnfs/sbn/data_add/sbn_nd/poms_production/data/MCP2025Av3/v10_04_06_01/MCP2025Av3_DevSample/flatcaf/bnblight";
     // Data Golden sample
     //const std::string DataTargetPath = "/pnfs/sbnd/persistent/users/sungbino/2025_prod/2025A_GoldenRun/bnbzerobias";
-
     // MC2025A April test samples
     const std::string TargetPath = "/pnfs/sbn/data_add/sbn_nd/poms_production/mc/MCP2025Av3/v10_04_06_01/prodgenie_corsika_proton_rockbox_sbnd/CV/caf";
     
@@ -49,7 +56,8 @@ namespace ana
     //const std::string TargetPath = "/pnfs/sbnd/persistent/users/twester/sbnd/v09_78_04/cv";
  
     const std::vector<std::string> InputFiles = tools.GetInputFiles(TargetPath);
-    const std::vector<std::string> DataInputFiles = tools.GetInputFiles(DataTargetPath,false,true);
+    const std::vector<std::string> DataInputFiles = tools.GetInputFiles(DataTargetPath,false,false,true);
+    const std::vector<std::string> CosmicInputFiles = tools.GetInputFiles(CosmicTargetPath);    
 
     // Constants
     const float fFVXMax = 180.f;
@@ -482,7 +490,7 @@ namespace ana
                         fMuAverage += pfp.trk.chi2pid[i].chi2_muon / 3;
                     }
                 }
-                if (!bSkipPFP) return fMuAverage;
+                if (!bSkipPFP) { return fMuAverage; }
             }
         }
         return 0;
@@ -1207,9 +1215,9 @@ namespace ana
     // Check for cosmics (not const for data script)
     Cut kCosmicCut([](const caf::SRSliceProxy* slc) {
         
-	return (
+	    return (
 
-            slc->nu_score > 0.4 /*&&     // check how neutrino like slice is
+            slc->nu_score > 0.5 /*&&     // check how neutrino like slice is
             slc->fmatch.score < 7.0 && // check flash match score
             slc->fmatch.time > 0. &&   // check flash is in beam
             slc->fmatch.time < 1.8*/
@@ -1217,6 +1225,24 @@ namespace ana
         );
 
     });
+
+    Cut kCosmicBarycenterCut([](const caf::SRSliceProxy* slc) {
+
+        for (auto const& pfp : slc -> reco.pfp) {
+        //for (auto const& bc : slc -> barycenterFM) {
+   
+        }        
+        
+	    //return (
+
+            //slc->barycenterFM.flashTime > 0. &&
+            //slc->barycenterFM.flashTime < 2.5         
+
+        //);
+
+        return true;
+
+    });  
 
     const Cut kIsCosmic([](const caf::SRSliceProxy* slc) {
         return (slc->truth.genie_mode == -1);
@@ -1421,19 +1447,51 @@ namespace ana
     });
 
     const SpillVar kSpillData([](const caf::StandardRecordProxy* sr) {
+
         fstream file;
         std::string FileName = "/exp/sbnd/data/users/" + UserName + "/CAFAnaOutput/EventData.csv";
         file.open(FileName, fstream::out | fstream::app);
+
         for (auto const& slc : sr->slc) {
+
             if (kRecoIsSignal(&slc)) {
+
                 file << sr->hdr.fno << ",";
                 file << sr->hdr.run << ",";
                 file << sr->hdr.subrun << ",";
                 file << sr->hdr.evt << ",";
-                file << sr->hdr.subevt << std::endl;       
+                file << sr->hdr.subevt << std::endl;   
+
             }
         }
+
         return 0.5;
+        
+    });
+
+    const SpillVar kSpillCosmic([](const caf::StandardRecordProxy* sr) {
+
+        fstream file;
+        std::string FileName = "/exp/sbnd/data/users/" + UserName + "/CAFAnaOutput/EventCosmic.csv";
+        file.open(FileName, fstream::out | fstream::app);
+
+        int r = -99;
+        int runs = 0;
+
+        for (auto const& slc : sr->slc) {
+
+            if (r != (int)(sr->hdr.run) ) {
+
+                runs++;
+                r = sr->hdr.run;
+                file << r << std::endl;
+
+            }
+
+        }
+
+        return 0.5;
+        
     });
 
     /////////////////////////////
