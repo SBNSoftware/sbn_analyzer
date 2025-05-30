@@ -30,24 +30,28 @@ using namespace std;
 using namespace ana;
 using namespace Constants;
 
-void SelectionEfficiencySIS() {
+void SelectionEfficiency() {
   TH1D::SetDefaultSumw2();
   TH2D::SetDefaultSumw2();
 
   bool doSIS=false;
+  signalIsSIS=doSIS;//this controls all the IsSignal fucntions but probably doesnt matter if I already put in definitions everywhere
 
   int FontStyle = 132;
   double TextSize = 0.06;	
     
   // The SpectrumLoader object handles the loading of CAFs and the creation of Spectrum.
-  SpectrumLoader NuLoader(InputFiles);
-
+  //SpectrumLoader NuLoader(InputFiles); //make sure not to use xrootd which isnt working 
+  SpectrumLoader NuLoader("/pnfs/sbn/data_add/sbn_nd/poms_production/official/MCP2024B/v09_91_02_02/prodoverlay_corsika_cosmics_proton_genie_rockbox_sce/caf/*/*/caf.flat.caf*.root");//2024B MC
   // We will create efficiency plots using true variables and definining signal efficiency
   // as the number of reconstructed the events that pass our signal definition and are true
   // signal events over the total true signal events; these two histograms are plotted
 
   // Root file to store objects in
-  TString RootFilePath = "/exp/sbnd/data/users/" + (TString)UserName + "/CAFAnaOutput/SelectionEfficiencyTrueSIS.root";
+  TString fileDir="/exp/sbnd/data/users/" + (TString)UserName + "/CAFAnaOutput/"+tag.c_str();
+  checkDir(fileDir);  
+  TString RootFilePath = fileDir+(TString)"/SelectionEfficiencyTrueSIS.root";
+  if(!doSIS) RootFilePath = fileDir+(TString)"/SelectionEfficiency.root";
   TFile* SaveFile = new TFile(RootFilePath, "recreate");
 
   //Define set of analysis specific variables
@@ -65,12 +69,15 @@ void SelectionEfficiencySIS() {
   auto truthCut= doSIS? kTruthIsSIS: kTruthIsSignal;
   auto recoCut= doSIS? kRecoIsSignal : kRecoIsSignal;
   auto recoTruthCut= doSIS? kRecoIsTrueSIS: kRecoIsTrueReco;
-
+//Fix me!!! --- what did I need to fix this seems fine?? did I already fix it? 
   for (std::size_t i = 0; i < Vars.size(); i++) {
     auto TrueSignals = std::make_unique<Spectrum>(VarLabels.at(i), VarBins.at(i), NuLoader, std::get<2>(Vars.at(i)), truthCut, kNoSpillCut);
     auto RecoTrueSignals = std::make_unique<Spectrum>(VarLabels.at(i), VarBins.at(i), NuLoader, std::get<2>(Vars.at(i)), truthCut, kNoSpillCut, recoCut);
     Spectra.push_back({std::move(TrueSignals), std::move(RecoTrueSignals)});
   }
+
+  //int iRecoE=Vars.size()-1;
+  //auto RecoTrueSignals = std::make_unique<Spectrum>(VarLabels.at(iRecoE), VarBins.at(iRecoE), NuLoader, std::get<1>(Vars.at(iRecoE)), truthCut, kNoSpillCut);
   /*    for (std::size_t i = 0; i < Vars.size(); i++) {
         cout<<"l57 i:"<<i<<"  VarBins.NBins(): "<<VarBins[i].NBins()<<" ["<<VarBins[i].Min()<<","<<VarBins[i].Max()<<"]"<<endl;
         auto RecoSignals = std::make_unique<Spectrum>(VarLabels.at(i), VarBins.at(i), NuLoader, std::get<2>(Vars.at(i)), kTruthIsSignal, kNoSpillCut, kRecoIsSignal);   
@@ -144,7 +151,7 @@ void SelectionEfficiencySIS() {
     TrueHisto->GetYaxis()->SetTitle(Form("True %s", AxisTitle(vary).c_str()));
     RecoTrueHisto->GetYaxis()->SetTitle(Form("True %s", AxisTitle(vary).c_str()));
 
-    TrueHisto->SetTitle(denomTitle);
+    TrueHisto->SetTitle(denomTitle.c_str() );
     RecoTrueHisto->SetTitle(numTitle.c_str() );
 
     c->cd();    
@@ -279,7 +286,14 @@ void SelectionEfficiencySIS() {
         textSlice->DrawLatexNDC(0.4,0.92,SliceLabel);
 
         // Save as pdf
-        PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/Efficiency_TrueSIS/"+SlicePlotName+".pdf");
+        //PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/Efficiency_TrueSIS/"+SlicePlotName+".pdf");
+        TString plotDir= dir_figs+"/Figs/CAFAna/Efficiency";
+        plotDir+= doSIS? "_TrueSIS/" :"/";
+        checkDir(plotDir);
+        plotDir+="/"+tag+"/";                                        
+        PlotCanvas->SaveAs(plotDir+SlicePlotName+".pdf");                                               
+        //if(doSIS) PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/Efficiency_TrueSIS/"+SlicePlotName+".pdf");
+        //else PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/Efficiency/"+tag.c_str()+"/"+SlicePlotName+".pdf");
 
         // Save to root file
         SaveFile->WriteObject(Eff, SlicePlotName+"_eff");
@@ -319,7 +333,8 @@ void SelectionEfficiencySIS() {
       Eff->GetPaintedGraph()->GetYaxis()->SetTickSize(0);
 
       // Save as pdf
-      PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/Efficiency_TrueSIS/"+PlotNames[i]+".pdf");
+      if(doSIS) PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/Efficiency_TrueSIS/"+PlotNames[i]+".pdf");
+      else PlotCanvas->SaveAs(dir_figs+"/Figs/CAFAna/Efficiency/"+tag.c_str()+"/"+PlotNames[i]+".pdf");
 
       // Save to root file
       SaveFile->WriteObject(Eff, PlotNames[i]+"_eff");

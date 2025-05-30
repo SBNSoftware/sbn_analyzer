@@ -39,6 +39,9 @@ const Binning VarBinning(string var, bool isTrue = true)
     return Binning::Simple(15, 0, 15);
   else if (var == "pdg" || var == "pdgMu" || var == "pdgPi" || var == "pdgP" || var == "allpdgs" || "candPdgs")
     return Binning::Simple(10, -1, 9, {"None", "e^{-}", "e^{+}", "#mu^{-}", "#mu^{+}", "#pi^{+}", "#pi^{-}", "p", "#gamma", "Other"});
+    else if (var=="resEnu"){
+     return Binning::Simple(40, -4, 4);       
+    }
   return Binning::Simple(100, 0, 10);
 }
 
@@ -46,6 +49,9 @@ const Binning VarBinning(string var, bool isTrue = true)
 std::tuple<Var,Var, TruthVar> GetVarTuple(std::string var){
   if (var=="onebin"){
     return {kEventCount, kEventCount, kTrueEventCount};
+  }
+  else if(var=="resEnu"){
+    return {kResEnu, kResEnu, kTruthNeutrinoEnergy};
   }
   else if (var=="pMu"){
     return {kMuonMomentum, kRecoTruthMuonMomentum, kTruthMuonMomentum}; 
@@ -117,7 +123,6 @@ static const std::vector<std::tuple<Var, Var, TruthVar>> GetSISVars()
   return Vars;
 }
 
-
 static const std::vector<Binning> GetSISBins(){
   std::vector<std::string> varnames = GetSISVarNames();
   std::vector<Binning> VarBins;
@@ -127,6 +132,8 @@ static const std::vector<Binning> GetSISBins(){
   }
   return VarBins;
 }
+
+
 
 void WritePOT(TFile *file, double mcPOT){
   TVector2* pot=new TVector2(TargetPOT, mcPOT);

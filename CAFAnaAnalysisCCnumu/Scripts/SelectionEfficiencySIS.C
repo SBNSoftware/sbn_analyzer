@@ -59,12 +59,14 @@ void SelectionEfficiencySIS() {
   // Construct all spectra
   std::vector< std::tuple<std::unique_ptr<Spectrum>, std::unique_ptr<Spectrum> > > Spectra;
   std::vector< std::tuple<std::unique_ptr<Spectrum>, std::unique_ptr<Spectrum> > > Spectra2D;
-
-  for (std::size_t i = 0; i < Vars.size(); i++) {
+  for (std::size_t i = 0; i < Vars.size()-1; i++) {
     auto TrueSignals = std::make_unique<Spectrum>(VarLabels.at(i), VarBins.at(i), NuLoader, std::get<2>(Vars.at(i)), kTruthIsSIS, kNoSpillCut);
     auto RecoTrueSignals = std::make_unique<Spectrum>(VarLabels.at(i), VarBins.at(i), NuLoader, std::get<2>(Vars.at(i)), kTruthIsSIS, kNoSpillCut, kRecoIsSignal);
     Spectra.push_back({std::move(TrueSignals), std::move(RecoTrueSignals)});
   }
+
+  
+  
   /*    for (std::size_t i = 0; i < Vars.size(); i++) {
         cout<<"l57 i:"<<i<<"  VarBins.NBins(): "<<VarBins[i].NBins()<<" ["<<VarBins[i].Min()<<","<<VarBins[i].Max()<<"]"<<endl;
         auto RecoSignals = std::make_unique<Spectrum>(VarLabels.at(i), VarBins.at(i), NuLoader, std::get<2>(Vars.at(i)), kTruthIsSignal, kNoSpillCut, kRecoIsSignal);   

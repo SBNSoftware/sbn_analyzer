@@ -49,6 +49,7 @@ namespace Constants {
       TParticlePDG* part=pdg_db->GetParticle(pdg);
       double mass= -999;
       if(part) mass=part->Mass(); // returns in GeV
+      else if(pdg==1000180400) mass=37.21;//GeV if wolfram alpha is to be belived//argon nucleus according to a comment in MCParticle on the larsoft doxyygen, uses extended particle numbering scheme 
       else cout<<"Constants::GetMass -- Mass of particle with PDG "<<pdg<<" not found in database, setting to -999"<<endl;
       return mass;
     }

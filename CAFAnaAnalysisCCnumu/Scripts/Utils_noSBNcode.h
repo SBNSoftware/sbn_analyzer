@@ -78,6 +78,9 @@ std::string AxisTitle(std::string var)
     return "#chi^{2} for Muon Hypothesis";
   else if (var=="sumE")
     return "E_{#mu} + E_{had} (GeV)";
+else if (var=="resEnu"){
+    return "True- Reco E_{#nu} / True E_{#nu}";
+}
   //else if (var == "W")
     //return "W (GeV)";
   //else if (var == "Q2")
@@ -88,7 +91,7 @@ std::string AxisTitle(std::string var)
 
 std::vector<std::string> GetSISVarNames()
 {
-  std::vector<std::string> varnames = {"onebin", "pMu", "EAvail", "Enu", "sumE", "Ehad"};//,"Q2", "W"};
+  std::vector<std::string> varnames = {"onebin", "pMu", "EAvail", "Enu", "sumE", "Ehad",  "Q2", "W"};//"resEnu",
   return varnames;
 }
 
@@ -113,20 +116,53 @@ static const std::vector<std::string> GetSISVarLabels(){
 
 
 std::pair<std::string, std::string> GetEffSpectrumNames(std::string var){
-    std::string specnameA="TrueSignal_"+var;
-    std::string specnameB="RecoTrueSignal_"+var;
-    return{specnameA, specnameB};
+  std::string specnameA="TrueSignal_"+var;
+  std::string specnameB="RecoTrueSignal_"+var;
+  return{specnameA, specnameB};
 }
 
 
 //make a function to check if a directory exists and make it if not
-/*void checkDir(TString histdir){
-  if( 0 != system( Form( "test -d %s", histdir.Data() ) ) )
-    {
-      int madedir = system( Form( "mkdir -m 755 -p %s", histdir.Data() ) );
+void checkDir(TString histdir){
+  if( 0 != system( Form( "test -d %s", histdir.Data() ) ) ){
+    int madedir = system( Form( "mkdir -m 755 -p %s", histdir.Data() ) );
             
-      if( 0 != madedir )
-        Error( "checkDir", Form("Could not make directory '%s'", histdir.Data() ) );
+    if( 0 != madedir ){
+      TString errorMsg="Could not make directory" + histdir;
+      //string errMsg=errorMsgTS.Data();
+      Error( "checkDir", "%s", errorMsg.Data() );
     }
-    }*/
+  }
+}
 
+std::vector<std::string> getChannelShortNames(){
+  return {"sis", "dis", "trans", "lowestW", "lowQ2", "notCCNumu", "other"};
+}
+
+std::vector<std::string> getChannelLongNames(){
+  return {"SIS", "DIS", "Transition", "Lowest W", "Q^{2}<1. GeV^{2}", "!CC #nu#_{#mu}", "other"};
+}
+
+
+/*static const std::vector<std::string> GetChannels(){
+    std::vector<std::string> channels={
+        "sis",
+        "dis",
+        "trans",
+        "lowestW",
+        "lowQ2",
+        "notCCNumu",
+        "other"
+    };
+    return channels;
+}*/
+
+enum kChannels{
+ kSIS=0,
+ kDIS,
+ kTrans,
+ kLowestW,
+ kLowQ2,
+ kNotCC,
+ kOther
+};
