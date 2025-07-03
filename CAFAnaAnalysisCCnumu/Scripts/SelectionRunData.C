@@ -29,8 +29,19 @@ using namespace Constants;
 
 void SelectionRunData() {
     // The SpectrumLoader object handles the loading of CAFs and the creation of Spectrum.
-    SpectrumLoader NuLoader(InputFiles);
+    //SpectrumLoader NuLoader(InputFiles);
+  //SpectrumLoader NuLoader("/pnfs/sbn/data_add/sbn_nd/poms_production/data/MCP2025Av3/v10_04_06_01/MCP2025Av3_DevSample/flatcaf/bnblight/*/*.flat.caf.root");
 
+  std::ifstream infiles("list_Data_MCP2025v3_DevSample.txt");
+  string infile;
+  vector<string> fnames; 
+  while (std::getline(infiles, infile)){
+    fnames.push_back(infile);
+    //tree->Add("/pnfs/sbn/data_add/sbn_nd/poms_production/data/MCP2025Av3/v10_04_06_01/MCP2025Av3_DevSample/flatcaf/bnblight/*/*.flat.caf.root");                                                                                          
+    //tree->Add((infiledir+"/*.flat.caf.root").c_str() );
+  }
+
+  SpectrumLoader NuLoader(fnames);
     // Open csv file to store data
     TString FilePath = "/exp/sbnd/data/users/" + (TString)UserName + "/CAFAnaOutput/EventData.csv";
     fstream file; file.open(FilePath, fstream::out); 
@@ -39,11 +50,18 @@ void SelectionRunData() {
 
     Spectrum sRecoSignals(
         "RecoSignals",
-        bEventCount, // does not really matter
+        bEventCount,      //binning
         NuLoader,
-        kSpillData,
-        kNoSpillCut
+        kEventCount,
+        kNoSpillCut,
+        kNoCut
+        //kFirstCut
     );
 
     NuLoader.Go();
+
+    sRecoSignals.OverridePOT(1);
+    cout<<"Livetime: "<< sRecoSignals.Livetime()<<endl;
+    TH1D* honebin=sRecoSignals.ToTH1(1);
+    honebin->SaveAs("singlebinData.root");
 }

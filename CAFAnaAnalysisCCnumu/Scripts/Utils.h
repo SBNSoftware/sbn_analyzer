@@ -22,7 +22,7 @@ const Binning VarBinning(string var, bool isTrue = true)
   else if (var == "W")
     return Binning::Simple(50, 0, 3);
   else if (var == "Q2")
-    return Binning::Simple(50, 0, 2);
+    return Binning::Simple(50, 0, 2.5);
   else if (var == "trkLen")
     return Binning::Simple(40, 0, 200);
   else if (var == "nParticles")
@@ -57,11 +57,12 @@ std::tuple<Var,Var, TruthVar> GetVarTuple(std::string var){
     return {kMuonMomentum, kRecoTruthMuonMomentum, kTruthMuonMomentum}; 
   }
   else if (var=="W"){
-    return {kRecoTruthInvariantMass, kRecoTruthInvariantMass, kTruthInvariantMass};//tmp fix
+    return {kW, kRecoTruthW, kTruthW};
+    //return {kInvariantMass, kRecoTruthInvariantMass, kTruthInvariantMass};
     //return {kInvariantMass, kRecoTruthInvariantMass, kTruthInvariantMass};  
   }   
   else if (var=="Q2"){
-    return {kRecoTruthQ2, kRecoTruthQ2, kTruthQ2};//tmp fix
+    return {kQ2, kRecoTruthQ2, kTruthQ2};//tmp fix
     //return {kQ2, kRecoTruthQ2, kTruthQ2};  
   }   
   else if (var=="EAvail"){

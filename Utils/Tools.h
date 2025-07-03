@@ -58,6 +58,7 @@ class Tools {
 
 		void CalcChiSquared(TH1D* h_model, TH1D* h_data, TH2D* cov, double &chi, int &ndof, double &pval, double &sigma);
 		const std::vector<std::string> GetInputFiles(const std::string TargetPath, bool print, bool detvar);
+        const std::vector<std::string> GetInputFilesWoXrootd(const std::string TargetPath, bool print, bool detvar);
 
 		double MuonMass; // MeV
 		double ProtonMass; // MeV

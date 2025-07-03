@@ -18,6 +18,7 @@
 
 // Definitions for Vars and Cuts.
 #include "Definitions.h"
+#include "Utils.h"
 
 // Utils includes.
 #include "../../Utils/Constants.h"
@@ -35,7 +36,7 @@ void SelectionData() {
     double TextSize = 0.06;	
 
     // The SpectrumLoader object handles the loading of CAFs and the creation of Spectrum.
-    SpectrumLoader DataLoader("/pnfs/sbn/data_add/sbnd/keepup/caf/*/*flat.caf.root");
+    SpectrumLoader DataLoader(InputFilesData); //"/pnfs/sbn/data_add/sbnd/keepup/caf/*/*flat.caf.root");
     SpectrumLoader MCLoader(InputFiles);
 
     // Root file to store objects in

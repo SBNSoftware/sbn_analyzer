@@ -140,7 +140,7 @@ std::vector<std::string> getChannelShortNames(){
 }
 
 std::vector<std::string> getChannelLongNames(){
-  return {"SIS", "DIS", "Transition", "Lowest W", "Q^{2}<1. GeV^{2}", "!CC #nu#_{#mu}", "other"};
+  return {"SIS", "DIS", "Transition", "Lowest W", "Q^{2}<1. GeV^{2}", "!CC #nu_{#mu}", "other"};
 }
 
 
@@ -166,3 +166,60 @@ enum kChannels{
  kNotCC,
  kOther
 };
+
+
+std::vector<std::string> getRecoCutsShortNames(){
+    /*vector<const Cut> kRecoCuts={
+    kCosmicCut,
+    kFiducialVol,
+    kRecoIsCCNuMu,
+    kRecoIsSISW,
+    kRecoIsSISQ2,
+    kRecoIsSIS
+  }*/
+std::vector<std::string> cutnames={
+    "CosmicCut",
+    "FiducialCut",
+    "RecoIsCCNuMu",
+    "RecoIsSISW",
+    "RecoIsSISQ2",
+    "RecoIsSIS"
+};
+return cutnames;
+
+}
+
+void styleHistogram(TH1D* RecoHisto, std::string varlabel){
+    //I should just use MnvPlotter but probably better to keep that in independent code instead of making the selections dependent on MAT 
+    int FontStyle = 132;
+    double TextSize = 0.06;	
+  
+	RecoHisto->SetLineColor(kBlue+2);
+	RecoHisto->SetLineWidth(4);
+	
+	// Style histograms
+	RecoHisto->GetXaxis()->SetTitleFont(FontStyle);
+	RecoHisto->GetXaxis()->SetLabelFont(FontStyle);
+	RecoHisto->GetXaxis()->SetNdivisions(8);
+	RecoHisto->GetXaxis()->SetLabelSize(TextSize);
+	RecoHisto->GetXaxis()->SetTitleSize(TextSize);
+	RecoHisto->GetXaxis()->SetTitleOffset(1.1);
+	RecoHisto->GetXaxis()->CenterTitle();
+	RecoHisto->GetXaxis()->SetTitle(("Reco " + varlabel).c_str());
+	
+	RecoHisto->GetYaxis()->SetTitleFont(FontStyle);
+	RecoHisto->GetYaxis()->SetLabelFont(FontStyle);
+	RecoHisto->GetYaxis()->SetNdivisions(6);
+	RecoHisto->GetYaxis()->SetLabelSize(TextSize);
+	RecoHisto->GetYaxis()->SetTitleSize(TextSize);
+	RecoHisto->GetYaxis()->SetTitleOffset(1.3);
+	RecoHisto->GetYaxis()->SetTickSize(0);
+	RecoHisto->GetYaxis()->CenterTitle();
+    
+	double imax = RecoHisto->GetMaximum();
+	double YAxisRange = 1.3*imax;
+	RecoHisto->GetYaxis()->SetRangeUser(0.,YAxisRange);
+
+
+
+}
