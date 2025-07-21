@@ -21,8 +21,8 @@ namespace Constants {
     const TString dir_figs = "/exp/sbnd/data/users/" + TString(UserName) + "/SISPlots";
 
     const double Units = 1E38;
-
-    const double TargetPOT = 1e21;
+    
+    //const double TargetPOT = 1e21;
     const double NTargets = 1.05E30; // Argon nuclei, not nucleons
     // const double NTargets = 4.6712e31; // Nucleons
 

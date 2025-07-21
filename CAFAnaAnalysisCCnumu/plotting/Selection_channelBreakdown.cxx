@@ -35,7 +35,7 @@ int main(int args, char* argv[]){
 
   string UserName=std::getenv("USER"); 
   string tag=std::getenv("XSEC_TAG");
-  TString RootFilePath = "/exp/sbnd/data/users/" + UserName + "/CAFAnaOutput/"+tag+"/Selection.root";//tag.c_str()+"/SelectionEfficiency.root";
+  TString RootFilePath = "/exp/sbnd/data/users/" + UserName + "/CAFAnaOutput/"+tag+"/SelectionCC.root";//tag.c_str()+"/SelectionEfficiency.root";
   if(useTrueSIS) RootFilePath = "/exp/sbnd/data/users/" + UserName + "/CAFAnaOutput/"+tag+"/SelectionSIS.root";
   TFile* fin=new TFile(RootFilePath);
   std::vector<std::string> vars=GetSISVarNames();
@@ -138,7 +138,7 @@ int main(int args, char* argv[]){
   MnvPlotter plotter(kNukeCCStyle);
   gStyle->SetOptTitle(0);//I want titles even though plotutils defaults to them off
   plotter.print_topdir="/exp/sbnd/data/users/afilkins/SISPlots/"+tag;
-  if(useTrueSIS) plotter.print_topdir="/exp/sbnd/data/users/afilkins/SISPlots/TrueSIS/";//+tag.c_str();
+  if(useTrueSIS) plotter.print_topdir="/exp/sbnd/data/users/afilkins/SISPlots/TrueSIS/"+tag;//.c_str();
  
   plotter.legend_fill_color=-1; // <0 makes it transparent
 

@@ -28,7 +28,7 @@ using namespace ana;
 using namespace Constants;
 
 void Selection() {
-  signalIsSIS=false; //defines what TrueSignal is in Defnitions.h
+  signalIsSIS=true; //defines what TrueSignal is in Defnitions.h
 
   bool debug=true;
   bool runData=true;
@@ -42,20 +42,31 @@ void Selection() {
   if(debug)cout<<"l37"<<endl;
   std::filesystem::create_directory(plotdir.Data() );
   // The SpectrumLoader object handles the loading of CAFs and the creation of Spectrum.
-  SpectrumLoader NuLoader("/pnfs/sbn/data_add/sbn_nd/poms_production/mc/MCP2025Av3/v10_04_06_01/prodgenie_corsika_proton_rockbox_sbnd/CV/caf/*/*/*caf.flat.caf*.root");//2025A in a way thats big hopefully??? 
+  //SpectrumLoader NuLoader("/pnfs/sbn/data_add/sbn_nd/poms_production/mc/MCP2025B_5e18_02/v10_06_00_02/prodgenie_corsika_proton_rockbox_sbnd/CV/caf/*/*/caf.flat*.root")
+    //spring25 2025B 5e18POT
+    //"/pnfs/sbn/data_add/sbn_nd/poms_production/mc/MCP2025Av3/v10_04_06_01/prodgenie_corsika_proton_rockbox_sbnd/CV/caf/*/*/*caf.flat.caf*.root");//2025A in a way thats big hopefully??? 
   //InputFiles); //"/pnfs/sbn/data_add/sbn_nd/poms_production/official/MCP2024B/v09_91_02_02/prodoverlay_corsika_cosmics_proton_genie_rockbox_sce/caf/*/*/caf.flat.caf*.root");//2024B MC //InputFiles);
   //SpectrumLoader DataLoader("/pnfs/sbn/data_add/sbn_nd/poms_production/data/MCP2025B/v10_06_00/DevSample/flatcaf/bnblight/*/*/*flat.caf.root");
   //InputFilesData);
   //hack needs to get fixed just checking if these files are in fact the issue here. 
   // SpectrumLoader DataLoader("/pnfs/sbn/data_add/sbn_nd/poms_production/data/MCP2025Av3/v10_04_06_01/MCP2025Av3_DevSample/flatcaf/bnblight/00/*.flat.caf.root");//spring25 validations sample 
-
-  std::ifstream datainfiles("list_Data_MCP2025v3_DevSample.txt");
   string infile;
-  vector<string> fnames;
-  while (std::getline(datainfiles, infile)){
-    fnames.push_back(infile);
+  vector<string> dnames, mcnames;
+
+std::ifstream mcinfiles("list_mc_spring25_5e18POT_2025B.txt"); //list_Data_MCP2025v3_DevSample.txt");
+
+  while (std::getline(mcinfiles, infile)){
+    mcnames.push_back(infile);
   }
-  SpectrumLoader DataLoader(fnames);
+  SpectrumLoader NuLoader(mcnames);
+
+
+  std::ifstream datainfiles("list_data_spring25FixedDev_5e18POT_2025B.txt"); //list_Data_MCP2025v3_DevSample.txt");
+
+  while (std::getline(datainfiles, infile)){
+    dnames.push_back(infile);
+  }
+  SpectrumLoader DataLoader(dnames);
 
 
   //"/pnfs/sbn/data_add/sbn_nd/poms_production/data/MCP2025Av3/v10_04_06_01/MCP2025Av3_DevSample/flatcaf/bnblight/cd/reco2_reco1_filtered_decoded-raw_filtered_data_EventBuilder3_art2_run18255_54_strmBNBLight_20250218T062324-cd4bf471-e5e4-c724-d453-1c3f25c3fe35.flat.caf.root");//signle file in sprint25 validations sample 
@@ -83,7 +94,7 @@ void Selection() {
                 std::unique_ptr<Spectrum>
                 >> Spectra;
 
-  std::vector<std::vector< std::unique_ptr<Spectrum> > > channelSpectra, dataCutsSpectra;
+  std::vector<std::vector< std::unique_ptr<Spectrum> > > channelSpectra, dataCutsSpectra, mcCutsSpectra;
   
   static const std::vector<std::tuple<Var, Var, TruthVar>> Vars=GetSISVars();
   static const std::vector<Binning> VarBins = GetSISBins();
@@ -116,6 +127,16 @@ void Selection() {
       for(int c=0; c<ncuts; c++){
         auto DataCut=std::make_unique<Spectrum>(VarLabels.at(i), VarBins.at(i), DataLoader, std::get<0>(Vars.at(i)), kNoSpillCut, kRecoCuts[c]);
         dataCutsSpectra[i].push_back(std::move(DataCut)); 
+      }
+
+    }
+
+    //=========cuts spectra for MC=========
+     if(runData){
+      mcCutsSpectra.push_back({});//create empty vector for this variable.
+      for(int c=0; c<ncuts; c++){
+        auto mcCut=std::make_unique<Spectrum>(VarLabels.at(i), VarBins.at(i), NuLoader, std::get<0>(Vars.at(i)), kNoSpillCut, kRecoCuts[c]);
+        mcCutsSpectra[i].push_back(std::move(mcCut)); 
       }
 
     }
@@ -183,13 +204,13 @@ void Selection() {
     */
 
 	TCanvas* PlotCanvas = new TCanvas("Selection","Selection",205,34,1124,768);
-	TH1D* RecoHisto = RecoSignals->ToTH1(mcPOT ); //dont scale //TargetPOT);
-	TH1D* RecoTrueHisto = RecoTrueSignals->ToTH1(mcPOT);//TargetPOT);
-	TH1D* RecoBkgHisto = RecoBkgSignals->ToTH1(mcPOT);//TargetPOT);
+	TH1D* RecoHisto = RecoSignals->ToTH1(TargetPOT); //setting targetpot to 5e18 ~the data pot 
+	TH1D* RecoTrueHisto = RecoTrueSignals->ToTH1(TargetPOT);
+	TH1D* RecoBkgHisto = RecoBkgSignals->ToTH1(TargetPOT);
 	
     auto& DataSignals=dataSpectra.at(i);
     TH1D* DataHisto;
-    vector<TH1D*> DataCutHistos;
+    vector<TH1D*> DataCutHistos, mcCutHistos;
     if(debug) cout<<"in loop l169, i="<<i<<endl;  
     if(runData){
       //if(i==0) dataPOT=DataSignals->POT();
@@ -206,6 +227,16 @@ void Selection() {
         DataCutHistos.push_back(dataCutsSpectra[i][c]->ToTH1(1) );
       }
     }
+    //mc cuts
+    for(int c=0; c<ncuts; c++){
+        string cutname=cutnames[c];
+        //auto dataCutSpectrum=dataCutsSpectra[i][c];
+        //TH1D* chanHisto = channelSpectra[i][jChannel]->ToTH1(TargetPOT);
+        //mcCutsSpectra[i][c]->OverridePOT(1);
+        mcCutHistos.push_back(mcCutsSpectra[i][c]->ToTH1(TargetPOT) );
+      }
+
+
 	// Manage under/overflow bins
     //What is this?why do we have to manage the over and underflow? theyre defining overflow as a normal bin and not the overflow I guess?
 	RecoHisto->SetBinContent(RecoHisto->GetNbinsX(), RecoHisto->GetBinContent(RecoHisto->GetNbinsX()) + RecoHisto->GetBinContent(RecoHisto->GetNbinsX() + 1));
@@ -294,6 +325,11 @@ void Selection() {
       
       DataCutHistos.clear();
     }
+      for(int c=0; c<ncuts; c++){
+        SaveFile->WriteObject(mcCutHistos[c], Form("%s_%s_mc", var.c_str(), cutnames[c].c_str() ));
+      }
+      mcCutHistos.clear();
+
     SaveFile->WriteObject(RecoHisto, Form("%s_reco", var.c_str() ) );
 	SaveFile->WriteObject(RecoTrueHisto, Form("%s_reco_true", var.c_str() ) );//PlotNames[i]+"_reco_true");
 	SaveFile->WriteObject(RecoBkgHisto, Form("%s_bkg", var.c_str() ) );//PlotNames[i]+"_bkg");
@@ -301,7 +337,7 @@ void Selection() {
     if(debug) cout<<"in loop l259, i="<<i<<endl;    
 
     for(int jChannel=0; jChannel< channelsRecoSignal.size(); jChannel++){
-      TH1D* chanHisto = channelSpectra[i][jChannel]->ToTH1(TargetPOT);
+      TH1D* chanHisto = channelSpectra[i][jChannel]->ToTH1(mcPOT);//TargetPOT);
       chanHisto->GetXaxis()->SetTitle(("Reconstructed " + VarLabels.at(i)).c_str());
       SaveFile->WriteObject(chanHisto, Form("%s_truthIs_%s", var.c_str(), chanNames[jChannel].c_str() ) );
     }

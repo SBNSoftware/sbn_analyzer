@@ -33,6 +33,9 @@ namespace ana {
   Tools tools;
 
   bool signalIsSIS=true;
+
+  double TargetPOT=5e18;
+
   // Files with samples
   //const std::string TargetPath = "/pnfs/sbnd/persistent/users/twester/sbnd/v09_78_04/cv";
   const std::string TargetPath = "/pnfs/sbn/data_add/sbn_nd/poms_production/official/MCP2024B/v09_91_02_02/prodoverlay_corsika_cosmics_proton_genie_rockbox_sce/caf"; //2024B
@@ -55,10 +58,12 @@ namespace ana {
   const float fFVZMax = 450.f;
   const float fFVZMin = 10.f;
 
-  const float fMuCutMuScore = 30.0f;
-  const float fMuCutPrScore = 60.0f;
-  const float fMuCutLength = 50.0f;
+  //changing these from Afros cuts to Bears cut limits
+  const float fMuCutMuScore = 18.;//30.0f;
+  const float fMuCutPrScore = 87;//60.0f;
+  const float fMuCutLength = 32;//50.0f;
   const float fPrCutPrScore = 100.0f;
+  const float fTrackScore=0.6;
 
   const float minW=1.5;
   const float maxW=2;
@@ -227,7 +232,8 @@ namespace ana {
       if (std::isnan(pfp.trk.len))
         continue;
       if (
-          fMuAverage < fMuCutMuScore &&
+          pfp.trackScore> fTrackScore &&//was not used at all i guess? 
+          fMuAverage < fMuCutMuScore && //is bear using an average or a single view though? check that
           fPrAverage > fMuCutPrScore &&
           pfp.trk.len > fMuCutLength &&
           fMomentum >= lb &&
@@ -1720,10 +1726,10 @@ std::vector<TruthCut> getTrueChannelCuts(){
   // Check for cosmics (not const for data script)
   Cut kCosmicCut([](const caf::SRSliceProxy *slc) { 
       return (
-              slc->nu_score > 0.4 &&     // check how neutrino like slice is
+              slc->nu_score > 0.5 &&     // check how neutrino like slice is
               //fmatch isnt defined in the data -- will switch to using what bear is using (opt0 score) i think...
-              (slc->opt0.score)>320 &&
-              slc->is_clear_cosmic==false
+              //(slc->opt0.score)>320 &&
+              slc->is_clear_cosmic==false);
               //slc->fmatch.score < 7.0 && // check flash match score
               //slc->fmatch.time > 0. &&   // check flash is in beam
               //slc->fmatch.time < 1.8); 
