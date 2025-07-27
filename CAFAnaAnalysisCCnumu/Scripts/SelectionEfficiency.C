@@ -41,8 +41,20 @@ void SelectionEfficiency() {
   double TextSize = 0.06;	
     
   // The SpectrumLoader object handles the loading of CAFs and the creation of Spectrum.
+
+  string infile;
+  vector<string> mcnames;
+
+  std::ifstream mcinfiles("list_mc_spring25_5e18POT_2025B.txt"); //list_Data_MCP2025v3_DevSample.txt");
+
+  while (std::getline(mcinfiles, infile)){
+    mcnames.push_back(infile);
+  }
+  SpectrumLoader NuLoader(mcnames);
+
+
   //SpectrumLoader NuLoader(InputFiles); //make sure not to use xrootd which isnt working 
-  SpectrumLoader NuLoader("/pnfs/sbn/data_add/sbn_nd/poms_production/official/MCP2024B/v09_91_02_02/prodoverlay_corsika_cosmics_proton_genie_rockbox_sce/caf/*/*/caf.flat.caf*.root");//2024B MC
+  //SpectrumLoader NuLoader("/pnfs/sbn/data_add/sbn_nd/poms_production/official/MCP2024B/v09_91_02_02/prodoverlay_corsika_cosmics_proton_genie_rockbox_sce/caf/*/*/caf.flat.caf*.root");//2024B MC
   // We will create efficiency plots using true variables and definining signal efficiency
   // as the number of reconstructed the events that pass our signal definition and are true
   // signal events over the total true signal events; these two histograms are plotted
@@ -69,6 +81,7 @@ void SelectionEfficiency() {
   auto truthCut= doSIS? kTruthIsSIS: kTruthIsSignal;
   auto recoCut= doSIS? kRecoIsSignal : kRecoIsSignal;
   auto recoTruthCut= doSIS? kRecoIsTrueSIS: kRecoIsTrueReco;
+  auto recoCCTruthCut= kRecoIsCCNuMuTruthIsSignal; //kRecoIsCCNuMu && truthCut; 
 //Fix me!!! --- what did I need to fix this seems fine?? did I already fix it? 
   for (std::size_t i = 0; i < Vars.size(); i++) {
     auto TrueSignals = std::make_unique<Spectrum>(VarLabels.at(i), VarBins.at(i), NuLoader, std::get<2>(Vars.at(i)), truthCut, kNoSpillCut);
@@ -109,7 +122,7 @@ void SelectionEfficiency() {
 
 
   //Make migration matrix histograms  
-  std::vector< std::unique_ptr<Spectrum> > SpectraMig;
+  std::vector< std::unique_ptr<Spectrum> > SpectraMig, SpectraMigRecoCC;
   for( unsigned i=0; i<Vars.size(); i++){
     string var=varnamesshort[i];
     Var recoVar=get<0>(Vars[i]);
@@ -123,6 +136,11 @@ void SelectionEfficiency() {
     auto RecoTrueSignals=std::make_unique<Spectrum>(AxisTitle(var), AxisTitle(var), NuLoader, VarBinning(var), recoVar, VarBinning(var), trueVar, kNoSpillCut, recoTruthCut); //truevar on Y axis, recoVar on X 
         
     SpectraMig.push_back(std::move(RecoTrueSignals));
+
+    auto RecoCCTrueSignals=std::make_unique<Spectrum>(AxisTitle(var), AxisTitle(var), NuLoader, VarBinning(var), recoVar, VarBinning(var), trueVar, kNoSpillCut, recoCCTruthCut); //truevar on Y axis, recoVar on X 
+        
+    SpectraMigRecoCC.push_back(std::move(RecoCCTrueSignals));
+
 
   }
 
@@ -176,16 +194,24 @@ void SelectionEfficiency() {
     TH1D* TrueHisto = TrueSignals->ToTH1(TargetPOT);
     TH1D* RecoTrueHisto = RecoTrueSignals->ToTH1(TargetPOT);
     TH2* MigHisto= SpectraMig[i]->ToTH2(TargetPOT);
+    TH2* MigHistoRecoCC= SpectraMigRecoCC[i]->ToTH2(TargetPOT);
     
     TrueHisto->GetXaxis()->SetTitle(VarLabels[i].c_str());
     RecoTrueHisto->GetXaxis()->SetTitle(VarLabels[i].c_str());
     MigHisto->GetYaxis()->SetTitle(Form("True %s", VarLabels[i].c_str() ));
     MigHisto->GetXaxis()->SetTitle(Form("Reconstructed %s", VarLabels[i].c_str()) );
-    MigHisto->SetTitle("Reco & True CC #nu_{#mu}, True SIS");
+    TString title=doSIS? "Reco & True CC #nu_{#mu} SIS": "Reco & True CC #nu_{#mu}";
+    MigHisto->SetTitle(title);//"Reco & True CC #nu_{#mu}, True SIS");
+
+    MigHistoRecoCC->GetYaxis()->SetTitle(Form("True %s", VarLabels[i].c_str() ));
+    MigHistoRecoCC->GetXaxis()->SetTitle(Form("Reconstructed %s", VarLabels[i].c_str()) );
+    MigHistoRecoCC->SetTitle("Reco & True CC #nu_{#mu}, True SIS");
+
     
     SaveFile->WriteObject(TrueHisto, Form("EffDenom_%s",varnamesshort[i].c_str() ) );
     SaveFile->WriteObject(RecoTrueHisto, Form("EffNum_%s",varnamesshort[i].c_str() ) );
     SaveFile->WriteObject(MigHisto, Form("Mig_%s",varnamesshort[i].c_str() ) );
+    SaveFile->WriteObject(MigHisto, Form("Mig_recoCC_%s",varnamesshort[i].c_str() ) );
                                    
     if(i==0) mcPOT=RecoTrueSignals->POT();
     // Manage under/overflow bins

@@ -75,6 +75,7 @@ int main(int args, char* argv[]){
  map<string, TObjArray*> hchannelArrays; //hchannel[varname][jChannel]
  map<string, TH1D*> hRecoAll;
  map<string, TH1D*> hreco_org;
+ map<string, TH1D*> hdatas;
  //mapTH1D* sumReco=(TH1D*) fin->Get(
  for(int iVar=0; iVar<vars.size(); iVar++){//(string var: vars){
     string var=vars[iVar];
@@ -92,7 +93,8 @@ int main(int args, char* argv[]){
     //hRecoAll[var]->Reset();
     //assert(hreco || Form("Didn't find TH1D %s_truthIs_other", var.c_str() ) );
 
-    
+    TH1D* hdata=(TH1D*) fin->Get(Form("%s_data",var.c_str() ) );
+    hdatas[var]=hdata;
     //for(int jChan=0; jChan<channels.size(); jChan++){//(string chan :channels){
     for(int jChan=channels.size()-1; jChan>=0; jChan--){//so SIS is on top of legend
       string chan=channels[jChan];
@@ -101,6 +103,7 @@ int main(int args, char* argv[]){
       names.push_back(name);
       TH1D* hchan=(TH1D*) fin->Get(name.c_str() );
       assert(hchan || Form("Didn't find TH1D %s", name.c_str() ) );
+      hchan->Scale(pot->X()/pot->Y());
       if(var=="W") hchan->GetXaxis()->SetRangeUser(1.2, 2.2);
       //hRecoAll[var]->Add(hchan);
       //hchannel.push_back(h);
@@ -160,8 +163,9 @@ int main(int args, char* argv[]){
                                    const char* yaxislabel)
     */
     string plotname="selection_chanStack_"+var;
-    plotter.DrawStackedMC(hchannelArrays[var],colors,  1. , "TC");//, 152, 1);
+    plotter.DrawStackedMC(hchannelArrays[var],colors,  1. , "TR");//, 152, 1);
 
+    hdatas[var]->Draw("same");
 
     plotter.MultiPrint(c, plotname);
 

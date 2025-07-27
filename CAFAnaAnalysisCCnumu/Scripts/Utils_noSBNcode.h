@@ -16,7 +16,7 @@ std::string AxisTitle(std::string var)
   else if (var=="EAvail" || var=="Eavail")
     return "Available Energy (Gev)";
   else if (var=="EHad" || var== "Ehad")
-    return "E_{#nu}-E_{#mu} (GeV)";
+    return "E_{had} (GeV)";
     //return ("Hadronic Energy");
   else if (var=="EhadSummed" )
     return "#Sigma T_{had} (Gev)";
@@ -81,6 +81,9 @@ std::string AxisTitle(std::string var)
 else if (var=="resEnu"){
     return "True- Reco E_{#nu} / True E_{#nu}";
 }
+else if (var=="npfp"){
+    return "# PFPs";
+}
   //else if (var == "W")
     //return "W (GeV)";
   //else if (var == "Q2")
@@ -91,8 +94,15 @@ else if (var=="resEnu"){
 
 std::vector<std::string> GetSISVarNames()
 {
-  std::vector<std::string> varnames = {"onebin", "pMu", "EAvail", "Enu", "sumE", "Ehad",  "Q2", "W"};//"resEnu",
+  std::vector<std::string> varnames = {"onebin", "pMu", "EAvail", "Enu", "sumE", "Ehad",  "Q2", "W", "npfp", "nTracks", "nShowers"};//, "chi2Mu", "chi2Pi", "chi2P"};
+    //"chi2MuMu", "chi2MuPi", "chi2MuP", "chi2PMu", "chi2PPi", "chi2PP", "chi2PiMu", "chi2PiPi", "chi2PiP", "nShowers"};
+//"resEnu",
   return varnames;
+}
+
+std::vector<std::string> GetSISMultiVarNames(){
+    std::vector<std::string> varnames= {"trackScore", "chi2Mu", "chi2Pi", "chi2P"};
+    return varnames;
 }
 
 
@@ -136,12 +146,15 @@ void checkDir(TString histdir){
 }
 
 std::vector<std::string> getChannelShortNames(){
-  return {"sis", "dis", "trans", "lowestW", "lowQ2", "notCCNumu", "other"};
+  return {"sis", "dis", "trans", "lowestW", "lowQ2", "nue", "nc", "ws", "notFV", "cosmic", "other"};
 }
 
 std::vector<std::string> getChannelLongNames(){
-  return {"SIS", "DIS", "Transition", "Lowest W", "Q^{2}<1. GeV^{2}", "!CC #nu_{#mu}", "other"};
+  return {"SIS", "DIS", "Transition", "Lowest W", "Q^{2}<1. GeV^{2}", "CC #nu_{e}", "NC", "Wrong sign", "!FV", "Cosmic", "Other"};
+    //"!CC #nu_{#mu}", "other"};
 }
+
+
 
 
 /*static const std::vector<std::string> GetChannels(){
@@ -151,7 +164,12 @@ std::vector<std::string> getChannelLongNames(){
         "trans",
         "lowestW",
         "lowQ2",
-        "notCCNumu",
+        //"notCCNumu",
+         kTruthIsCCNuE,
+        kTruthIsNC,
+        kTruthIsWS,
+        kTruthIsNotFV,
+        kTruthIsCosmic,
         "other"
     };
     return channels;
@@ -163,7 +181,12 @@ enum kChannels{
  kTrans,
  kLowestW,
  kLowQ2,
- kNotCC,
+ kCCNuE,
+kNC,
+kWS,
+kNotFV,
+kCosmic,
+       
  kOther
 };
 

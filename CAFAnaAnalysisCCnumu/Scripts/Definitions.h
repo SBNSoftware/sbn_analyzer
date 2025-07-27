@@ -34,7 +34,7 @@ namespace ana {
 
   bool signalIsSIS=true;
 
-  double TargetPOT=5e18;
+  double TargetPOT=4.6e18;//from sungbins tally of the tor numbers docdb 42153
 
   // Files with samples
   //const std::string TargetPath = "/pnfs/sbnd/persistent/users/twester/sbnd/v09_78_04/cv";
@@ -45,7 +45,7 @@ namespace ana {
   std::vector<std::string> InputFiles = tools.GetInputFiles(TargetPath);
 
   const std::string TargetPathData= //"/pnfs/sbn/data_add/sbn_nd/poms_production/data/MCP2025B/v10_06_00/DevSample/flatcaf/bnblight/";
-  "/pnfs/sbn/data_add/sbn_nd/poms_production/official/MCP2025A/v10_04_01_01/prodoverlay_corsika_cosmics_proton_genie_rockbox_sce/MCP2025A/caf"; //2025AWorkshoptiny
+    "/pnfs/sbn/data_add/sbn_nd/poms_production/official/MCP2025A/v10_04_01_01/prodoverlay_corsika_cosmics_proton_genie_rockbox_sce/MCP2025A/caf"; //2025AWorkshoptiny
   std::vector<std::string> InputFilesData = tools.GetInputFiles(TargetPathData);
 
   //  std::string tag=std::getenv("XSEC_TAG");
@@ -103,11 +103,11 @@ namespace ana {
     {-13, {0.1f, 7.f}}                                 // Mu+ because theyre indistinguishable
   };
 
-//std::map<int, double> M_by_PDG={
-//    {13, M_MU},
-//    {PROTON_PDG, M_PROTON},
-//    {NEUTRON_PDG, M_NEUTRON}
-//} // jk wrote GetMass function in constants instead
+  //std::map<int, double> M_by_PDG={
+  //    {13, M_MU},
+  //    {PROTON_PDG, M_PROTON},
+  //    {NEUTRON_PDG, M_NEUTRON}
+  //} // jk wrote GetMass function in constants instead
    
   
   bool debug=false;
@@ -459,7 +459,7 @@ namespace ana {
     if(debug) cout<<"l371"<<endl;
     if (!(FirstMuon)) {
       std::cout << "GetTrueVector: Didn't find a muon. Returning a NULL vector" << std::endl;
-        return {notFound, HadronVectors, HadronPIDs};
+      return {notFound, HadronVectors, HadronPIDs};
       //exit(-1);
       
     }
@@ -654,6 +654,65 @@ namespace ana {
   const Var kFMatchScore([](const caf::SRSliceProxy *slc) -> double { return slc->fmatch.score; });
   const Var kFMatchTime([](const caf::SRSliceProxy *slc) -> double { return slc->fmatch.time; });
 
+  const Var kNPFP([](const caf::SRSliceProxy *slc) ->int {
+      int npfp= slc->reco.pfp.size();
+      return npfp; 
+    });
+
+  const TruthVar kTrueNParticles([](const caf::SRTrueInteractionProxy *nu) -> double {
+      int nParticles=nu->nprim;
+      return nParticles; });
+
+const MultiVar kTrackScore([](const caf::SRSliceProxy *slc) -> std::vector<double> {
+    std::vector<double> scores={};
+    for (auto const& pfp : slc -> reco.pfp) {  
+        scores.push_back(pfp.trackScore);
+    };
+    return scores;
+ });
+
+ const Var kNTracks([](const caf::SRSliceProxy *slc) -> int{
+    int nTracks=0;
+    for (auto const& pfp : slc -> reco.pfp) {  
+        if(pfp.trackScore>0.5) nTracks++;
+    }
+    return nTracks;
+ });
+
+ const Var kNShowers([](const caf::SRSliceProxy *slc) -> int{
+    int nShowers=0;
+    for (auto const& pfp : slc -> reco.pfp) {  
+        if(pfp.trackScore<=0.5) nShowers++;
+    }
+    return nShowers;
+ });
+
+
+ // Mu chi2 for
+  const MultiVar kMuChi2([](const caf::SRSliceProxy *slc) -> std::vector<double> {
+        std::vector<double> chi2s={};
+      for (auto const& pfp : slc -> reco.pfp) {
+          bool bSkipPFP = false;
+          double fMuAverage = 0.;
+          for (int i = 0; i < 3; i++) { 
+            if (
+                std::isnan(pfp.trk.chi2pid[i].chi2_muon) ||
+                pfp.trk.chi2pid[i].chi2_muon == 0.
+                ) {
+              bSkipPFP = true;
+              if(pfp.trackScore<0.5) bSkipPFP=true;
+              break;
+            } else {
+              fMuAverage += pfp.trk.chi2pid[i].chi2_muon / 3;
+            }
+          }
+          if (!bSkipPFP) chi2s.push_back(fMuAverage);//return fMuAverage;
+        
+      }
+      return chi2s;
+    });
+
+
   // Mu chi2 for muon
   const Var kMuMuChi2([](const caf::SRSliceProxy *slc) -> double {
       for (auto const& pfp : slc -> reco.pfp) {
@@ -842,6 +901,33 @@ namespace ana {
       return 0;
     });
 
+  // Pion chi2 for pion
+  const Var kPionPionChi2([](const caf::SRSliceProxy *slc) -> double {
+      bool firstProton = false;
+      for (auto const &pfp : slc->reco.pfp) {
+        if (pfp.trk.truth.p.pdg == 211 || pfp.trk.truth.p.pdg == -211) {
+          bool bSkipPFP = false;
+          double fPrAverage = 0.;
+          for (int i = 0; i < 3; i++) {
+            if (
+                std::isnan(pfp.trk.chi2pid[i].chi2_pion) ||
+                pfp.trk.chi2pid[i].chi2_pion == 0.) {
+              bSkipPFP = true;
+              break;
+            } else {
+              fPrAverage += pfp.trk.chi2pid[i].chi2_pion / 3;
+            }
+          }
+          if (!firstProton && !bSkipPFP)
+            firstProton = true;
+          else if (firstProton && !bSkipPFP)
+            return fPrAverage;
+        }
+      }
+      return 0;
+    });
+
+
   // For all the following vars, there are three variations:
   //     1. Reconstructed value `Var`
   //     2. True value `TruthVar`
@@ -1003,7 +1089,7 @@ namespace ana {
       return kTruthNeutrinoEnergy(&slc->truth);
     });
 
-//Reco Neutrino energy defined after Ehad 
+  //Reco Neutrino energy defined after Ehad 
 
     
   const Var kEhad([](const caf::SRSliceProxy *slc) -> double { 
@@ -1038,11 +1124,11 @@ namespace ana {
       return Ehad+Emu;
     });
 
-    const Var kResEnu([](const caf::SRSliceProxy *slc) -> double {
-        double trueEnu= kRecoTruthNeutrinoEnergy(slc);
-        double recoEnu=kNeutrinoEnergy(slc);
-        if(trueEnu<0 || recoEnu<0) return -999;
-        return( (trueEnu-recoEnu)/trueEnu);
+  const Var kResEnu([](const caf::SRSliceProxy *slc) -> double {
+      double trueEnu= kRecoTruthNeutrinoEnergy(slc);
+      double recoEnu=kNeutrinoEnergy(slc);
+      if(trueEnu<0 || recoEnu<0) return -999;
+      return( (trueEnu-recoEnu)/trueEnu);
     });
 
 
@@ -1129,8 +1215,8 @@ namespace ana {
         double M_part= GetMass(prim.pdg); 
         double KE=prim.genE - M_part; //prim.genP;
         if(KE<0){
-            cout<<"Negative kinentic energy calcuated. PDG: "<<prim.pdg<<", genE: "<<prim.genE<<", M:"<<M_part<<endl;
-            continue;
+          cout<<"Negative kinentic energy calcuated. PDG: "<<prim.pdg<<", genE: "<<prim.genE<<", M:"<<M_part<<endl;
+          continue;
         }
         //if( std::find( PDGsWithThresholds.begin(), PDGsWithThresholds.end(), prim.pdg)){//check if we have a threshold for that PDG
         //proton threshold is the higest lets just make it that for everything
@@ -1156,41 +1242,41 @@ namespace ana {
   
 
   const TruthVar kTruthEhadSummed([](const caf::SRTrueInteractionProxy *nu) -> double { 
-    //auto [Muon, HadronVector, HadronPDG] = GetTrueVector(nu); 
-    //return kTruthVars(nu).at(6);
-    double EhadSummed=0;
-    double Ehad=kTruthHadronicEnergy(nu);
-    for (auto const &prim : nu->prim) {
+      //auto [Muon, HadronVector, HadronPDG] = GetTrueVector(nu); 
+      //return kTruthVars(nu).at(6);
+      double EhadSummed=0;
+      double Ehad=kTruthHadronicEnergy(nu);
+      for (auto const &prim : nu->prim) {
         if(abs(prim.pdg)==MUON_PDG) continue; //dont include muon energy
         double M_part= GetMass(prim.pdg); 
         double KE=prim.genE - M_part; //prim.genP;
         if(KE<0){
-            cout<<"Negative kinentic energy calcuated. PDG: "<<prim.pdg<<", genE: "<<prim.genE<<", M:"<<M_part<<endl;
-            continue;
+          cout<<"Negative kinentic energy calcuated. PDG: "<<prim.pdg<<", genE: "<<prim.genE<<", M:"<<M_part<<endl;
+          continue;
         }
-      //if(abs(prim.pdg)==NEUTRON_PDG) continue;//skip neutrons
-      //if( std::find( PDGsWithThresholds.begin(), PDGsWithThresholds.end(), prim.pdg)){//check if we have a threshold for that PDG
-      //proton threshold is the higest lets just make it that for everything
-      //cout<<"prim.startE: "<<prim.startE<< "\t low threshold: "<<PDGThresholds[PROTON_PDG].first<< "\t high threshold:"<< PDGThresholds[PROTON_PDG].second<<endl;
-      //if( KE< PDGThresholds[PROTON_PDG].first) continue;
-      //if( KE> PDGThresholds[PROTON_PDG].second) continue;//check if energy is within thresholds
-      //cout<<"passed"<<endl;
-      //}else{//if we don't idk put out a warning but do nothing for now? 
-      //    cout<<"Not using any threshold for TrueEhadSummed particle with PDG "<<prim.pdg<<endl;
-      //}
+        //if(abs(prim.pdg)==NEUTRON_PDG) continue;//skip neutrons
+        //if( std::find( PDGsWithThresholds.begin(), PDGsWithThresholds.end(), prim.pdg)){//check if we have a threshold for that PDG
+        //proton threshold is the higest lets just make it that for everything
+        //cout<<"prim.startE: "<<prim.startE<< "\t low threshold: "<<PDGThresholds[PROTON_PDG].first<< "\t high threshold:"<< PDGThresholds[PROTON_PDG].second<<endl;
+        //if( KE< PDGThresholds[PROTON_PDG].first) continue;
+        //if( KE> PDGThresholds[PROTON_PDG].second) continue;//check if energy is within thresholds
+        //cout<<"passed"<<endl;
+        //}else{//if we don't idk put out a warning but do nothing for now? 
+        //    cout<<"Not using any threshold for TrueEhadSummed particle with PDG "<<prim.pdg<<endl;
+        //}
 
-      //if(abs(prim.pdg)==2212) 
-      // I *think* Baryons are even PDGs and mesons are odd 
-      //if(  abs(prim.pdg)>2000 && abs(prim.pdg)%2==0 )//greater then 2000 and even should basically just be a protonbut techincally could catch other stuff that won't exist
-      //if(prim.pdg==PROTON_PDG) //Idk why I would want to do this?
-      //E= E- M_PROTON;
-      EhadSummed+=KE;
-    }
-    //cout<<"EhadSummed: "<<EhadSummed<< "\t Enu-Emu: "<<Ehad<<endl;
-    return EhadSummed;
-  });
+        //if(abs(prim.pdg)==2212) 
+        // I *think* Baryons are even PDGs and mesons are odd 
+        //if(  abs(prim.pdg)>2000 && abs(prim.pdg)%2==0 )//greater then 2000 and even should basically just be a protonbut techincally could catch other stuff that won't exist
+        //if(prim.pdg==PROTON_PDG) //Idk why I would want to do this?
+        //E= E- M_PROTON;
+        EhadSummed+=KE;
+      }
+      //cout<<"EhadSummed: "<<EhadSummed<< "\t Enu-Emu: "<<Ehad<<endl;
+      return EhadSummed;
+    });
 
-const Var kRecoTruthEhadSummed([](const caf::SRSliceProxy *slc) -> double { return kTruthEhadSummed(&slc->truth); });
+  const Var kRecoTruthEhadSummed([](const caf::SRSliceProxy *slc) -> double { return kTruthEhadSummed(&slc->truth); });
 
 
   // Sum Energy ie Emu+ Ehad 
@@ -1212,13 +1298,13 @@ const Var kRecoTruthEhadSummed([](const caf::SRSliceProxy *slc) -> double { retu
 
   //Q2
   const Var kQ2([](const caf::SRSliceProxy *slc) -> double { 
-    double Enu=kNeutrinoEnergy(slc);
-    double pMu=kMuonMomentum(slc);
-    double thetaMu=kMuonTheta(slc);
-    if(Enu<0 || pMu<0 || thetaMu==-999) return -999;
-    double Q2= CalcQ2(Enu, pMu, thetaMu);//( kNeutrinoEnergy(slc), kMuonMomentum(slc), kMuonTheta(slc) );
-    return Q2;
-  });
+      double Enu=kNeutrinoEnergy(slc);
+      double pMu=kMuonMomentum(slc);
+      double thetaMu=kMuonTheta(slc);
+      if(Enu<0 || pMu<0 || thetaMu==-999) return -999;
+      double Q2= CalcQ2(Enu, pMu, thetaMu);//( kNeutrinoEnergy(slc), kMuonMomentum(slc), kMuonTheta(slc) );
+      return Q2;
+    });
   
   const TruthVar kTruthQ2([](const caf::SRTrueInteractionProxy *nu) -> double {
       double pmu=kTruthMuonMomentum(nu);
@@ -1234,36 +1320,37 @@ const Var kRecoTruthEhadSummed([](const caf::SRSliceProxy *slc) -> double { retu
   
   //W -- InvariantMass
   const Var kInvariantMass([](const caf::SRSliceProxy *slc) -> double { 
-    double Enu=kNeutrinoEnergy(slc);
-    double pMu=kMuonMomentum(slc);
-    double thetaMu=kMuonTheta(slc);
-    //cout<<"l1232 kInvarnat mass"<<endl;
-    if(Enu<0 || pMu<0 || thetaMu==-999) return -999;
-    double W=CalcW( kNeutrinoEnergy(slc), kMuonMomentum(slc), kMuonTheta(slc) );
-    //return kVars(slc).at(13);
-    return W; 
-});
+      double Enu=kNeutrinoEnergy(slc);
+      double pMu=kMuonMomentum(slc);
+      double thetaMu=kMuonTheta(slc);
+      //cout<<"Enu: "<<Enu<<" pMu: "<<pMu<<"  thetaMu: "<< thetaMu<<endl;
+      if(Enu<0 || pMu<0 || thetaMu==-999) return -999;
+      double W=CalcW( kNeutrinoEnergy(slc), kMuonMomentum(slc), kMuonTheta(slc) );
+      //return kVars(slc).at(13);
+      return W; 
+    });
   
   const TruthVar kTruthInvariantMass([](const caf::SRTrueInteractionProxy *nu) -> double { 
       //auto [Muon, HadronVector, HadronPDG] = GetTrueVector(nu); 
       double pmu=kTruthMuonMomentum(nu);
       if(pmu==-999) return -999;
+      if(kTruthNeutrinoEnergy(nu)<0) return -999;
       double W= CalcW( kTruthNeutrinoEnergy(nu), pmu, kTruthMuonTheta(nu) );
       return W;
     });
   
   const Var kRecoTruthInvariantMass([](const caf::SRSliceProxy *slc) -> double {
-    return kTruthInvariantMass(&slc->truth); });
+      return kTruthInvariantMass(&slc->truth); });
   
   //same thing but calling it W because I know thats what how I'm going to want call this function
   const Var kW([](const caf::SRSliceProxy *slc) -> double {
-    //cout<<"in kW so probably am using it as a variable cause its no where else"<<endl;
-     return kInvariantMass(slc);
+      //cout<<"in kW so probably am using it as a variable cause its no where else"<<endl;
+      return kInvariantMass(slc);
     });
   const TruthVar kTruthW([](const caf::SRTrueInteractionProxy *nu) -> double { return kTruthInvariantMass(nu);});
   const Var kRecoTruthW([](const caf::SRSliceProxy *slc) -> double { 
-    //cout<<"kRecoTruthW"<<endl;
-    return kTruthInvariantMass(&slc->truth); });
+      //cout<<"kRecoTruthW"<<endl;
+      return kTruthInvariantMass(&slc->truth); });
 
   //EnergyCompleteness
   const TruthVar kTruthEnergyCompleteness([](const caf::SRTrueInteractionProxy *nu) -> double { 
@@ -1549,7 +1636,37 @@ const Var kRecoTruthEhadSummed([](const caf::SRSliceProxy *slc) -> double { retu
              ); 
     });
 
+  const TruthCut kTruthIsCCNuE([](const caf::SRTrueInteractionProxy *nu) {
+      return(
+             bIsInFV(&nu->position) &&                                                                               // check position is in fiducial volume
+             nu->iscc &&                                                                                             // check it is charged current interaction
+             nu->pdg == 12                                                                                         // check neutrino is muon neutrino
+             ); 
+    });
+ 
+  const TruthCut kTruthIsNC([](const caf::SRTrueInteractionProxy *nu) {
+      return(
+             bIsInFV(&nu->position) &&
+             nu->isnc 
+             );
+    });
   
+
+  const TruthCut kTruthIsWS([](const caf::SRTrueInteractionProxy *nu) {
+      return(
+             bIsInFV(&nu->position) &&
+             !kTruthIsNC(nu) &&
+             (nu->pdg== -12 || nu->pdg==-14 || nu->pdg==-16)
+             );
+    });
+      
+  const TruthCut kTruthIsNotFV([](const caf::SRTrueInteractionProxy *nu) {
+      return(
+             !bIsInFV(&nu->position) 
+             );
+    });
+
+
   const TruthCut kTruthIsSIS([](const caf::SRTrueInteractionProxy *nu) {
       bool isSIS=kTruthIsCCNuMu(nu);
       if(!isSIS) return isSIS;//break before trying to get variables that might not be defined if its not a cc numu event
@@ -1561,9 +1678,9 @@ const Var kRecoTruthEhadSummed([](const caf::SRSliceProxy *slc) -> double { retu
       
     });
 
-const TruthCut kTruthIsSignal([](const caf::SRTrueInteractionProxy *nu) {
-     bool isSignal= signalIsSIS? kTruthIsSIS(nu) : kTruthIsCCNuMu(nu);
-     return isSignal;
+  const TruthCut kTruthIsSignal([](const caf::SRTrueInteractionProxy *nu) {
+      bool isSignal= signalIsSIS? kTruthIsSIS(nu) : kTruthIsCCNuMu(nu);
+      return isSignal;
     });
   
 
@@ -1572,6 +1689,11 @@ const TruthCut kTruthIsSignal([](const caf::SRTrueInteractionProxy *nu) {
   const TruthCut kTruthNoSIS([](const caf::SRTrueInteractionProxy *nu) { return !kTruthIsSIS(nu); });
 
   const TruthCut kTruthNoCCNuMu([](const caf::SRTrueInteractionProxy *nu) { return !kTruthIsCCNuMu(nu); });
+
+  const TruthCut kTruthIsCosmic([](const caf::SRTrueInteractionProxy *nu) { 
+      bool cosmic=!kTruthIsCCNuMu(nu) && !kTruthIsCCNuE(nu) && !kTruthIsNC(nu) && !kTruthIsWS(nu) && !kTruthIsNotFV(nu); //does that cover all other possibilities? doesnt distinguish in and out of time though
+      return cosmic;
+    });
 
   // Truth cuts for other topologies
 
@@ -1640,77 +1762,84 @@ const TruthCut kTruthIsSignal([](const caf::SRTrueInteractionProxy *nu) {
 
 
 
-   const TruthCut kTruthIsDIS([](const caf::SRTrueInteractionProxy *nu) {
-    bool isDIS= kTruthIsCCNuMu(nu) && !kTruthIsSIS(nu);//this should be redundant but good to make sure I guess 
-    if(!isDIS) return isDIS;//break before trying to get variables that might not be defined if its not a cc numu event
+  const TruthCut kTruthIsDIS([](const caf::SRTrueInteractionProxy *nu) {
+      bool isDIS= kTruthIsCCNuMu(nu) && !kTruthIsSIS(nu);//this should be redundant but good to make sure I guess 
+      if(!isDIS) return isDIS;//break before trying to get variables that might not be defined if its not a cc numu event
       isDIS &= kTruthQ2(nu)>=minQ2;
       double W=kTruthInvariantMass(nu);
       isDIS &= (W > maxW); //if I change minQ2 and maxW this is gonna not be my standard Q2 1 and W 2 definition but its probably what I would want for the category anyway
       return isDIS;
-   });
+    });
 
 
-   const TruthCut kTruthIsTransition([](const caf::SRTrueInteractionProxy *nu) {
-    //This is really not the transition region its high Q2 with Ws in the Res region but thats too long a name
-    bool isTransition= kTruthIsCCNuMu(nu);// && !kTruthIsSIS(nu);//this should be redundant but good to make sure I guess 
-    if(!isTransition) return isTransition;//break before trying to get variables that might not be defined if its not a cc numu event
-    isTransition &= kTruthQ2(nu)>=minQ2;
-    double W=kTruthInvariantMass(nu);
-    isTransition &= (W < minW) && W>=1.15; 
-    return isTransition;
-   });
+  const TruthCut kTruthIsTransition([](const caf::SRTrueInteractionProxy *nu) {
+      //This is really not the transition region its high Q2 with Ws in the Res region but thats too long a name
+      bool isTransition= kTruthIsCCNuMu(nu);// && !kTruthIsSIS(nu);//this should be redundant but good to make sure I guess 
+      if(!isTransition) return isTransition;//break before trying to get variables that might not be defined if its not a cc numu event
+      isTransition &= kTruthQ2(nu)>=minQ2;
+      double W=kTruthInvariantMass(nu);
+      isTransition &= (W < minW) && W>=1.15; 
+      return isTransition;
+    });
 
-   const TruthCut kTruthIsLowestW([](const caf::SRTrueInteractionProxy *nu) {
-    bool isLowestW= kTruthIsCCNuMu(nu);// && !kTruthIsSIS(nu);//this should be redundant but good to make sure I guess 
-    if(!isLowestW) return isLowestW;//break before trying to get variables that might not be defined if its not a cc numu events
-    isLowestW &= kTruthQ2(nu)>=minQ2;
-    double W=kTruthInvariantMass(nu);
-    isLowestW &= (W < minW) && W>=1.15; 
-    return isLowestW;
-   });
+  const TruthCut kTruthIsLowestW([](const caf::SRTrueInteractionProxy *nu) {
+      bool isLowestW= kTruthIsCCNuMu(nu);// && !kTruthIsSIS(nu);//this should be redundant but good to make sure I guess 
+      if(!isLowestW) return isLowestW;//break before trying to get variables that might not be defined if its not a cc numu events
+      isLowestW &= kTruthQ2(nu)>=minQ2;
+      double W=kTruthInvariantMass(nu);
+      isLowestW &= (W < minW) && W>=1.15; 
+      return isLowestW;
+    });
 
-   const TruthCut kTruthIsLowQ2([](const caf::SRTrueInteractionProxy *nu) {
-    //This is really not the transition region its high Q2 with Ws in the Res region but thats too long a name
-    bool isLowQ2= kTruthIsCCNuMu(nu);// && !kTruthIsSIS(nu);//this should be redundant but good to make sure I guess 
-    if(!isLowQ2) return isLowQ2;//break before trying to get variables that might not be defined if its not a cc numu event
-    isLowQ2 &= kTruthQ2(nu)<minQ2;
-    return isLowQ2;
-   });
+  const TruthCut kTruthIsLowQ2([](const caf::SRTrueInteractionProxy *nu) {
+      //This is really not the transition region its high Q2 with Ws in the Res region but thats too long a name
+      bool isLowQ2= kTruthIsCCNuMu(nu);// && !kTruthIsSIS(nu);//this should be redundant but good to make sure I guess 
+      if(!isLowQ2) return isLowQ2;//break before trying to get variables that might not be defined if its not a cc numu event
+      isLowQ2 &= kTruthQ2(nu)<minQ2;
+      return isLowQ2;
+    });
 
 
 
   const TruthCut kOtherTopology([](const caf::SRTrueInteractionProxy *nu) { 
-      return !(
-               kTruthIsSIS(nu) || //if this i
-               kTruthIsDIS(nu) ||
-                kTruthIsTransition(nu) ||
-                kTruthIsLowestW(nu) ||
-                kTruthIsLowQ2(nu) ||
-               kTruthNoCCNuMu(nu) 
-               //kCC1p0pi(nu) ||
-               //kCCNg2p0pi(nu) ||
-               //kCCNgt0p1pi(nu) ||
-              // kCC0p0pi(nu)
-               // kCCNgt0pNg1pi
-               ); 
-               //this should really come up with no events if I define it right
+      bool isOther= !(
+                      kTruthIsSIS(nu) || //if this i
+                      kTruthIsDIS(nu) ||
+                      kTruthIsTransition(nu) ||
+                      kTruthIsLowestW(nu) ||
+                      kTruthIsLowQ2(nu) ||
+                      kTruthNoCCNuMu(nu) 
+                      //kCC1p0pi(nu) ||
+                      //kCCNg2p0pi(nu) ||
+                      //kCCNgt0p1pi(nu) ||
+                      // kCC0p0pi(nu)
+                      // kCCNgt0pNg1pi
+                      ); 
+      if(isOther) cout<<"Theres an event in kOther?? unclear why."<<endl;
+      return isOther;   
+      //this should really come up with no events if I define it right
     });
 
   
 
-std::vector<TruthCut> getTrueChannelCuts(){
+  std::vector<TruthCut> getTrueChannelCuts(){
     TruthCut a =kTruthIsSIS;
     std::vector<TruthCut> cuts={
-        kTruthIsSIS,
-        kTruthIsDIS,
-        kTruthIsTransition,
-        kTruthIsLowestW,
-        kTruthIsLowQ2,
-        kTruthNoCCNuMu,
-        kOtherTopology
+      kTruthIsSIS,
+      kTruthIsDIS,
+      kTruthIsTransition,
+      kTruthIsLowestW,
+      kTruthIsLowQ2,
+      kTruthIsCCNuE,
+      kTruthIsNC,
+      kTruthIsWS,
+      kTruthIsNotFV,
+      kTruthIsCosmic,
+      //kTruthNoCCNuMu,
+      kOtherTopology
     };
     return cuts;
-};
+  };
 
 
 
@@ -1730,9 +1859,9 @@ std::vector<TruthCut> getTrueChannelCuts(){
               //fmatch isnt defined in the data -- will switch to using what bear is using (opt0 score) i think...
               //(slc->opt0.score)>320 &&
               slc->is_clear_cosmic==false);
-              //slc->fmatch.score < 7.0 && // check flash match score
-              //slc->fmatch.time > 0. &&   // check flash is in beam
-              //slc->fmatch.time < 1.8); 
+      //slc->fmatch.score < 7.0 && // check flash match score
+      //slc->fmatch.time > 0. &&   // check flash is in beam
+      //slc->fmatch.time < 1.8); 
     });
   
   const Cut kIsCosmic([](const caf::SRSliceProxy *slc) { return (slc->truth.genie_mode == -1); });
@@ -1776,76 +1905,81 @@ std::vector<TruthCut> getTrueChannelCuts(){
       return false; 
     });
 
-    const Cut kRecoIsCCNuMu([](const caf::SRSliceProxy *slc) {
+  const Cut kRecoIsCCNuMu([](const caf::SRSliceProxy *slc) {
   
-        // Reject cosmic events
-        if (!kCosmicCut(slc)) return false; 
+      // Reject cosmic events
+      if (!kCosmicCut(slc)) return false; 
   
-        // Check neutrino vertex is in fiducial volume
-        if (!bIsInFV(&slc->vertex)) return false;
+      // Check neutrino vertex is in fiducial volume
+      if (!bIsInFV(&slc->vertex)) return false;
   
-        // Check there is one muon in signal
-        auto [OneMuon, MuonID] = bOneMuon(slc);
-        if (!OneMuon) return false;
+      // Check there is one muon in signal
+      auto [OneMuon, MuonID] = bOneMuon(slc);
+      if (!OneMuon) return false;
   
-        // Signal definition satisifed
-        return true; 
-      });
+      // Signal definition satisifed
+      return true; 
+    });
   
 
- // Check reconstructed event is signal
- const Cut kRecoIsSIS([](const caf::SRSliceProxy *slc) {
-    bool isSIS=kRecoIsCCNuMu(slc);
-    if (!isSIS) return false;
-    isSIS &= kQ2(slc)>=minQ2;
-    //cout<<"l1783 -- kRecoIsSIS"<<endl;
-    double W=kInvariantMass(slc);
-    //cout<<"l1785 -- kRecoIsSIS"<<endl;
-    isSIS &= (minW <= W) && (W <= maxW);
+  // Check reconstructed event is signal
+  const Cut kRecoIsSIS([](const caf::SRSliceProxy *slc) {
+      bool isSIS=kRecoIsCCNuMu(slc);
+      if (!isSIS) return false;
+      isSIS &= kQ2(slc)>=minQ2;
+      //cout<<"l1783 -- kRecoIsSIS"<<endl;
+      double W=kInvariantMass(slc);
+      //cout<<"l1785 -- kRecoIsSIS"<<endl;
+      isSIS &= (minW <= W) && (W <= maxW);
 
-    return isSIS; 
-  });
+      return isSIS; 
+    });
 
 
- const Cut kRecoIsSISW([](const caf::SRSliceProxy *slc) {
-    bool isSIS=kRecoIsCCNuMu(slc);
-    if (!isSIS) return false;
-    //isSIS &= kQ2(slc)>=minQ2;
-    //cout<<"l1783 -- kRecoIsSIS"<<endl;
-    double W=kInvariantMass(slc);
-    //cout<<"l1785 -- kRecoIsSIS"<<endl;
-    isSIS &= (minW <= W) && (W <= maxW);
+  const Cut kRecoIsSISW([](const caf::SRSliceProxy *slc) {
+      bool isSIS=kRecoIsCCNuMu(slc);
+      if (!isSIS) return false;
+      //isSIS &= kQ2(slc)>=minQ2;
+      //cout<<"l1783 -- kRecoIsSIS"<<endl;
+      double W=kInvariantMass(slc);
+      //cout<<"l1785 -- kRecoIsSIS"<<endl;
+      isSIS &= (minW <= W) && (W <= maxW);
 
-    return isSIS; 
-  });
+      return isSIS; 
+    });
 
- const Cut kRecoIsSISQ2([](const caf::SRSliceProxy *slc) {
-    bool isSIS=kRecoIsCCNuMu(slc);
-    if (!isSIS) return false;
-    isSIS &= kQ2(slc)>=minQ2;
-    //cout<<"l1783 -- kRecoIsSIS"<<endl;
-    //double W=kInvariantMass(slc);
-    //cout<<"l1785 -- kRecoIsSIS"<<endl;
-    //isSIS &= (minW <= W) && (W <= maxW);
+  const Cut kRecoIsSISQ2([](const caf::SRSliceProxy *slc) {
+      bool isSIS=kRecoIsCCNuMu(slc);
+      if (!isSIS) return false;
+      isSIS &= kQ2(slc)>=minQ2;
+      //cout<<"l1783 -- kRecoIsSIS"<<endl;
+      //double W=kInvariantMass(slc);
+      //cout<<"l1785 -- kRecoIsSIS"<<endl;
+      //isSIS &= (minW <= W) && (W <= maxW);
 
-    return isSIS; 
-  });
+      return isSIS; 
+    });
 
 
 
   const Cut kRecoIsSignal([](const caf::SRSliceProxy *slc) { 
-        //cout<<"kRecoIsSignal -- signalIsSIS: "<<signalIsSIS<<" kTruthInvariantMass: "<<kTruthInvariantMass(&slc->truth)<<"  kInvariantMass: "<<kInvariantMass(slc)<<endl;
-    if(signalIsSIS){
+      //cout<<"kRecoIsSignal -- signalIsSIS: "<<signalIsSIS<<" kTruthInvariantMass: "<<kTruthInvariantMass(&slc->truth)<<"  kInvariantMass: "<<kInvariantMass(slc)<<endl;
+      if(signalIsSIS){
         //cout<<"returning kRecoIsSIS"<<endl;
-         return kRecoIsSIS(slc);
-    }
-    return kRecoIsCCNuMu(slc); 
-});
+        return kRecoIsSIS(slc);
+      }
+      return kRecoIsCCNuMu(slc); 
+    });
 
   const Cut kRecoIsTrueReco([](const caf::SRSliceProxy *slc) { return (kRecoIsSignal(slc) && kTruthIsSignal(&slc->truth)); });
 
   const Cut kRecoIsTrueSIS([](const caf::SRSliceProxy *slc) { return (kRecoIsSignal(slc) && kTruthIsSIS(&slc->truth)); });
   const Cut kRecoIsTrueCCNuMu([](const caf::SRSliceProxy *slc) { return (kRecoIsSignal(slc) && kTruthIsCCNuMu(&slc->truth)); });
+  
+const Cut kRecoIsCCNuMuTruthIsSignal([](const caf::SRSliceProxy *slc){
+return (kRecoIsCCNuMu(slc) && kTruthIsSignal(&slc->truth));
+});
+
 
   const Cut kRecoIsBackground([](const caf::SRSliceProxy *slc) { return (kRecoIsSignal(slc) && kTruthNoSignal(&slc->truth)); });
 
@@ -1856,18 +1990,30 @@ std::vector<TruthCut> getTrueChannelCuts(){
   const Cut kRecoIsTrueNoCCNuMu([](const caf::SRSliceProxy *slc) { return (kRecoIsSignal(slc) && kTruthNoCCNuMu(&slc->truth)); });
   const Cut kRecoIsTrueOther([](const caf::SRSliceProxy *slc) { return (kRecoIsSignal(slc) && kOtherTopology(&slc->truth)); });
   
+
+  const Cut kRecoIsTrueCCNuE([](const caf::SRSliceProxy *slc) { return (kRecoIsSignal(slc) && kTruthIsCCNuE(&slc->truth)); });
+  const Cut kRecoIsTrueNC([](const caf::SRSliceProxy *slc) { return (kRecoIsSignal(slc) && kTruthIsNC(&slc->truth)); });
+  const Cut kRecoIsTrueWS([](const caf::SRSliceProxy *slc) { return (kRecoIsSignal(slc) && kTruthIsWS(&slc->truth)); });
+  const Cut kRecoIsTrueNotFV([](const caf::SRSliceProxy *slc) { return (kRecoIsSignal(slc) && kTruthIsNotFV(&slc->truth)); });
+  const Cut kRecoIsTrueCosmic([](const caf::SRSliceProxy *slc) { return (kRecoIsSignal(slc) && kTruthIsCosmic(&slc->truth)); });
+
   
   std::vector<Cut> getRecoTrueChannelCuts(){
-      std::vector<Cut> cuts={
-          kRecoIsTrueSIS,
-          kRecoIsTrueDIS,
-          kRecoIsTrueTransition,
-          kRecoIsTrueLowestW,
-          kRecoIsTrueLowQ2,
-          kRecoIsTrueNoCCNuMu,
-          kRecoIsTrueOther
-      };
-      return cuts;
+    std::vector<Cut> cuts={
+      kRecoIsTrueSIS,
+      kRecoIsTrueDIS,
+      kRecoIsTrueTransition,
+      kRecoIsTrueLowestW,
+      kRecoIsTrueLowQ2,
+      //kRecoIsTrueNoCCNuMu,
+      kRecoIsTrueCCNuE,
+      kRecoIsTrueNC,
+      kRecoIsTrueWS,
+      kRecoIsTrueNotFV,
+      kRecoIsTrueCosmic,
+      kRecoIsTrueOther
+    };
+    return cuts;
   };
 
 

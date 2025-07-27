@@ -27,10 +27,10 @@ using namespace std;
 using namespace ana;
 using namespace Constants;
 
-void Selection() {
-  signalIsSIS=true; //defines what TrueSignal is in Defnitions.h
+void SelectionInTimeCosmics(bool doSIS=true){//, bool do2025B=true) {
+  signalIsSIS=doSIS; //true; //defines what TrueSignal is in Defnitions.h
 
-  bool debug=true;
+  bool debug=false;//true;
   bool runData=true;
   //signalIsSis (set it defs overridable here)
   // Set defaults and load tools
@@ -41,11 +41,13 @@ void Selection() {
   double TextSize = 0.06;	
   if(debug)cout<<"l37"<<endl;
   std::filesystem::create_directory(plotdir.Data() );
+
   // The SpectrumLoader object handles the loading of CAFs and the creation of Spectrum.
   //SpectrumLoader NuLoader("/pnfs/sbn/data_add/sbn_nd/poms_production/mc/MCP2025B_5e18_02/v10_06_00_02/prodgenie_corsika_proton_rockbox_sbnd/CV/caf/*/*/caf.flat*.root")
     //spring25 2025B 5e18POT
     //"/pnfs/sbn/data_add/sbn_nd/poms_production/mc/MCP2025Av3/v10_04_06_01/prodgenie_corsika_proton_rockbox_sbnd/CV/caf/*/*/*caf.flat.caf*.root");//2025A in a way thats big hopefully??? 
-  //InputFiles); //"/pnfs/sbn/data_add/sbn_nd/poms_production/official/MCP2024B/v09_91_02_02/prodoverlay_corsika_cosmics_proton_genie_rockbox_sce/caf/*/*/caf.flat.caf*.root");//2024B MC //InputFiles);
+  //InputFiles);
+  //SpectrumLoader NuLoader("/pnfs/sbn/data_add/sbn_nd/poms_production/official/MCP2024B/v09_91_02_02/prodoverlay_corsika_cosmics_proton_genie_rockbox_sce/caf/*/*/caf.flat.caf*.root");//2024B MC //InputFiles);
   //SpectrumLoader DataLoader("/pnfs/sbn/data_add/sbn_nd/poms_production/data/MCP2025B/v10_06_00/DevSample/flatcaf/bnblight/*/*/*flat.caf.root");
   //InputFilesData);
   //hack needs to get fixed just checking if these files are in fact the issue here. 
@@ -53,13 +55,13 @@ void Selection() {
   string infile;
   vector<string> dnames, mcnames;
 
-std::ifstream mcinfiles("list_mc_spring25_5e18POT_2025B.txt"); //list_Data_MCP2025v3_DevSample.txt");
+  std::ifstream mcinfiles("list_intimecosmics_5e18poteq.txt");//"list_mc_spring25_5e18POT_2025B.txt"); //list_Data_MCP2025v3_DevSample.txt");
 
   while (std::getline(mcinfiles, infile)){
     mcnames.push_back(infile);
   }
   SpectrumLoader NuLoader(mcnames);
-
+  
 
   std::ifstream datainfiles("list_data_spring25FixedDev_5e18POT_2025B.txt"); //list_Data_MCP2025v3_DevSample.txt");
 
@@ -83,7 +85,7 @@ std::ifstream mcinfiles("list_mc_spring25_5e18POT_2025B.txt"); //list_Data_MCP20
   TString dirPath = "/exp/sbnd/data/users/" + (TString)UserName + Form("/CAFAnaOutput/%s", tag.c_str());
   std::filesystem::create_directory(dirPath.Data() );
   TString RootFilePath=dirPath;
-  RootFilePath+= signalIsSIS? "/SelectionSIS.root":"/SelectionCC.root";
+  RootFilePath+= signalIsSIS? "/SelectionCosmicsSIS.root":"/SelectionCosmicsCC.root";
   TFile* SaveFile = new TFile(RootFilePath, "RECREATE");
   if(debug)  cout<<"l49"<<endl;
   // Construct all spectra
@@ -198,6 +200,8 @@ std::ifstream mcinfiles("list_mc_spring25_5e18POT_2025B.txt"); //list_Data_MCP20
     auto& [RecoSignals, RecoTrueSignals, RecoBkgSignals] = Spectra.at(i);
     
 	if(i==0) mcPOT=RecoSignals->POT();
+	TargetPOT=mcPOT*0.036;//scale i need as per sungbins calculation
+	
     /*RecoSignals->OverridePOT(1);
     RecoTrueSignals->OverridePOT(1);
     RecoBkgSignals->OverridePOT(1);
@@ -214,9 +218,10 @@ std::ifstream mcinfiles("list_mc_spring25_5e18POT_2025B.txt"); //list_Data_MCP20
     if(debug) cout<<"in loop l169, i="<<i<<endl;  
     if(runData){
       //if(i==0) dataPOT=DataSignals->POT();
+      dataPOT=DataSignals->POT();
       if(debug) cout<<"making Data histo"<<endl;
       DataSignals->OverridePOT(1);
-      double nspills=DataSignals->Livetime();
+      //double nspills=DataSignals->Livetime();
       DataHisto= DataSignals->ToTH1(1);//nspills, kLivetime );//TargetPOT);
 
       for(int c=0; c<ncuts; c++){
@@ -318,7 +323,7 @@ std::ifstream mcinfiles("list_mc_spring25_5e18POT_2025B.txt"); //list_Data_MCP20
 
 	// Save to root file
 	if(runData){
-      SaveFile->WriteObject(DataHisto, Form("%s_data", var.c_str() ) );
+      SaveFile->WriteObject(DataHisto, Form("%s_data", var.c_str() ) ); 
       for(int c=0; c<ncuts; c++){
         SaveFile->WriteObject(DataCutHistos[c], Form("%s_%s_data", var.c_str(), cutnames[c].c_str() ));
       }
@@ -337,7 +342,7 @@ std::ifstream mcinfiles("list_mc_spring25_5e18POT_2025B.txt"); //list_Data_MCP20
     if(debug) cout<<"in loop l259, i="<<i<<endl;    
 
     for(int jChannel=0; jChannel< channelsRecoSignal.size(); jChannel++){
-      TH1D* chanHisto = channelSpectra[i][jChannel]->ToTH1(mcPOT);//TargetPOT);
+      TH1D* chanHisto = channelSpectra[i][jChannel]->ToTH1(TargetPOT);
       chanHisto->GetXaxis()->SetTitle(("Reconstructed " + VarLabels.at(i)).c_str());
       SaveFile->WriteObject(chanHisto, Form("%s_truthIs_%s", var.c_str(), chanNames[jChannel].c_str() ) );
     }

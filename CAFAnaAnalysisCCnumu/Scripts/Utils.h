@@ -16,7 +16,7 @@ const Binning VarBinning(string var, bool isTrue = true)
   //else if (var == "Emu" || var == "Enu" )//|| var == "pMu")
  //   return Binning::Simple(50, 0, 3.5);
   else if (var == "EAvail" || var == "Ehad" || var=="EhadSummed")//|| var == "pMu")
-    return Binning::Simple(15, 0, 4);
+    return Binning::Simple(30, 0, 4);//temp making finer to fit
   else if (var == "ECompleteness" )//|| var == "pMu")
     return Binning::Simple(25, 0, 1);
   else if (var == "W")
@@ -27,7 +27,7 @@ const Binning VarBinning(string var, bool isTrue = true)
     return Binning::Simple(40, 0, 200);
   else if (var == "nParticles")
     return Binning::Simple(100, 0, 100);
-  else if (var == "chi2Ps" || var == "chi2Mus" || var == "chi2Pis" || var == "chi2Ks")
+  else if (var == "chi2P" || var == "chi2Mu" || var == "chi2Pi" || var == "chi2Ks")
     return Binning::Simple(80, 0, 400);
   else if (var == "ndaughts")
     return Binning::Simple(20, 0, 20);
@@ -35,7 +35,7 @@ const Binning VarBinning(string var, bool isTrue = true)
     return Binning::Simple(50, 0, 3.5);
   else if (var == "Tp")
     return Binning::Simple(90, 0, 3.);
-  else if (var == "Npi" || var == "Np")
+  else if (var == "Npi" || var == "Np" || var=="npfp" || var=="nTracks"|| var=="nShowers")
     return Binning::Simple(15, 0, 15);
   else if (var == "pdg" || var == "pdgMu" || var == "pdgPi" || var == "pdgP" || var == "allpdgs" || "candPdgs")
     return Binning::Simple(10, -1, 9, {"None", "e^{-}", "e^{+}", "#mu^{-}", "#mu^{+}", "#pi^{+}", "#pi^{-}", "p", "#gamma", "Other"});
@@ -62,7 +62,7 @@ std::tuple<Var,Var, TruthVar> GetVarTuple(std::string var){
     //return {kInvariantMass, kRecoTruthInvariantMass, kTruthInvariantMass};  
   }   
   else if (var=="Q2"){
-    return {kQ2, kRecoTruthQ2, kTruthQ2};//tmp fix
+    return {kQ2, kRecoTruthQ2, kTruthQ2};
     //return {kQ2, kRecoTruthQ2, kTruthQ2};  
   }   
   else if (var=="EAvail"){
@@ -92,11 +92,29 @@ else if (var=="sumE"){
 else if (var =="Ehad" || var=="EHad"){
     return{kEhad, kRecoTruthHadronicEnergy, kTruthHadronicEnergy};
 }
-  else{
+else if (var=="npfp"){
+    return{kNPFP, kNPFP, kTrueNParticles};
+}
+else if (var=="nTracks"){
+    return{kNTracks, kNTracks, kTrueNParticles};//fix me if you want to use the truth info
+}
+else if (var=="nShowers"){
+    return{kNShowers, kNShowers, kTrueNParticles};//fix me if you want to use the truth info
+}
+
+else{
     cout<<"Variable string "<<var.c_str()<<" not found. Returning one bin event count variable"<<endl;
     return {kEventCount, kEventCount, kTrueEventCount};
   }
 
+}
+
+std::tuple<MultiVar,MultiVar, TruthMultiVar> GetMultiVarTuple(std::string var){
+    //std::vector<std::tuple<MultiVar, MultiVar, TruthMultivar>
+    if (var=="chi2Mu"){
+        return {kMuChi2, kMuChi2, kTruthVars};
+    }
+    else return {kMuChi2, kMuChi2, kTruthVars};
 }
 
 static const std::vector<std::tuple<Var, Var, TruthVar>> GetVars(std::vector<std::string> varnames)
